@@ -41,7 +41,7 @@ class CrawlDetailSpider(scrapy.Spider):
         #                              meta={'summary': summary})
 
         # 在现有数据基础上新增引用内容
-        details = Detail.objects.filter()  # 找到标记的期刊
+        details = Detail.objects.filter(detail_id='ZJYX201710014')  # 找到标记的期刊
         print(details.count())
         count = 0
         for detail in details:
@@ -51,7 +51,7 @@ class CrawlDetailSpider(scrapy.Spider):
                 references_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1'.format(
                     detail.detail_id)
                 yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
-                                     meta={'detail': detail})
+                                     meta={'detail': detail, 'cur_page': 1})
 
     def parse(self, response):
         """
@@ -111,5 +111,40 @@ class CrawlDetailSpider(scrapy.Spider):
         :param response:
         :return:
         """
+        # 中国学术期刊网络出版总库
+        # id = "pc_CJFQ"
+        # 中国博士学位论文全文数据库
+        # id = "pc_CDFD"
+        # 中国优秀硕士学位论文全文数据库
+        # id = "pc_CMFD"
+        # 中国图书全文数据库
+        # id = "pc_CBBD"
+        # 国际期刊数据库
+        # id = "pc_SSJD"
+        # 外文题录数据库
+        # id = "pc_CRLDENG"
+        # 只有
+        # 中国学术期刊网络出版总库
+        # 中国博士学位论文全文数据库
+        # 中国优秀硕士学位论文全文数据库
+        # 国际期刊数据库
+        # 这四个是有url的
         detail = response.meta.get('detail')
-        print(response.url)
+        cur_page = response.meta.get('cur_page')
+        references_url = response.url.split('page=')[0] + 'page=' + str(cur_page + 1)
+        pc_CJFQ = int(response.xpath('//span[@id="pc_CJFQ"]/text()').extract_first(default=0))
+        pc_CDFD = int(response.xpath('//span[@id="pc_CJFQ"]/text()').extract_first(default=0))
+        pc_CMFD = int(response.xpath('//span[@id="pc_CMFD"]/text()').extract_first(default=0))
+        pc_CBBD = int(response.xpath('//span[@id="pc_CBBD"]/text()').extract_first(default=0))
+        pc_SSJD = int(response.xpath('//span[@id="pc_SSJD"]/text()').extract_first(default=0))
+        pc_CRLDENG = int(response.xpath('//span[@id="pc_CRLDENG"]/text()').extract_first(default=0))
+        page = max(pc_CJFQ, pc_CDFD, pc_CMFD, pc_CBBD, pc_SSJD, pc_CRLDENG)  # 找到最大的参考文献库个数，定制翻页次数
+        page = (page / 10) + 1  # 每页有10条数据
+        div = response.css('.essayBox')  # 拿到所有含有文献列表的模块
+
+        if page > cur_page:
+            # 网页+1继续获取信息
+            yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
+                                 meta={'detail': detail, 'cur_page': cur_page + 1})
+
+
