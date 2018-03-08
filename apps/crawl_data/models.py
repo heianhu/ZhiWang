@@ -100,6 +100,7 @@ class ReferencesCRLDENG(models.Model):
     参考文献
     外文题录数据库
     """
+    title = models.CharField(max_length=255, verbose_name='文章的题名', blank=True, null=True)
     info = models.CharField(max_length=255, verbose_name='文章的所有信息')
     issuing_time = models.CharField(max_length=255, verbose_name='发表时间')
 
