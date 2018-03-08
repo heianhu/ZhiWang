@@ -109,6 +109,22 @@ class ReferencesCRLDENG(models.Model):
         verbose_name_plural = verbose_name
 
 
+class ReferencesCCND(models.Model):
+    """
+    参考文献
+    中国重要报纸全文数据库
+    """
+    url = models.URLField(max_length=255, verbose_name='文章的url', unique=True)
+    title = models.CharField(max_length=255, verbose_name='文章的题名')
+    authors = models.CharField(max_length=255, verbose_name='文章的作者')
+    source = models.CharField(max_length=255, verbose_name='文章的来源')
+    issuing_time = models.CharField(max_length=255, verbose_name='发表时间')
+
+    class Meta:
+        verbose_name = '参考文献(中国重要报纸全文数据库)'
+        verbose_name_plural = verbose_name
+
+
 class References(models.Model):
     """
     参考文献
@@ -128,6 +144,8 @@ class References(models.Model):
                             blank=True, null=True)
     CRLDENG = models.CharField(max_length=255, verbose_name='外文题录数据库', help_text='外文题录数据库在数据库中的ID集合，用空格分开', default='',
                                blank=True, null=True)
+    CCND = models.CharField(max_length=255, verbose_name='中国重要报纸全文数据库', help_text='中国重要报纸全文数据库在数据库中的ID集合，用空格分开',
+                            default='', blank=True, null=True)
 
     class Meta:
         verbose_name = '参考文献'

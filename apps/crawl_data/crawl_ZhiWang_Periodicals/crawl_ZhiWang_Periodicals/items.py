@@ -8,7 +8,7 @@
 import scrapy
 from scrapy_djangoitem import DjangoItem
 from crawl_data.models import Detail, Summary, Authors, Organization, ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD, \
-    ReferencesCBBD, ReferencesSSJD, ReferencesCRLDENG
+    ReferencesCBBD, ReferencesSSJD, ReferencesCRLDENG, References, ReferencesCCND
 
 
 class DetailItem(scrapy.Item):
@@ -111,6 +111,16 @@ class ReferencesItem(scrapy.Item):
     SSJD = scrapy.Field()
     CRLDENG = scrapy.Field()
 
+    def insert_database(self):
+        references = References()
+        references.CJFQ = ' '.join(self['CJFQ'])
+        references.CDFD = ' '.join(self['CDFD'])
+        references.CMFD = ' '.join(self['CMFD'])
+        references.CBBD = ' '.join(self['CBBD'])
+        references.SSJD = ' '.join(self['SSJD'])
+        references.CRLDENG = ' '.join(self['CRLDENG'])
+        references.save()
+
 
 class ReferencesCJFQItem(scrapy.Item):
     url = scrapy.Field()
@@ -195,3 +205,14 @@ class ReferencesCRLDENGItem(scrapy.Item):
         CRLDENG.info = self['info']
         CRLDENG.issuing_time = self['issuing_time']
         CRLDENG.save()
+
+
+class ReferencesCCNDItem(ReferencesCJFQItem):
+    def insert_database(self):
+        CCND = ReferencesCCND()
+        CCND.url = self['url']
+        CCND.title = self['title']
+        CCND.authors = self['authors']
+        CCND.source = self['source']
+        CCND.issuing_time = self['issuing_time']
+        CCND.save()
