@@ -7,7 +7,7 @@
 
 import scrapy
 from scrapy_djangoitem import DjangoItem
-from crawl_data.models import Detail, Summary, Authors, Organization
+from crawl_data.models import Detail, Summary, Authors, Organization, ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD
 
 
 class DetailItem(scrapy.Item):
@@ -118,13 +118,36 @@ class ReferencesCJFQItem(scrapy.Item):
     source = scrapy.Field()
     issuing_time = scrapy.Field()
 
+    def insert_database(self):
+        CJFQ = ReferencesCJFQ()
+        CJFQ.url = self['url']
+        CJFQ.title = self['title']
+        CJFQ.authors = self['authors']
+        CJFQ.source = self['source']
+        CJFQ.issuing_time = self['issuing_time']
+        CJFQ.save()
+
 
 class ReferencesCDFDItem(ReferencesCJFQItem):
-    pass
+    def insert_database(self):
+        CDFD = ReferencesCDFD()
+        CDFD.url = self['url']
+        CDFD.title = self['title']
+        CDFD.authors = self['authors']
+        CDFD.source = self['source']
+        CDFD.issuing_time = self['issuing_time']
+        CDFD.save()
 
 
 class ReferencesCMFDItem(ReferencesCJFQItem):
-    pass
+    def insert_database(self):
+        CMFD = ReferencesCMFD()
+        CMFD.url = self['url']
+        CMFD.title = self['title']
+        CMFD.authors = self['authors']
+        CMFD.source = self['source']
+        CMFD.issuing_time = self['issuing_time']
+        CMFD.save()
 
 
 class ReferencesCBBDItem(scrapy.Item):

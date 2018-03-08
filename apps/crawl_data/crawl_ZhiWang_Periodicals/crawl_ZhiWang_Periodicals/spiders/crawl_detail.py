@@ -4,7 +4,8 @@ from django.db.models import Q  # 数据库中用多操作
 import re
 
 from crawl_data.models import Summary, Periodicals, Detail
-from items import DetailItem
+from items import DetailItem, ReferencesCJFQItem, ReferencesCMFDItem, ReferencesCDFDItem
+from crawl_data.models import ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD
 
 
 class CrawlDetailSpider(scrapy.Spider):
@@ -41,7 +42,7 @@ class CrawlDetailSpider(scrapy.Spider):
         #                              meta={'summary': summary})
 
         # 在现有数据基础上新增引用内容
-        details = Detail.objects.filter(detail_id='ZJYX201710014')  # 找到标记的期刊
+        details = Detail.objects.filter(detail_id='ZDTJ201608005')  # 找到标记的期刊
         print(details.count())
         count = 0
         for detail in details:
@@ -51,7 +52,8 @@ class CrawlDetailSpider(scrapy.Spider):
                 references_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1'.format(
                     detail.detail_id)
                 yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
-                                     meta={'detail': detail, 'cur_page': 1})
+                                     meta={'detail': detail, 'cur_page': 1, 'CJFQ_list': [], 'CDFD_list': [],
+                                           'CMFD_list': [], 'CBBD_list': [], 'SSJD_list': [], 'CRLDENG_list': []})
 
     def parse(self, response):
         """
@@ -108,43 +110,168 @@ class CrawlDetailSpider(scrapy.Spider):
     def parse_references(self, response):
         """
         处理参考文献，提取出各项
+
+        中国学术期刊网络出版总库
+        id = "pc_CJFQ"
+
+
+        <li class="">
+            <em>[1]</em>
+            <a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=JXKX200305012&amp;dbcode=CJFQ&amp;dbname=CJFD2003&amp;v=">基于Voronoi图的快速成型扫描路径生成算法研究</a>
+        [J]. 陈剑虹,马鹏举,田杰谟,刘振凯,卢秉恒.&nbsp&nbsp
+            <a onclick="getKns55NaviLink('','CJFQ','CJFQbaseinfo','JXKX');">机械科学与技术</a>.
+            <a onclick="getKns55NaviLinkIssue('','CJFQ','CJFQyearinfo','JXKX','2003','05')">2003(05)</a>
+        </li>
+
+        <li class="">
+            <em>[1]</em>
+            <a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=BDZK201405003&amp;dbcode=CJFQ&amp;dbname=CJFD2014&amp;v=">作为马克思哲学思想起点的伊壁鸠鲁哲学</a>
+        [J]. 聂锦芳.&nbsp&nbsp
+            <a onclick="getKns55NaviLink('','CJFQ','CJFQbaseinfo','BDZK');">北京大学学报(哲学社会科学版)</a>.
+            <a onclick="getKns55NaviLinkIssue('','CJFQ','CJFQyearinfo','BDZK','2014','05')">2014(05)</a>
+        </li>
+
+        <li class="">
+            <em>[1]</em>
+            <a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=DXWJ201301031&amp;dbcode=CJFQ&amp;dbname=CJFD2013&amp;v=">多屏融合下的流媒体技术</a>
+        [J]. &nbsp&nbsp
+            <a onclick="getKns55NaviLink('WEEvREcwSlJHSldRa1FhdkJkVWI2K2N5enhlaTBhaUNkaXdtbFlLSjM5dz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4ggI8Fm4gTkoUKaID8j8gFw!!','CJFQ','CJFQbaseinfo','DXWJ');">电信网技术</a>.
+            <a onclick="getKns55NaviLinkIssue('WEEvREcwSlJHSldRa1FhdkJkVWI2K2N5enhlaTBhaUNkaXdtbFlLSjM5dz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4ggI8Fm4gTkoUKaID8j8gFw!!','CJFQ','CJFQyearinfo','DXWJ','2013','01')">2013(01)</a>
+        </li>
+
+
+        中国博士学位论文全文数据库
+        id = "pc_CDFD"
+        中国优秀硕士学位论文全文数据库
+        id = "pc_CMFD"
+
+
+        中国图书全文数据库
+        id = "pc_CBBD"
+        数据均是堆成一坨的
+        创客[M].                      马克思与亚里士多德[M].
+            中信出版社                    华东师范大学出版社
+            ,                      ,
+            安德森,                     麦卡锡,
+            2012                    2014
+
+
+        国际期刊数据库
+        id = "pc_SSJD"
+        外文题录数据库
+        id = "pc_CRLDENG"
+        只有
+        中国学术期刊网络出版总库
+        中国博士学位论文全文数据库
+        中国优秀硕士学位论文全文数据库
+        国际期刊数据库
+        这四个是有url的
         :param response:
         :return:
         """
-        # 中国学术期刊网络出版总库
-        # id = "pc_CJFQ"
-        # 中国博士学位论文全文数据库
-        # id = "pc_CDFD"
-        # 中国优秀硕士学位论文全文数据库
-        # id = "pc_CMFD"
-        # 中国图书全文数据库
-        # id = "pc_CBBD"
-        # 国际期刊数据库
-        # id = "pc_SSJD"
-        # 外文题录数据库
-        # id = "pc_CRLDENG"
-        # 只有
-        # 中国学术期刊网络出版总库
-        # 中国博士学位论文全文数据库
-        # 中国优秀硕士学位论文全文数据库
-        # 国际期刊数据库
-        # 这四个是有url的
+
         detail = response.meta.get('detail')
         cur_page = response.meta.get('cur_page')
         references_url = response.url.split('page=')[0] + 'page=' + str(cur_page + 1)
         pc_CJFQ = int(response.xpath('//span[@id="pc_CJFQ"]/text()').extract_first(default=0))
+        CJFQ_list = response.meta.get('CJFQ_list')
         pc_CDFD = int(response.xpath('//span[@id="pc_CJFQ"]/text()').extract_first(default=0))
+        CDFD_list = response.meta.get('CDFD_list')
         pc_CMFD = int(response.xpath('//span[@id="pc_CMFD"]/text()').extract_first(default=0))
+        CMFD_list = response.meta.get('CMFD_list')
         pc_CBBD = int(response.xpath('//span[@id="pc_CBBD"]/text()').extract_first(default=0))
+        CBBD_list = response.meta.get('CBBD_list')
         pc_SSJD = int(response.xpath('//span[@id="pc_SSJD"]/text()').extract_first(default=0))
+        SSJD_list = response.meta.get('SSJD_list')
         pc_CRLDENG = int(response.xpath('//span[@id="pc_CRLDENG"]/text()').extract_first(default=0))
+        CRLDENG_list = response.meta.get('CRLDENG_list')
         page = max(pc_CJFQ, pc_CDFD, pc_CMFD, pc_CBBD, pc_SSJD, pc_CRLDENG)  # 找到最大的参考文献库个数，定制翻页次数
-        page = (page / 10) + 1  # 每页有10条数据
-        div = response.css('.essayBox')  # 拿到所有含有文献列表的模块
+        page = (page / 10)  # 每页有10条数据
+        div_s = response.css('.essayBox')  # 拿到所有含有文献列表的模块
+        for div in div_s:
+            # 分块提取信息
+            # 判断当前块所属库
+            dbId = div.css('.dbTitle span::attr(id)').extract_first()
+            li_s = div.css('li')
+            if dbId == 'pc_CJFQ':
+                pass
+                # 提取中国学术期刊网络出版总库信息
+                for li in li_s:
+                    a_s = li.css('a')
+                    url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
+                    title = a_s[0].css('a::text').extract_first()
+                    authors = li.css('li::text').extract_first().split('[J].')[-1].split('.&nbsp&nbsp')[0]
+                    source = a_s[1].css('a::text').extract_first()
+                    issuing_time = a_s[2].css('a::text').extract_first().rsplit()[0]
+                    if not ReferencesCJFQ.objects.filter(url=url):
+                        # 在数据库中没有这条数据信息
+                        CJFQ_item = ReferencesCJFQItem()
+                        CJFQ_item['url'] = url
+                        CJFQ_item['title'] = title
+                        CJFQ_item['authors'] = authors
+                        CJFQ_item['source'] = source
+                        CJFQ_item['issuing_time'] = issuing_time
+                        yield CJFQ_item
+                    CJFQ_list.append(str(ReferencesCJFQ.objects.filter(url=url)[0].id))
+            elif dbId == 'pc_CDFD':
+                # 提取中国博士学位论文全文数据库
+                for li in li_s:
+                    a_s = li.css('a')
+                    url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
+                    title = a_s[0].css('a::text').extract_first()
+                    authors = li.css('li::text').extract_first().split('[D].')[-1]
+                    source = a_s[1].css('a::text').extract_first()
+                    issuing_time = li.css('li').extract_first().split('</a>')[-1].split('</li>')[0].rsplit()[0]
+                    if not ReferencesCDFD.objects.filter(url=url):
+                        # 在数据库中没有这条数据信息
+                        CDFD_item = ReferencesCDFDItem()
+                        CDFD_item['url'] = url
+                        CDFD_item['title'] = title
+                        CDFD_item['authors'] = authors
+                        CDFD_item['source'] = source
+                        CDFD_item['issuing_time'] = issuing_time
+                        yield CDFD_item
+                    CDFD_list.append(str(ReferencesCDFD.objects.filter(url=url)[0].id))
+            elif dbId == 'pc_CMFD':
+                # 提取中国优秀硕士学位论文全文数据库
+                for li in li_s:
+                    a_s = li.css('a')
+                    url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
+                    title = a_s[0].css('a::text').extract_first()
+                    authors = li.css('li::text').extract_first().split('[D].')[-1]
+                    source = a_s[1].css('a::text').extract_first()
+                    issuing_time = li.css('li').extract_first().split('</a>')[-1].split('</li>')[0].rsplit()[0]
+                    if not ReferencesCMFD.objects.filter(url=url):
+                        # 在数据库中没有这条数据信息
+                        CMFD_item = ReferencesCMFDItem()
+                        CMFD_item['url'] = url
+                        CMFD_item['title'] = title
+                        CMFD_item['authors'] = authors
+                        CMFD_item['source'] = source
+                        CMFD_item['issuing_time'] = issuing_time
+                        yield CMFD_item
+                    CMFD_list.append(str(ReferencesCMFD.objects.filter(url=url)[0].id))
+
+
+            elif dbId == 'pc_CBBD':
+                # 提取中国图书全文数据库
+                pass
+            elif dbId == 'pc_SSJD':
+                # 提取国际期刊数据库
+                pass
+            elif dbId == 'pc_CRLDENG':
+                # 提取外文题录数据库
+                pass
+            else:
+                print('当前块所属库dbId错误!')
 
         if page > cur_page:
             # 网页+1继续获取信息
             yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
-                                 meta={'detail': detail, 'cur_page': cur_page + 1})
-
-
+                                 meta={'detail': detail, 'cur_page': cur_page + 1,
+                                       'CJFQ_list': CJFQ_list, 'CDFD_list': CDFD_list, 'CMFD_list': CMFD_list,
+                                       'CBBD_list': CBBD_list, 'SSJD_list': SSJD_list, 'CRLDENG_list': CRLDENG_list})
+        else:
+            print('CJFQ_list:', CJFQ_list)
+            print('CDFD_list:', CDFD_list)
+            print('CMFD_list:', CMFD_list)
