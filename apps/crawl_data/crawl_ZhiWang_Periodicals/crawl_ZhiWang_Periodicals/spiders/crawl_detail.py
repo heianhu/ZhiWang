@@ -5,9 +5,9 @@ import re
 
 from crawl_data.models import Summary, Periodicals, Detail
 from items import DetailItem, ReferencesCJFQItem, ReferencesCMFDItem, ReferencesCDFDItem, ReferencesCBBDItem, \
-    ReferencesSSJDItem, ReferencesCRLDENGItem
+    ReferencesSSJDItem, ReferencesCRLDENGItem, ReferencesItem, ReferencesCCNDItem
 from crawl_data.models import ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD, ReferencesCBBD, ReferencesSSJD, \
-    ReferencesCRLDENG
+    ReferencesCRLDENG, References, ReferencesCCND
 
 
 class CrawlDetailSpider(scrapy.Spider):
@@ -42,9 +42,9 @@ class CrawlDetailSpider(scrapy.Spider):
         #     else:
         #         yield scrapy.Request(url=summary.url, headers=self.header, callback=self.parse,
         #                              meta={'summary': summary})
-
         # 在现有数据基础上新增引用内容
-        details = Detail.objects.filter(detail_id='ZDTJ201608005')  # 找到标记的期刊
+        details = Detail.objects.filter(references=None)  # 找到标记的期刊
+        # details = Detail.objects.filter(detail_id='JYYJ201707003')  # 找到标记的期刊
         print(details.count())
         count = 0
         for detail in details:
@@ -55,7 +55,8 @@ class CrawlDetailSpider(scrapy.Spider):
                     detail.detail_id)
                 yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
                                      meta={'detail': detail, 'cur_page': 1, 'CJFQ_list': [], 'CDFD_list': [],
-                                           'CMFD_list': [], 'CBBD_list': [], 'SSJD_list': [], 'CRLDENG_list': []})
+                                           'CMFD_list': [], 'CBBD_list': [], 'SSJD_list': [], 'CRLDENG_list': [],
+                                           'CCND_list': []})
 
     def parse(self, response):
         """
@@ -197,6 +198,22 @@ class CrawlDetailSpider(scrapy.Spider):
 
         外文题录数据库
         id = "pc_CRLDENG"
+
+
+        中国重要报纸全文数据库
+        id = "pc_CCND"
+
+
+        <li class="">
+            <em>[1]</em>
+            <a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=CJYB201704190051&amp;dbcode=CCND&amp;dbname=CCND2017&amp;v=">是核心还是综合</a>
+        [N].
+        杨志成.&nbsp&nbsp中国教育报.
+        2017
+        (005)
+        </li>
+
+
         只有
         中国学术期刊网络出版总库
         中国博士学位论文全文数据库
@@ -222,7 +239,9 @@ class CrawlDetailSpider(scrapy.Spider):
         SSJD_list = response.meta.get('SSJD_list')
         pc_CRLDENG = int(response.xpath('//span[@id="pc_CRLDENG"]/text()').extract_first(default=0))
         CRLDENG_list = response.meta.get('CRLDENG_list')
-        page = max(pc_CJFQ, pc_CDFD, pc_CMFD, pc_CBBD, pc_SSJD, pc_CRLDENG)  # 找到最大的参考文献库个数，定制翻页次数
+        pc_CCND = int(response.xpath('//span[@id="pc_CCND"]/text()').extract_first(default=0))
+        CCND_list = response.meta.get('CCND_list')
+        page = max(pc_CJFQ, pc_CDFD, pc_CMFD, pc_CBBD, pc_SSJD, pc_CRLDENG, pc_CCND)  # 找到最大的参考文献库个数，定制翻页次数
         page = (page / 10)  # 每页有10条数据
         div_s = response.css('.essayBox')  # 拿到所有含有文献列表的模块
         for div in div_s:
@@ -237,6 +256,8 @@ class CrawlDetailSpider(scrapy.Spider):
                     url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
                     title = a_s[0].css('a::text').extract_first()
                     authors = li.css('li::text').extract_first().split('[J].')[-1].split('.&nbsp&nbsp')[0]
+                    if len(authors) > 255:
+                        authors = authors[:255]
                     source = a_s[1].css('a::text').extract_first()
                     issuing_time = a_s[2].css('a::text').extract_first().rsplit()[0]
                     if not ReferencesCJFQ.objects.filter(url=url):
@@ -256,6 +277,8 @@ class CrawlDetailSpider(scrapy.Spider):
                     url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
                     title = a_s[0].css('a::text').extract_first()
                     authors = li.css('li::text').extract_first().split('[D].')[-1]
+                    if len(authors) > 255:
+                        authors = authors[:255]
                     source = a_s[1].css('a::text').extract_first()
                     issuing_time = li.css('li').extract_first().split('</a>')[-1].split('</li>')[0].rsplit()[0]
                     if not ReferencesCDFD.objects.filter(url=url):
@@ -275,6 +298,8 @@ class CrawlDetailSpider(scrapy.Spider):
                     url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
                     title = a_s[0].css('a::text').extract_first()
                     authors = li.css('li::text').extract_first().split('[D].')[-1]
+                    if len(authors) > 255:
+                        authors = authors[:255]
                     source = a_s[1].css('a::text').extract_first()
                     issuing_time = li.css('li').extract_first().split('</a>')[-1].split('</li>')[0].rsplit()[0]
                     if not ReferencesCMFD.objects.filter(url=url):
@@ -293,6 +318,8 @@ class CrawlDetailSpider(scrapy.Spider):
                     all_info = li.css('li::text').extract_first().rsplit()
                     title = all_info[0]
                     authors = all_info[3]
+                    if len(authors) > 255:
+                        authors = authors[:255]
                     source = all_info[1]
                     issuing_time = all_info[4]
                     if not ReferencesCBBD.objects.filter(
@@ -312,6 +339,8 @@ class CrawlDetailSpider(scrapy.Spider):
                     title = li.css('a::text').extract_first()
                     all_info = li.css('li::text').extract_first().split('\r\n')
                     info = all_info[1]
+                    if len(info) > 255:
+                        info = info[:255]
                     issuing_time = all_info[2]
                     if not ReferencesSSJD.objects.filter(url=url):
                         SSJD_item = ReferencesSSJDItem()
@@ -321,13 +350,16 @@ class CrawlDetailSpider(scrapy.Spider):
                         SSJD_item['issuing_time'] = issuing_time
                         yield SSJD_item
                     SSJD_list.append(str(ReferencesSSJD.objects.filter(url=url)[0].id))
-
             elif dbId == 'pc_CRLDENG':
                 # 提取外文题录数据库
                 for li in li_s:
                     title = li.css('a::text').extract_first()
                     all_info = li.css('li::text').extract_first().split('\r\n')
+                    if len(all_info) < 3:
+                        continue
                     info = all_info[1]
+                    if len(info) > 255:
+                        info = info[:255]
                     issuing_time = all_info[2]
                     if not ReferencesCRLDENG.objects.filter(
                             Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time)):
@@ -338,19 +370,46 @@ class CrawlDetailSpider(scrapy.Spider):
                         yield CRLDENG_item
                     CRLDENG_list.append(str(ReferencesCRLDENG.objects.filter(
                         Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time))[0].id))
+            elif dbId == 'pc_CCND':
+                # 中国重要报纸全文数据库
+                for li in li_s:
+                    url = 'http://kns.cnki.net' + li.css('a::attr(href)').extract_first()
+                    title = li.css('a::text').extract_first()
+                    all_info = li.css('li::text').extract_first().split('\r\n')
+                    authors = all_info[1].split('&nbsp&nbsp')[0]
+                    if len(authors) > 255:
+                        authors = authors[:255]
+                    source = all_info[1].split('&nbsp&nbsp')[-1]
+                    issuing_time = all_info[2]
+                    if not ReferencesCCND.objects.filter(url=url):
+                        # 在数据库中没有这条数据信息
+                        CCND_item = ReferencesCCNDItem()
+                        CCND_item['url'] = url
+                        CCND_item['title'] = title
+                        CCND_item['authors'] = authors
+                        CCND_item['source'] = source
+                        CCND_item['issuing_time'] = issuing_time
+                        yield CCND_item
+                    CCND_list.append(str(ReferencesCCND.objects.filter(url=url)[0].id))
             else:
-                print('当前块所属库dbId错误!')
+                print('当前块所属库dbId错误!url=', response.url)
 
         if page > cur_page:
             # 网页+1继续获取信息
             yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
                                  meta={'detail': detail, 'cur_page': cur_page + 1,
                                        'CJFQ_list': CJFQ_list, 'CDFD_list': CDFD_list, 'CMFD_list': CMFD_list,
-                                       'CBBD_list': CBBD_list, 'SSJD_list': SSJD_list, 'CRLDENG_list': CRLDENG_list})
+                                       'CBBD_list': CBBD_list, 'SSJD_list': SSJD_list, 'CRLDENG_list': CRLDENG_list,
+                                       'CCND_list': CCND_list})
         else:
-            print('CJFQ_list:', CJFQ_list)
-            print('CDFD_list:', CDFD_list)
-            print('CMFD_list:', CMFD_list)
-            print('CBBD_list:', CBBD_list)
-            print('SSJD_list:', SSJD_list)
-            print('CRLDENG_list:', CRLDENG_list)
+            references = References()
+            references.CJFQ = ' '.join(CJFQ_list)
+            references.CDFD = ' '.join(CDFD_list)
+            references.CMFD = ' '.join(CMFD_list)
+            references.CBBD = ' '.join(CBBD_list)
+            references.SSJD = ' '.join(SSJD_list)
+            references.CRLDENG = ' '.join(CRLDENG_list)
+            references.CCND = ' '.join(CCND_list)
+            references.save()
+            detail.references = references
+            detail.save()
