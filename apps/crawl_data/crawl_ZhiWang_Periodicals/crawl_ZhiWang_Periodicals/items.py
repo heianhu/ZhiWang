@@ -7,7 +7,8 @@
 
 import scrapy
 from scrapy_djangoitem import DjangoItem
-from crawl_data.models import Detail, Summary, Authors, Organization, ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD
+from crawl_data.models import Detail, Summary, Authors, Organization, ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD, \
+    ReferencesCBBD, ReferencesSSJD, ReferencesCRLDENG
 
 
 class DetailItem(scrapy.Item):
@@ -151,10 +152,21 @@ class ReferencesCMFDItem(ReferencesCJFQItem):
 
 
 class ReferencesCBBDItem(scrapy.Item):
+    """
+    中国图书全文数据库
+    """
     title = scrapy.Field()
     authors = scrapy.Field()
     source = scrapy.Field()
     issuing_time = scrapy.Field()
+
+    def insert_database(self):
+        CBBD = ReferencesCBBD()
+        CBBD.title = self['title']
+        CBBD.authors = self['authors']
+        CBBD.source = self['source']
+        CBBD.issuing_time = self['issuing_time']
+        CBBD.save()
 
 
 class ReferencesSSJDItem(scrapy.Item):
@@ -163,7 +175,23 @@ class ReferencesSSJDItem(scrapy.Item):
     info = scrapy.Field()
     issuing_time = scrapy.Field()
 
+    def insert_database(self):
+        SSJD = ReferencesSSJD()
+        SSJD.url = self['url']
+        SSJD.title = self['title']
+        SSJD.info = self['info']
+        SSJD.issuing_time = self['issuing_time']
+        SSJD.save()
+
 
 class ReferencesCRLDENGItem(scrapy.Item):
+    title = scrapy.Field()
     info = scrapy.Field()
     issuing_time = scrapy.Field()
+
+    def insert_database(self):
+        CRLDENG = ReferencesCRLDENG()
+        CRLDENG.title = self['title']
+        CRLDENG.info = self['info']
+        CRLDENG.issuing_time = self['issuing_time']
+        CRLDENG.save()

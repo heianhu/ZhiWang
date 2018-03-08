@@ -4,8 +4,10 @@ from django.db.models import Q  # 数据库中用多操作
 import re
 
 from crawl_data.models import Summary, Periodicals, Detail
-from items import DetailItem, ReferencesCJFQItem, ReferencesCMFDItem, ReferencesCDFDItem
-from crawl_data.models import ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD
+from items import DetailItem, ReferencesCJFQItem, ReferencesCMFDItem, ReferencesCDFDItem, ReferencesCBBDItem, \
+    ReferencesSSJDItem, ReferencesCRLDENGItem
+from crawl_data.models import ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD, ReferencesCBBD, ReferencesSSJD, \
+    ReferencesCRLDENG
 
 
 class CrawlDetailSpider(scrapy.Spider):
@@ -142,13 +144,36 @@ class CrawlDetailSpider(scrapy.Spider):
 
         中国博士学位论文全文数据库
         id = "pc_CDFD"
+
+
+        <li class="">
+            <em>[1]</em>
+            <a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=2010135951.nh&amp;dbcode=CDFD&amp;dbname=CDFD2010&amp;v=">心理弹性与压力困扰、适应的关系</a>
+        [D]. 蔡颖.
+            <a onclick="getKns55UnitNaviLink('','CDFD','GTSFU');">天津师范大学</a>
+         2010
+         </li>
+
+
         中国优秀硕士学位论文全文数据库
         id = "pc_CMFD"
 
 
+        <li class="">
+            <em>[1]</em>
+            <a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=2010135951.nh&amp;dbcode=CDFD&amp;dbname=CDFD2010&amp;v=">心理弹性与压力困扰、适应的关系</a>
+        [D]. 蔡颖.
+            <a onclick="getKns55UnitNaviLink('','CDFD','GTSFU');">天津师范大学</a>
+         2010
+         </li>
+
+
         中国图书全文数据库
         id = "pc_CBBD"
+
+
         数据均是堆成一坨的
+
         创客[M].                      马克思与亚里士多德[M].
             中信出版社                    华东师范大学出版社
             ,                      ,
@@ -158,6 +183,18 @@ class CrawlDetailSpider(scrapy.Spider):
 
         国际期刊数据库
         id = "pc_SSJD"
+
+
+        <li class="">
+            <em>[1]</em>
+            <a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=SJES13011300168223&amp;dbcode=SJES">Thriving not just surviving: A review of research on teacher resilience</a>
+            [J] .
+            Susan Beltman,Caroline Mansfield,Anne Price.&nbsp&nbspEducational Research Review .
+            2011
+            (3)
+        </li>
+
+
         外文题录数据库
         id = "pc_CRLDENG"
         只有
@@ -194,7 +231,6 @@ class CrawlDetailSpider(scrapy.Spider):
             dbId = div.css('.dbTitle span::attr(id)').extract_first()
             li_s = div.css('li')
             if dbId == 'pc_CJFQ':
-                pass
                 # 提取中国学术期刊网络出版总库信息
                 for li in li_s:
                     a_s = li.css('a')
@@ -251,17 +287,57 @@ class CrawlDetailSpider(scrapy.Spider):
                         CMFD_item['issuing_time'] = issuing_time
                         yield CMFD_item
                     CMFD_list.append(str(ReferencesCMFD.objects.filter(url=url)[0].id))
-
-
             elif dbId == 'pc_CBBD':
                 # 提取中国图书全文数据库
-                pass
+                for li in li_s:
+                    all_info = li.css('li::text').extract_first().rsplit()
+                    title = all_info[0]
+                    authors = all_info[3]
+                    source = all_info[1]
+                    issuing_time = all_info[4]
+                    if not ReferencesCBBD.objects.filter(
+                            Q(title=title) & Q(authors=authors) & Q(source=source) & Q(issuing_time=issuing_time)):
+                        CBBD_item = ReferencesCBBDItem()
+                        CBBD_item['title'] = title
+                        CBBD_item['authors'] = authors
+                        CBBD_item['source'] = source
+                        CBBD_item['issuing_time'] = issuing_time
+                        yield CBBD_item
+                    CBBD_list.append(str(ReferencesCBBD.objects.filter(
+                        Q(title=title) & Q(authors=authors) & Q(source=source) & Q(issuing_time=issuing_time))[0].id))
             elif dbId == 'pc_SSJD':
                 # 提取国际期刊数据库
-                pass
+                for li in li_s:
+                    url = 'http://kns.cnki.net' + li.css('a::attr(href)').extract_first()
+                    title = li.css('a::text').extract_first()
+                    all_info = li.css('li::text').extract_first().split('\r\n')
+                    info = all_info[1]
+                    issuing_time = all_info[2]
+                    if not ReferencesSSJD.objects.filter(url=url):
+                        SSJD_item = ReferencesSSJDItem()
+                        SSJD_item['url'] = url
+                        SSJD_item['title'] = title
+                        SSJD_item['info'] = info
+                        SSJD_item['issuing_time'] = issuing_time
+                        yield SSJD_item
+                    SSJD_list.append(str(ReferencesSSJD.objects.filter(url=url)[0].id))
+
             elif dbId == 'pc_CRLDENG':
                 # 提取外文题录数据库
-                pass
+                for li in li_s:
+                    title = li.css('a::text').extract_first()
+                    all_info = li.css('li::text').extract_first().split('\r\n')
+                    info = all_info[1]
+                    issuing_time = all_info[2]
+                    if not ReferencesCRLDENG.objects.filter(
+                            Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time)):
+                        CRLDENG_item = ReferencesCRLDENGItem()
+                        CRLDENG_item['title'] = title
+                        CRLDENG_item['info'] = info
+                        CRLDENG_item['issuing_time'] = issuing_time
+                        yield CRLDENG_item
+                    CRLDENG_list.append(str(ReferencesCRLDENG.objects.filter(
+                        Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time))[0].id))
             else:
                 print('当前块所属库dbId错误!')
 
@@ -275,3 +351,6 @@ class CrawlDetailSpider(scrapy.Spider):
             print('CJFQ_list:', CJFQ_list)
             print('CDFD_list:', CDFD_list)
             print('CMFD_list:', CMFD_list)
+            print('CBBD_list:', CBBD_list)
+            print('SSJD_list:', SSJD_list)
+            print('CRLDENG_list:', CRLDENG_list)
