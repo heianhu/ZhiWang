@@ -140,24 +140,21 @@ class References(models.Model):
     """
     参考文献
     """
-    CJFQ = models.CharField(max_length=255, verbose_name='中国学术期刊网络出版总库', help_text='中国学术期刊网络出版总库在数据库中的ID集合，用空格分开',
-                            default='',
-                            blank=True, null=True)
-    CDFD = models.CharField(max_length=255, verbose_name='中国博士学位论文全文数据库', help_text='中国博士学位论文全文数据库在数据库中的ID集合，用空格分开',
-                            default='',
-                            blank=True, null=True)
-    CMFD = models.CharField(max_length=255, verbose_name='中国优秀硕士学位论文全文数据库', help_text='中国优秀硕士学位论文全文数据库在数据库中的ID集合，用空格分开',
-                            default='',
-                            blank=True, null=True)
-    CBBD = models.CharField(max_length=255, verbose_name='中国图书全文数据库', help_text='中国图书全文数据库在数据库中的ID集合，用空格分开', default='',
-                            blank=True, null=True)
-    SSJD = models.CharField(max_length=255, verbose_name='国际期刊数据库', help_text='国际期刊数据库在数据库中的ID集合，用空格分开', default='',
-                            blank=True, null=True)
-    CRLDENG = models.CharField(max_length=255, verbose_name='外文题录数据库', help_text='外文题录数据库在数据库中的ID集合，用空格分开', default='',
-                               blank=True, null=True)
-    CCND = models.CharField(max_length=255, verbose_name='中国重要报纸全文数据库', help_text='中国重要报纸全文数据库在数据库中的ID集合，用空格分开',
-                            default='', blank=True, null=True)
-    CPFD = models.CharField(max_length=255, verbose_name='中国重要报纸全文数据库', help_text='中国重要报纸全文数据库在数据库中的ID集合，用空格分开',
+    CJFQ = models.TextField(verbose_name='中国学术期刊网络出版总库', help_text='中国学术期刊网络出版总库在数据库中的ID集合，用空格分开',
+                            default='', blank=True)
+    CDFD = models.TextField(max_length=255, verbose_name='中国博士学位论文全文数据库', help_text='中国博士学位论文全文数据库在数据库中的ID集合，用空格分开',
+                            default='', blank=True)
+    CMFD = models.TextField(max_length=255, verbose_name='中国优秀硕士学位论文全文数据库', help_text='中国优秀硕士学位论文全文数据库在数据库中的ID集合，用空格分开',
+                            default='', blank=True)
+    CBBD = models.TextField(max_length=255, verbose_name='中国图书全文数据库', help_text='中国图书全文数据库在数据库中的ID集合，用空格分开', default='',
+                            blank=True)
+    SSJD = models.TextField(max_length=255, verbose_name='国际期刊数据库', help_text='国际期刊数据库在数据库中的ID集合，用空格分开', default='',
+                            blank=True)
+    CRLDENG = models.TextField(max_length=255, verbose_name='外文题录数据库', help_text='外文题录数据库在数据库中的ID集合，用空格分开', default='',
+                               blank=True)
+    CCND = models.TextField(max_length=255, verbose_name='中国重要报纸全文数据库', help_text='中国重要报纸全文数据库在数据库中的ID集合，用空格分开',
+                            default='', blank=True)
+    CPFD = models.TextField(max_length=255, verbose_name='中国重要报纸全文数据库', help_text='中国重要报纸全文数据库在数据库中的ID集合，用空格分开',
                             default='', blank=True)
 
     class Meta:
