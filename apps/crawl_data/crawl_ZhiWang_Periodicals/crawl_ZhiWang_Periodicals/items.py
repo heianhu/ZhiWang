@@ -6,7 +6,6 @@
 # http://doc.scrapy.org/en/latest/topics/items.html
 
 import scrapy
-from scrapy_djangoitem import DjangoItem
 from crawl_data.models import Detail, Summary, Authors, Organization, ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD, \
     ReferencesCBBD, ReferencesSSJD, ReferencesCRLDENG, References, ReferencesCCND, ReferencesCPFD
 
@@ -23,7 +22,7 @@ class DetailItem(scrapy.Item):
 
     def processing_authors(self):
         authors_database_id = []
-        for authors_id, authors_name in self.authors_dic.items():
+        for authors_id, authors_name in self['authors_dic'].items():
             # 处理作者信息
             if authors_id == '':
                 # ID为空的时候
@@ -53,7 +52,7 @@ class DetailItem(scrapy.Item):
 
     def processing_organizations(self):
         organization_database_id = []
-        for organization_id, organization_name in self.organizations_dic.items():
+        for organization_id, organization_name in self['organizations_dic'].items():
             # 处理组织信息
             if organization_id == '':
                 # ID为空的时候
@@ -87,20 +86,20 @@ class DetailItem(scrapy.Item):
         organization_database_id = self.processing_organizations()
 
         detail = Detail()
-        detail.detail_id = self.detail_id
-        detail.detail_keywords = self.detail_keywords
-        if not self.detail_abstract:
+        detail.detail_id = self['detail_id']
+        detail.detail_keywords = self['detail_keywords']
+        if not self['detail_abstract']:
             detail.detail_abstract = ''
         else:
-            detail.detail_abstract = self.detail_abstract
+            detail.detail_abstract = self['detail_abstract']
 
-        detail.detail_date = self.detail_date
+        detail.detail_date = self['detail_date']
         detail.authors = ' '.join(authors_database_id)
         detail.organizations = ' '.join(organization_database_id)
         detail.save()
-        self.summary.detail = detail
-        self.summary.have_detail = True
-        self.summary.save()
+        self['summary'].detail = detail
+        self['summary'].have_detail = True
+        self['summary'].save()
 
 
 class ReferencesItem(scrapy.Item):
