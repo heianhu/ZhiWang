@@ -5,9 +5,9 @@ import re
 
 from crawl_data.models import Summary, Periodicals, Detail
 from items import DetailItem, ReferencesCJFQItem, ReferencesCMFDItem, ReferencesCDFDItem, ReferencesCBBDItem, \
-    ReferencesSSJDItem, ReferencesCRLDENGItem, ReferencesItem, ReferencesCCNDItem
+    ReferencesSSJDItem, ReferencesCRLDENGItem, ReferencesItem, ReferencesCCNDItem, ReferencesCPFDItem
 from crawl_data.models import ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD, ReferencesCBBD, ReferencesSSJD, \
-    ReferencesCRLDENG, References, ReferencesCCND
+    ReferencesCRLDENG, References, ReferencesCCND, ReferencesCPFD
 
 
 class CrawlDetailSpider(scrapy.Spider):
@@ -43,8 +43,8 @@ class CrawlDetailSpider(scrapy.Spider):
         #         yield scrapy.Request(url=summary.url, headers=self.header, callback=self.parse,
         #                              meta={'summary': summary})
         # 在现有数据基础上新增引用内容
-        details = Detail.objects.filter(references=None)  # 找到标记的期刊
-        # details = Detail.objects.filter(detail_id='JYYJ201707003')  # 找到标记的期刊
+        # details = Detail.objects.filter(references=None)  # 找到没有参考文献数据的期刊
+        details = Detail.objects.filter(detail_id='HIGH201601005')  # 找到指定的期刊
         print(details.count())
         count = 0
         for detail in details:
@@ -56,7 +56,7 @@ class CrawlDetailSpider(scrapy.Spider):
                 yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
                                      meta={'detail': detail, 'cur_page': 1, 'CJFQ_list': [], 'CDFD_list': [],
                                            'CMFD_list': [], 'CBBD_list': [], 'SSJD_list': [], 'CRLDENG_list': [],
-                                           'CCND_list': []})
+                                           'CCND_list': [], 'CPFD_list': []})
 
     def parse(self, response):
         """
@@ -214,6 +214,19 @@ class CrawlDetailSpider(scrapy.Spider):
         </li>
 
 
+        中国重要会议论文全文数据库
+        id="pc_CPFD"
+
+        <li class="">
+            <em>[1]</em>
+            <a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=JYJJ200912001163&amp;dbcode=CPFD&amp;dbname=CPFD2011&amp;v=">高等教育经费省际投入支出的公平性研究</a>
+        [A].
+        张炜.2009年中国教育经济学学术年会论文集[C].
+        2009
+        </li>
+
+
+
         只有
         中国学术期刊网络出版总库
         中国博士学位论文全文数据库
@@ -241,7 +254,9 @@ class CrawlDetailSpider(scrapy.Spider):
         CRLDENG_list = response.meta.get('CRLDENG_list')
         pc_CCND = int(response.xpath('//span[@id="pc_CCND"]/text()').extract_first(default=0))
         CCND_list = response.meta.get('CCND_list')
-        page = max(pc_CJFQ, pc_CDFD, pc_CMFD, pc_CBBD, pc_SSJD, pc_CRLDENG, pc_CCND)  # 找到最大的参考文献库个数，定制翻页次数
+        pc_CPFD = int(response.xpath('//span[@id="pc_CPFD"]/text()').extract_first(default=0))
+        CPFD_list = response.meta.get('CPFD_list')
+        page = max(pc_CJFQ, pc_CDFD, pc_CMFD, pc_CBBD, pc_SSJD, pc_CRLDENG, pc_CCND, pc_CPFD)  # 找到最大的参考文献库个数，定制翻页次数
         page = (page / 10)  # 每页有10条数据
         div_s = response.css('.essayBox')  # 拿到所有含有文献列表的模块
         for div in div_s:
@@ -391,6 +406,23 @@ class CrawlDetailSpider(scrapy.Spider):
                         CCND_item['issuing_time'] = issuing_time
                         yield CCND_item
                     CCND_list.append(str(ReferencesCCND.objects.filter(url=url)[0].id))
+            elif dbId == 'pc_CPFD':
+                for li in li_s:
+                    url = 'http://kns.cnki.net' + li.css('a::attr(href)').extract_first()
+                    title = li.css('a::text').extract_first()
+                    all_info = li.css('li::text').extract_first().split('\r\n')
+                    info = all_info[1]
+                    if len(info) > 255:
+                        info = info[:255]
+                    issuing_time = all_info[2]
+                    if not ReferencesCPFD.objects.filter(url=url):
+                        CPFD_item = ReferencesCPFDItem()
+                        CPFD_item['url'] = url
+                        CPFD_item['title'] = title
+                        CPFD_item['info'] = info
+                        CPFD_item['issuing_time'] = issuing_time
+                        yield CPFD_item
+                    CPFD_list.append(str(ReferencesCPFD.objects.filter(url=url)[0].id))
             else:
                 print('当前块所属库dbId错误!url=', response.url)
 
@@ -402,14 +434,28 @@ class CrawlDetailSpider(scrapy.Spider):
                                        'CBBD_list': CBBD_list, 'SSJD_list': SSJD_list, 'CRLDENG_list': CRLDENG_list,
                                        'CCND_list': CCND_list})
         else:
-            references = References()
-            references.CJFQ = ' '.join(CJFQ_list)
-            references.CDFD = ' '.join(CDFD_list)
-            references.CMFD = ' '.join(CMFD_list)
-            references.CBBD = ' '.join(CBBD_list)
-            references.SSJD = ' '.join(SSJD_list)
-            references.CRLDENG = ' '.join(CRLDENG_list)
-            references.CCND = ' '.join(CCND_list)
-            references.save()
-            detail.references = references
-            detail.save()
+            # Debug
+            print('CJFQ_list:', CJFQ_list)
+            print('CDFD_list:', CDFD_list)
+            print('CMFD_list:', CMFD_list)
+            print('CBBD_list:', CBBD_list)
+            print('SSJD_list:', SSJD_list)
+            print('CRLDENG_list:', CRLDENG_list)
+            print('CCND_list:', CCND_list)
+            print('CPFD_list:', CPFD_list)
+
+
+            # if max(CJFQ_list, CDFD_list, CMFD_list, CBBD_list, SSJD_list, CRLDENG_list, CCND_list, pc_CPFD) == 0:
+            #     references = References.objects.filter(id=76438)[0]
+            # else:
+            #     references = References()
+            #     references.CJFQ = ' '.join(CJFQ_list)
+            #     references.CDFD = ' '.join(CDFD_list)
+            #     references.CMFD = ' '.join(CMFD_list)
+            #     references.CBBD = ' '.join(CBBD_list)
+            #     references.SSJD = ' '.join(SSJD_list)
+            #     references.CRLDENG = ' '.join(CRLDENG_list)
+            #     references.CCND = ' '.join(CCND_list)
+            #     references.save()
+            # detail.references = references
+            # detail.save()
