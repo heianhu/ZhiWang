@@ -23,40 +23,41 @@ class CrawlDetailSpider(scrapy.Spider):
         控制开始
         从数据库中找出所要爬取的url
         """
-        # periodicals = Periodicals.objects.filter(mark=True)  # 找到标记的期刊
-        # summarys = Summary.objects.filter(Q(have_detail=False) & Q(source__in=periodicals))  # 标记且没有爬去过的
-        # print(summarys.count())
-        # count = 0
-        # for summary in summarys:
-        #     print(count)
-        #     count += 1
-        #     # 去重
-        #     # 有些文章在不同的期刊中投放了两次，导致之前爬去过，现在又来了一遍，只要将这次的summary指向之前的detail即可
-        #     paper_id = re.search('filename=((.*?))&', summary.url).group(1)  # 文章ID Detail.detail_id
-        #     detail = Detail.objects.filter(detail_id=paper_id)
-        #     if detail:
-        #         print('Duplicate')
-        #         summary.detail = detail[0]
-        #         summary.have_detail = True
-        #         summary.save()
-        #     else:
-        #         yield scrapy.Request(url=summary.url, headers=self.header, callback=self.parse,
-        #                              meta={'summary': summary})
-        # 在现有数据基础上新增引用内容
-        details = Detail.objects.filter(references=None)  # 找到没有参考文献数据的期刊
-        # details = Detail.objects.filter(detail_id='JYYJ200902021')  # 找到指定的期刊
-        print(details.count())
+        periodicals = Periodicals.objects.filter(mark=True)  # 找到标记的期刊
+        summarys = Summary.objects.filter(Q(have_detail=False) & Q(source__in=periodicals))  # 标记且没有爬去过的
+        print(summarys.count())
         count = 0
-        for detail in details:
+        for summary in summarys:
             print(count)
             count += 1
-            if detail.references is None:
-                references_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1'.format(
-                    detail.detail_id)
-                yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
-                                     meta={'detail': detail, 'cur_page': 1, 'CJFQ_list': [], 'CDFD_list': [],
-                                           'CMFD_list': [], 'CBBD_list': [], 'SSJD_list': [], 'CRLDENG_list': [],
-                                           'CCND_list': [], 'CPFD_list': []})
+            # 去重
+            # 有些文章在不同的期刊中投放了两次，导致之前爬去过，现在又来了一遍，只要将这次的summary指向之前的detail即可
+            paper_id = re.search('filename=((.*?))&', summary.url).group(1)  # 文章ID Detail.detail_id
+            detail = Detail.objects.filter(detail_id=paper_id)
+            if detail:
+                print('Duplicate')
+                summary.detail = detail[0]
+                summary.have_detail = True
+                summary.save()
+            else:
+                yield scrapy.Request(url=summary.url, headers=self.header, callback=self.parse,
+                                     meta={'summary': summary})
+
+        # # 在现有数据基础上新增引用内容
+        # details = Detail.objects.filter(references=None)  # 找到没有参考文献数据的期刊
+        # # details = Detail.objects.filter(detail_id='JYYJ200902021')  # 找到指定的期刊
+        # print(details.count())
+        # count = 0
+        # for detail in details:
+        #     print(count)
+        #     count += 1
+        #     if detail.references is None:
+        #         references_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1'.format(
+        #             detail.detail_id)
+        #         yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
+        #                              meta={'detail': detail, 'cur_page': 1, 'CJFQ_list': [], 'CDFD_list': [],
+        #                                    'CMFD_list': [], 'CBBD_list': [], 'SSJD_list': [], 'CRLDENG_list': [],
+        #                                    'CCND_list': [], 'CPFD_list': []})
 
     def parse(self, response):
         """
@@ -109,6 +110,13 @@ class CrawlDetailSpider(scrapy.Spider):
         detail_item['summary'] = summary
 
         yield detail_item
+        detail = Detail.objects.get(Q(detail_id=paper_id) & Q(summary=summary))
+        references_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1'.format(
+            detail.detail_id)
+        yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
+                             meta={'detail': detail, 'cur_page': 1, 'CJFQ_list': [], 'CDFD_list': [],
+                                   'CMFD_list': [], 'CBBD_list': [], 'SSJD_list': [], 'CRLDENG_list': [],
+                                   'CCND_list': [], 'CPFD_list': []})
 
     def parse_references(self, response):
         """

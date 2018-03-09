@@ -96,6 +96,7 @@ class DetailItem(scrapy.Item):
         detail.detail_date = self['detail_date']
         detail.authors = ' '.join(authors_database_id)
         detail.organizations = ' '.join(organization_database_id)
+        detail.references = None
         detail.save()
         self['summary'].detail = detail
         self['summary'].have_detail = True
