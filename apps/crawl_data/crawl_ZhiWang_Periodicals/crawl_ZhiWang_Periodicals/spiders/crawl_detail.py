@@ -44,7 +44,7 @@ class CrawlDetailSpider(scrapy.Spider):
         #                              meta={'summary': summary})
         # 在现有数据基础上新增引用内容
         details = Detail.objects.filter(references=None)  # 找到没有参考文献数据的期刊
-        # details = Detail.objects.filter(detail_id='HIGH201601005')  # 找到指定的期刊
+        # details = Detail.objects.filter(detail_id='JYYJ200902021')  # 找到指定的期刊
         print(details.count())
         count = 0
         for detail in details:
@@ -382,26 +382,29 @@ class CrawlDetailSpider(scrapy.Spider):
             elif dbId == 'pc_CRLDENG':
                 # 提取外文题录数据库
                 for li in li_s:
-                    title = li.css('a::text').extract_first()
-                    if len(title) > 255:
-                        title = title[:255]
-                    all_info = li.css('li::text').extract_first().split('\r\n')
-                    if len(all_info) < 3:
-                        # 数据个数不符
+                    try:
+                        title = li.css('a::text').extract_first()
+                        if len(title) > 255:
+                            title = title[:255]
+                        all_info = li.css('li::text').extract_first().split('\r\n')
+                        if len(all_info) < 3:
+                            # 数据个数不符
+                            continue
+                        info = all_info[1]
+                        if len(info) > 255:
+                            info = info[:255]
+                        issuing_time = all_info[2]
+                        if not ReferencesCRLDENG.objects.filter(
+                                Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time)):
+                            CRLDENG_item = ReferencesCRLDENGItem()
+                            CRLDENG_item['title'] = title
+                            CRLDENG_item['info'] = info
+                            CRLDENG_item['issuing_time'] = issuing_time
+                            yield CRLDENG_item
+                        CRLDENG_list.append(str(ReferencesCRLDENG.objects.filter(
+                            Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time))[0].id))
+                    except TypeError:
                         continue
-                    info = all_info[1]
-                    if len(info) > 255:
-                        info = info[:255]
-                    issuing_time = all_info[2]
-                    if not ReferencesCRLDENG.objects.filter(
-                            Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time)):
-                        CRLDENG_item = ReferencesCRLDENGItem()
-                        CRLDENG_item['title'] = title
-                        CRLDENG_item['info'] = info
-                        CRLDENG_item['issuing_time'] = issuing_time
-                        yield CRLDENG_item
-                    CRLDENG_list.append(str(ReferencesCRLDENG.objects.filter(
-                        Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time))[0].id))
             elif dbId == 'pc_CCND':
                 # 中国重要报纸全文数据库
                 for li in li_s:
