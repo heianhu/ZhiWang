@@ -80,7 +80,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'new_Cnki',
         'USER': 'root',
-        'PASSWORD': 'ms20090912',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '3306',
     },
