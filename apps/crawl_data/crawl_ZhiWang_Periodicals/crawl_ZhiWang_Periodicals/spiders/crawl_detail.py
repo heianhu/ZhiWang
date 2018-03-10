@@ -296,77 +296,91 @@ class CrawlDetailSpider(scrapy.Spider):
                             CJFQ_item['issuing_time'] = issuing_time
                             yield CJFQ_item
                         CJFQ_list.append(str(ReferencesCJFQ.objects.filter(url=url)[0].id))
+                    except TypeError:
+                        continue
                     except IndexError:
                         # 数据没有url获取他内容，不完整，不具备参考价值
                         continue
             elif dbId == 'pc_CDFD':
                 # 提取中国博士学位论文全文数据库
-                for li in li_s:
-                    a_s = li.css('a')
-                    url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
-                    title = a_s[0].css('a::text').extract_first()
-                    if len(title) > 255:
-                        title = title[:255]
-                    authors = li.css('li::text').extract_first().split('[D].')[-1]
-                    if len(authors) > 255:
-                        authors = authors[:255]
-                    source = a_s[1].css('a::text').extract_first()
-                    issuing_time = li.css('li').extract_first().split('</a>')[-1].split('</li>')[0].rsplit()[0]
-                    if not ReferencesCDFD.objects.filter(url=url):
-                        # 在数据库中没有这条数据信息
-                        CDFD_item = ReferencesCDFDItem()
-                        CDFD_item['url'] = url
-                        CDFD_item['title'] = title
-                        CDFD_item['authors'] = authors
-                        CDFD_item['source'] = source
-                        CDFD_item['issuing_time'] = issuing_time
-                        yield CDFD_item
-                    CDFD_list.append(str(ReferencesCDFD.objects.filter(url=url)[0].id))
+                try:
+                    for li in li_s:
+                        a_s = li.css('a')
+                        url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
+                        title = a_s[0].css('a::text').extract_first()
+                        if len(title) > 255:
+                            title = title[:255]
+                        authors = li.css('li::text').extract_first().split('[D].')[-1]
+                        if len(authors) > 255:
+                            authors = authors[:255]
+                        source = a_s[1].css('a::text').extract_first()
+                        issuing_time = li.css('li').extract_first().split('</a>')[-1].split('</li>')[0].rsplit()[0]
+                        if not ReferencesCDFD.objects.filter(url=url):
+                            # 在数据库中没有这条数据信息
+                            CDFD_item = ReferencesCDFDItem()
+                            CDFD_item['url'] = url
+                            CDFD_item['title'] = title
+                            CDFD_item['authors'] = authors
+                            CDFD_item['source'] = source
+                            CDFD_item['issuing_time'] = issuing_time
+                            yield CDFD_item
+                        CDFD_list.append(str(ReferencesCDFD.objects.filter(url=url)[0].id))
+                except IndexError:
+                    # 数据没有url获取他内容，不完整，不具备参考价值
+                    continue
             elif dbId == 'pc_CMFD':
                 # 提取中国优秀硕士学位论文全文数据库
-                for li in li_s:
-                    a_s = li.css('a')
-                    url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
-                    title = a_s[0].css('a::text').extract_first()
-                    if len(title) > 255:
-                        title = title[:255]
-                    authors = li.css('li::text').extract_first().split('[D].')[-1]
-                    if len(authors) > 255:
-                        authors = authors[:255]
-                    source = a_s[1].css('a::text').extract_first()
-                    issuing_time = li.css('li').extract_first().split('</a>')[-1].split('</li>')[0].rsplit()[0]
-                    if not ReferencesCMFD.objects.filter(url=url):
-                        # 在数据库中没有这条数据信息
-                        CMFD_item = ReferencesCMFDItem()
-                        CMFD_item['url'] = url
-                        CMFD_item['title'] = title
-                        CMFD_item['authors'] = authors
-                        CMFD_item['source'] = source
-                        CMFD_item['issuing_time'] = issuing_time
-                        yield CMFD_item
-                    CMFD_list.append(str(ReferencesCMFD.objects.filter(url=url)[0].id))
+                try:
+                    for li in li_s:
+                        a_s = li.css('a')
+                        url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
+                        title = a_s[0].css('a::text').extract_first()
+                        if len(title) > 255:
+                            title = title[:255]
+                        authors = li.css('li::text').extract_first().split('[D].')[-1]
+                        if len(authors) > 255:
+                            authors = authors[:255]
+                        source = a_s[1].css('a::text').extract_first()
+                        issuing_time = li.css('li').extract_first().split('</a>')[-1].split('</li>')[0].rsplit()[0]
+                        if not ReferencesCMFD.objects.filter(url=url):
+                            # 在数据库中没有这条数据信息
+                            CMFD_item = ReferencesCMFDItem()
+                            CMFD_item['url'] = url
+                            CMFD_item['title'] = title
+                            CMFD_item['authors'] = authors
+                            CMFD_item['source'] = source
+                            CMFD_item['issuing_time'] = issuing_time
+                            yield CMFD_item
+                        CMFD_list.append(str(ReferencesCMFD.objects.filter(url=url)[0].id))
+                except IndexError:
+                    # 数据没有url获取他内容，不完整，不具备参考价值
+                    continue
             elif dbId == 'pc_CBBD':
                 # 提取中国图书全文数据库
-                for li in li_s:
-                    all_info = li.css('li::text').extract_first().rsplit()
-                    title = all_info[0]
-                    if len(title) > 255:
-                        title = title[:255]
-                    authors = all_info[3]
-                    if len(authors) > 255:
-                        authors = authors[:255]
-                    source = all_info[1]
-                    issuing_time = all_info[4]
-                    if not ReferencesCBBD.objects.filter(
-                            Q(title=title) & Q(authors=authors) & Q(source=source) & Q(issuing_time=issuing_time)):
-                        CBBD_item = ReferencesCBBDItem()
-                        CBBD_item['title'] = title
-                        CBBD_item['authors'] = authors
-                        CBBD_item['source'] = source
-                        CBBD_item['issuing_time'] = issuing_time
-                        yield CBBD_item
-                    CBBD_list.append(str(ReferencesCBBD.objects.filter(
-                        Q(title=title) & Q(authors=authors) & Q(source=source) & Q(issuing_time=issuing_time))[0].id))
+                try:
+                    for li in li_s:
+                        all_info = li.css('li::text').extract_first().rsplit()
+                        title = all_info[0]
+                        if len(title) > 255:
+                            title = title[:255]
+                        authors = all_info[3]
+                        if len(authors) > 255:
+                            authors = authors[:255]
+                        source = all_info[1]
+                        issuing_time = all_info[4]
+                        if not ReferencesCBBD.objects.filter(
+                                Q(title=title) & Q(authors=authors) & Q(source=source) & Q(issuing_time=issuing_time)):
+                            CBBD_item = ReferencesCBBDItem()
+                            CBBD_item['title'] = title
+                            CBBD_item['authors'] = authors
+                            CBBD_item['source'] = source
+                            CBBD_item['issuing_time'] = issuing_time
+                            yield CBBD_item
+                        CBBD_list.append(str(ReferencesCBBD.objects.filter(
+                            Q(title=title) & Q(authors=authors) & Q(source=source) & Q(issuing_time=issuing_time))[0].id))
+                except IndexError:
+                    # 数据没有url获取他内容，不完整，不具备参考价值
+                    continue
             elif dbId == 'pc_SSJD':
                 # 提取国际期刊数据库
                 for li in li_s:
