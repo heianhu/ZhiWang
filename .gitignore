@@ -12,4 +12,4 @@ dist
 build
 
 # My configurations:
-/ZhiWang/settings.py
+ZhiWang/settings.py
