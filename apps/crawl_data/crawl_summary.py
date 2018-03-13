@@ -14,6 +14,7 @@ from scrapy.selector import Selector
 from datetime import datetime
 import time
 import re
+from django.db.models import Q
 
 pathname = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.extend([pathname, ])
@@ -102,7 +103,9 @@ class CrawlCnkiSummary(object):
                 url = 'http://kns.cnki.net/KCMS' + url
 
                 # 查询是否已经有该url
-                have_url = Summary.objects.filter(url=url)
+                filename = re.search('filename=((.*?))&', url).group(1)
+                dbname = re.search('dbname=((.*?))&', url).group(1)
+                have_url = Summary.objects.filter(Q(url__contains=filename) & Q(url__contains=dbname))
                 if have_url:
                     # 如果有收录过该url，则跳过本次，计数器+1
                     have_done += 1
