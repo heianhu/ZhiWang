@@ -377,7 +377,8 @@ class CrawlDetailSpider(scrapy.Spider):
                             CBBD_item['issuing_time'] = issuing_time
                             yield CBBD_item
                         CBBD_list.append(str(ReferencesCBBD.objects.filter(
-                            Q(title=title) & Q(authors=authors) & Q(source=source) & Q(issuing_time=issuing_time))[0].id))
+                            Q(title=title) & Q(authors=authors) & Q(source=source) & Q(issuing_time=issuing_time))[
+                                                 0].id))
                 except IndexError:
                     # 数据没有url获取他内容，不完整，不具备参考价值
                     continue

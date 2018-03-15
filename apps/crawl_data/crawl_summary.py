@@ -105,7 +105,7 @@ class CrawlCnkiSummary(object):
                 # 查询是否已经有该url
                 filename = re.search('filename=((.*?))&', url).group(1)
                 dbname = re.search('dbname=((.*?))&', url).group(1)
-                have_url = Summary.objects.filter(Q(url__contains=filename) & Q(url__contains=dbname))
+                have_url = Summary.objects.filter(Q(url__icontains=filename) & Q(url__icontains=dbname))
                 if have_url:
                     # 如果有收录过该url，则跳过本次，计数器+1
                     have_done += 1
