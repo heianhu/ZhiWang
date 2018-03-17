@@ -20,6 +20,6 @@ from retrieve.views import IndexView, Search
 urlpatterns = [
     # url(r'^admin/', admin.site.urls),
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^retrieve/$', include('retrieve.urls', namespace='garage')),
+    url(r'^retrieve/', include('retrieve.urls', namespace='garage')),
 
 ]

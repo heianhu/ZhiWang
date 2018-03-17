@@ -21,8 +21,8 @@
     </div>
     <div class="nav">
     	<ul class="searchList">
-             <a class="searchItem {% ifequal search_type 'title' %}current{% endifequal %}" data-type="title" href="?q={{ keywords }}&s_type=title">题目</a>
-             <a class="searchItem {% ifequal search_type 'author' %}current{% endifequal %}" data-type="author" href="?q={{ keywords }}&s_type=author">作者</a>
+             <a class="searchItem {% ifequal search_type 'title' %}current{% endifequal %}" data-type="title" href="?keywords={{ keywords }}&s_type=title">题目</a>
+             <a class="searchItem {% ifequal search_type 'author' %}current{% endifequal %}" data-type="author" href="?keywords={{ keywords }}&s_type=author">作者</a>
 
         </ul>
     </div>
@@ -39,9 +39,11 @@
               {% for article in all_articles.object_list %}
                     <div>Title: <a target="_blank" href="{{ article.url }}">{{ article.title }}</a>  </div>
                     <div>Authors: {{ article.authors }}</div>
+                    <div><a href="{% url 'garage:getdetailinfo' article.id  %}">下载链接 </a>  </div>
 
                     <br>
                 {% endfor %}
+
             </div>
 
                 <!-- 分页 -->
