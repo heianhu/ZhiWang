@@ -1,14 +1,12 @@
-
-
 <!DOCTYPE html >
 <html xmlns="http://www.w3.org/1999/xhtml">
-
+{% load staticfiles %}
 <head>
 <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>lcv-search 搜索引擎</title>
-<link href="/static/css/style.css" rel="stylesheet" type="text/css" />
-<link href="/static/css/index.css" rel="stylesheet" type="text/css" />
+<title>Cnki搜索</title>
+<link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'css/index.css' %}" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div id="container">
@@ -39,8 +37,8 @@
     </div>
 </div>
 </body>
-<script type="text/javascript" src="/static/js/jquery.js"></script>
-<script type="text/javascript" src="/static/js/global.js"></script>
+<script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/global.js' %}"></script>
 <script type="text/javascript">
     var suggest_url = "/suggest/"
     var search_url = "{# {% url 'retrieve' %} #}"

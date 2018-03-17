@@ -1,12 +1,10 @@
-
-
 <!DOCTYPE html >
 <html xmlns="http://www.w3.org/1999/xhtml">
 {% load staticfiles %}
 <head>
 <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>python-lcv-search搜索引擎</title>
+<title>搜索结果</title>
 <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
 <link href="{% static 'css/result.css' %}" rel="stylesheet" type="text/css" />
 </head>
@@ -39,7 +37,7 @@
               {% for article in all_articles.object_list %}
                     <div>Title: <a target="_blank" href="{{ article.url }}">{{ article.title }}</a>  </div>
                     <div>Authors: {{ article.authors }}</div>
-                    <div><a href="{% url 'garage:getdetailinfo' article.id  %}">下载链接 </a>  </div>
+                    <div><a href="{% url 'retrieve:getdetailinfo' article.id  %}">下载链接 </a>  </div>
 
                     <br>
                 {% endfor %}
@@ -77,7 +75,7 @@
     </div><!--End of bd-->
 </div>
 
-<div id="foot">Copyright &copy;projectsedu.com 版权所有  E-mail:admin@projectsedu.com</div>
+<div id="foot">Copyright &copy;heianhu.com 版权所有</div>
 </body>
 <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/global.js' %}"></script>

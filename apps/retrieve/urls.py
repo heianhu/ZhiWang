@@ -7,8 +7,5 @@ from .views import Search, GetDetailInfo
 
 
 urlpatterns = [
-    url(r'^$', Search.as_view(), name='retrieve'),
-
     url(r'^download/(?P<getdetailinfo_id>\d+)/$', GetDetailInfo.as_view(), name='getdetailinfo'),
-
 ]
