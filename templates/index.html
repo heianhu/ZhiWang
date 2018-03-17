@@ -29,16 +29,12 @@
 
             </div>
 
-
-
-
-
         </div><!-- End of main -->
     </div><!--End of bd-->
 
     <div class="foot">
         <div class="wrap">
-            <div class="copyright">Copyright &copy;uimaker.com 版权所有  E-mail:admin@uimaker.com</div>
+            <div class="copyright">Copyright &copy;heianhu.com 版权所有</div>
         </div>
     </div>
 </div>
@@ -47,7 +43,7 @@
 <script type="text/javascript" src="/static/js/global.js"></script>
 <script type="text/javascript">
     var suggest_url = "/suggest/"
-    var search_url = "/retrieve/"
+    var search_url = "{% url 'retrieve' %}"
 
 
     $('.searchList').on('click', '.searchItem', function(){
@@ -78,7 +74,7 @@
                 async: true,
                 success: function(data) {
                     for (var i=0;i<data.length;i++){
-                        tmpHtml += '<li><a href="'+search_url+'?q='+data[i]+'">'+data[i]+'</a></li>'
+                        tmpHtml += '<li><a href="'+search_url+'?keywords='+data[i]+'">'+data[i]+'</a></li>'
                     }
                     $(".dataList").html("")
                     $(".dataList").append(tmpHtml);
@@ -118,7 +114,7 @@
         {#    //然后再把搜索内容显示出来#}
         {#    MapSearchArr();#}
 
-        window.location.href=search_url+'?q='+val+"&s_type="+$(".searchItem.current").attr('data-type')
+        window.location.href=search_url+'?keywords='+val+"&s_type="+$(".searchItem.current").attr('data-type')
 
     }
 

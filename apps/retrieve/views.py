@@ -1,9 +1,14 @@
 from django.shortcuts import render
 from django.views.generic import View
 from crawl_data.models import Summary
+import jieba
+import jieba.posseg
 from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
+from django.db.models.query import QuerySet
+
+
 # Create your views here.
 
 class IndexView(View):
@@ -15,17 +20,35 @@ class IndexView(View):
 
 class Search(View):
     def get(self, request):
-        all_articles = Summary.objects.all()
-        keywords = request.GET.get('q', '')
+        """
+        尚未处理空字符串传入情况
+        :param request:
+        :return:
+        """
+        keywords = request.GET.get('keywords', '')
         search_type = request.GET.get('s_type', '')
-        if search_type == 'title':
-            all_articles = Summary.objects.filter(title__icontains=keywords)
-        elif search_type == 'author':
-            all_articles = Summary.objects.filter(authors__icontains=keywords)
+        if keywords.rsplit():
+            if search_type == 'title':
+                temp_articles = Summary.objects.filter(title__icontains=keywords, source__mark=True)
+                if temp_articles:
+                    all_articles = temp_articles
+                else:
+                    all_articles = Summary.objects.all()
+                    seg_list = jieba.posseg.cut(keywords)
+                    for seg, seg_tpye in seg_list:
+                        if 'n' in seg_tpye or 'v' in seg_tpye:
+                            all_articles = all_articles & Summary.objects.filter(title__icontains=seg,
+                                                                                 source__mark=True)
+            elif search_type == 'author':
+                all_articles = Summary.objects.filter(authors__icontains=keywords, source__mark=True)
+            else:
+                return render(request, 'index.html')
+        else:
+            return render(request, 'index.html')
 
         result_count = all_articles.count()
 
-        #进行分页
+        # 进行分页
         limit = 20  # 每页显示的记录数
         paginator = Paginator(all_articles, limit)  # 实例化一个分页对象
 
