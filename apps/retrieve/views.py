@@ -4,7 +4,8 @@ from crawl_data.models import Summary
 import jieba
 import jieba.posseg
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models.query import QuerySet
+from django.http import HttpResponse, FileResponse
+from django.utils.http import urlquote
 
 
 # Create your views here.
@@ -44,20 +45,6 @@ class Search(View):
         else:
             return render(request, 'index.html')
 
-        # result_count = all_articles.count()
-        #
-        # # 进行分页
-        # limit = 20  # 每页显示的记录数
-        # paginator = Paginator(all_articles, limit)  # 实例化一个分页对象
-        #
-        # page = request.GET.get('page')  # 获取页码
-        # try:
-        #     all_articles = paginator.page(page)  # 获取某页对应的记录
-        # except PageNotAnInteger:  # 如果页码不是个整数
-        #     all_articles = paginator.page(1)  # 取第一页的记录
-        # except EmptyPage:  # 如果页码太大，没有相应的记录
-        #     all_articles = paginator.page(paginator.num_pages)  # 取最后一页的记录
-
         # 分页功能
         try:
             page = request.GET.get('page', 1)
@@ -69,5 +56,23 @@ class Search(View):
         return render(request, 'result.html', {
             'all_articles': articles,
             'search_type': search_type,
-            'keywords': keywords
+            'keywords': keywords,
+            'result_count': all_articles.count()
         })
+
+
+class GetDetailInfo(View):
+    def get(self, request, summary_id):
+        summary_id = int(summary_id)
+        # 在Excel中插入数据，文件名为detail_id字段
+
+
+        # 保存并返回下载
+        filename = 'detail_id字段'
+        # newWb.save('media/{}.xls'.format(filename))
+        file = open('media/{}.xls'.format(filename), 'rb')
+        response = FileResponse(file)
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment;filename="{}.xls"'.format(urlquote(filename))
+
+        return response
