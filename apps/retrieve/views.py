@@ -4,11 +4,11 @@ from crawl_data.models import Summary, Detail, Authors, Periodicals, References
 from crawl_data.models import ReferencesCBBD, ReferencesCCND, ReferencesCDFD, ReferencesCJFQ
 from crawl_data.models import ReferencesCPFD, ReferencesCMFD, ReferencesCRLDENG, ReferencesSSJD
 import jieba
-
 import jieba.posseg
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, FileResponse
 from django.utils.http import urlquote
+from django.http import Http404
 from openpyxl import Workbook
 
 
@@ -24,12 +24,15 @@ class IndexView(View):
 class Search(View):
     def get(self, request):
         """
-        尚未处理空字符串传入情况
+        搜索功能
+        目前能根据标题和作者，在被标记的期刊中的文献进行搜索
         :param request:
         :return:
         """
+        # 获取关键词和搜索类型
         keywords = request.GET.get('keywords', '')
         search_type = request.GET.get('s_type', '')
+
         if keywords.rsplit():
             if search_type == 'title':
                 temp_articles = Summary.objects.filter(title__icontains=keywords, source__mark=True)
@@ -37,9 +40,10 @@ class Search(View):
                     all_articles = temp_articles
                 else:
                     all_articles = Summary.objects.all()
-                    seg_list = jieba.posseg.cut(keywords)
+                    seg_list = jieba.posseg.cut(keywords)  # 进行分词
                     for seg, seg_tpye in seg_list:
                         if 'n' in seg_tpye or 'v' in seg_tpye:
+                            # 将动词和名次进行查找，并取查找后的交集
                             all_articles = all_articles & Summary.objects.filter(title__icontains=seg,
                                                                                  source__mark=True)
             elif search_type == 'author':
@@ -75,54 +79,70 @@ class GetDetailInfo(View):
                   'TC', 'Z9', 'PU', 'PI', 'PA', 'SN', 'BN', 'J9', 'JI', 'PD', 'PY', 'VL', 'IS', 'SI', 'PN',
                   'SU', 'BP', 'EP', 'AR', 'DI', 'D2', 'PG', 'P2', 'WC', 'SC', 'GA', 'UT', 'ER', 'EF']
 
-        values = { field:[i,''] for i, field in enumerate(fields)}
+        values = {field: [i, ] for i, field in enumerate(fields)}
 
         article_summary = Summary.objects.get(id=summary_id)
         article_detail = Detail.objects.get(id=article_summary.detail_id)
         # 文件名
-        values['FN'][1] = article_detail.detail_id
+        values['FN'].append(article_detail.detail_id)
         # 作者
-        values['AU'][1] = article_summary.authors
+        # values['AU'][1] = article_summary.authors
+        for author in article_summary.detail.authors.split():
+            if author.isdigit():
+                values['AU'].append(Authors.objects.filter(id=int(author))[0].authors_name)
+            else:
+                values['AU'].append(author)
         # 标题
-        values['TI'][1] = article_summary.title
+        values['TI'].append(article_summary.title)
         # 出版日期
-        values['PD'][1] = article_summary.issuing_time
+        values['PD'].append(article_summary.issuing_time.strftime('%Y/%m/%d'))
         # issn号
-        values['SN'][1] = Periodicals.objects.get(id=article_summary.source_id).issn_number
+        values['SN'].append(Periodicals.objects.get(id=article_summary.source_id).issn_number)
         # 出版物名称
-        values['SO'][1] = Periodicals.objects.get(id=article_summary.source_id).name
+        values['SO'].append(Periodicals.objects.get(id=article_summary.source_id).name)
         # 摘要
-        values['AB'][1] = article_detail.detail_abstract
+        values['AB'].append(article_detail.detail_abstract)
         # 参考文献
-        article_reference =  References.objects.get(id=article_detail.references_id)
-        str_refer = ['CBBD', 'CDFD','CJFQ','CMFD','CRLDENG','SSJD','CCND','CPFD']
-        refers = [] # 参考于各个期刊的id，每个期刊的id以列表形式存在 [[1,2],[3,4]]
-        for refer in str_refer:
-            refers.append(getattr(article_reference, refer).split())
+        try:
+            article_reference = References.objects.get(id=article_detail.references_id)
+        except References.DoesNotExist:
+            # 处理没有文献情况
+            values['CR'].append('')
+        else:
+            str_refer = ['CBBD', 'CDFD', 'CJFQ', 'CMFD', 'CRLDENG', 'SSJD', 'CCND', 'CPFD']
+            refers = []  # 参考于各个期刊的id，每个期刊的id以列表形式存在 [[1,2],[3,4]]
+            for refer in str_refer:
+                refers.append(getattr(article_reference, refer).split())
 
-        all_refers = [] # 每一项是相应期刊的查询集
-        all_refers.append( ReferencesCBBD.objects.filter(id__in=refers[0]) )
-        all_refers.append( ReferencesCDFD.objects.filter(id__in=refers[1]) )
-        all_refers.append( ReferencesCJFQ.objects.filter(id__in=refers[2]) )
-        all_refers.append( ReferencesCMFD.objects.filter(id__in=refers[3]) )
-        all_refers.append( ReferencesCRLDENG.objects.filter(id__in=refers[4]) )
-        all_refers.append( ReferencesSSJD.objects.filter(id__in=refers[5]) )
-        all_refers.append( ReferencesCCND.objects.filter(id__in=refers[6]) )
-        all_refers.append( ReferencesCPFD.objects.filter(id__in=refers[7]) )
+            all_refers = []  # 每一项是相应期刊的查询集
+            all_refers.append(ReferencesCBBD.objects.filter(id__in=refers[0]))
+            all_refers.append(ReferencesCDFD.objects.filter(id__in=refers[1]))
+            all_refers.append(ReferencesCJFQ.objects.filter(id__in=refers[2]))
+            all_refers.append(ReferencesCMFD.objects.filter(id__in=refers[3]))
+            all_refers.append(ReferencesCRLDENG.objects.filter(id__in=refers[4]))
+            all_refers.append(ReferencesSSJD.objects.filter(id__in=refers[5]))
+            all_refers.append(ReferencesCCND.objects.filter(id__in=refers[6]))
+            all_refers.append(ReferencesCPFD.objects.filter(id__in=refers[7]))
 
-        # 对每一条结果取title值
-        all_refers_title = [refer.title for queryset in all_refers for refer in queryset]
-        # 合并所有title
-        title = ';'.join(all_refers_title)
-        values['CR'][1] = title
-
+            # 对每一条结果取title值
+            all_refers_title = (refer.title for queryset in all_refers for refer in queryset)
+            # # 合并所有title
+            # title = ';'.join(all_refers_title)
+            # values['CR'][1] = title
+            # 将每个title分别填入
+            for refers_title in all_refers_title:
+                values['CR'].append(refers_title)
 
         wb = Workbook()
         sheet = wb.get_active_sheet()
 
-        for k, [i, v] in values.items():
-            sheet.cell(row=i + 1, column=1).value = k
-            sheet.cell(row=i + 1, column=2).value = v
+        # for k, [i, v] in values.items():
+        #     sheet.cell(row=i + 1, column=1).value = k
+        #     sheet.cell(row=i + 1, column=2).value = v
+        for key, (i, *all_value) in values.items():
+            sheet.cell(row=i + 1, column=1).value = key
+            for _, v in enumerate(all_value):
+                sheet.cell(row=i + 1, column=2 + _).value = v
 
         # 保存并返回下载
         filename = '{0}.xlsx'.format(article_detail.detail_id)
@@ -133,5 +153,3 @@ class GetDetailInfo(View):
         response['Content-Disposition'] = 'attachment;filename="{}"'.format(urlquote(filename))
 
         return response
-
-
