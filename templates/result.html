@@ -81,8 +81,8 @@
 <script type="text/javascript" src="{% static 'js/global.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/pagination.js' %}"></script>
 <script type="text/javascript">
-    {#var search_url = "{% url 'retrieve' %}"#}
-    var search_url = "/retrieve/"
+    var search_url = "{% url 'retrieve' %}"
+    {#var search_url = "/retrieve/"#}
 
 
 
@@ -186,16 +186,16 @@
 
     function add_search(){
         var val = $(".searchInput").val();
-        {#if (val.length>=2){#}
-        {#    //点击搜索按钮时，去重#}
-        {#    KillRepeat(val);#}
-        {#    //去重后把数组存储到浏览器localStorage#}
-        {#    localStorage.search = searchArr;#}
-        {#    //然后再把搜索内容显示出来#}
-        {#    MapSearchArr();#}
-        var search_url = "/retrieve/"
+        //if (val.length>=2){
+        //    //点击搜索按钮时，去重
+        //    KillRepeat(val);
+        //    //去重后把数组存储到浏览器localStorage
+        //    localStorage.search = searchArr;
+        //    //然后再把搜索内容显示出来
+        //    MapSearchArr();
+        //var search_url = "/retrieve/"
 
-        window.location.href=search_url+'?q='+val+"&s_type="+$(".searchItem.current").attr('data-type')
+        window.location.href=search_url+'?keywords='+val+"&s_type="+$(".searchItem.current").attr('data-type')
 
     }
 
