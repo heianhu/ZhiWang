@@ -6,11 +6,11 @@ from crawl_data.models import ReferencesCPFD, ReferencesCMFD, ReferencesCRLDENG,
 import jieba
 import jieba.posseg
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse, FileResponse, JsonResponse
 from django.utils.http import urlquote
 from django.http import Http404
 from openpyxl import Workbook
-
+import json
 
 # Create your views here.
 
@@ -22,6 +22,18 @@ class IndexView(View):
 
 
 class Search(View):
+    def post(self, request):
+
+        keywords = request.POST.get('keywords', '')
+
+        all_articles = Summary.objects.filter(title__icontains=keywords, source__mark=True)[:10]
+        result_count = all_articles.count()
+        data = list(all_articles.values())
+        return JsonResponse({'status': 'success',
+                             'data': data,
+                             'result_count': result_count
+                             }, content_type='application/json')
+
     def get(self, request):
         """
         搜索功能
@@ -33,43 +45,44 @@ class Search(View):
         keywords = request.GET.get('keywords', '')
         search_type = request.GET.get('s_type', '')
 
-        if keywords.rsplit():
-            if search_type == 'title':
-                temp_articles = Summary.objects.filter(title__icontains=keywords, source__mark=True)
-                if temp_articles:
-                    all_articles = temp_articles
-                else:
-                    all_articles = Summary.objects.all()
-                    seg_list = jieba.posseg.cut(keywords)  # 进行分词
-                    for seg, seg_tpye in seg_list:
-                        if 'n' in seg_tpye or 'v' in seg_tpye:
-                            # 将动词和名次进行查找，并取查找后的交集
-                            all_articles = all_articles & Summary.objects.filter(title__icontains=seg,
-                                                                                 source__mark=True)
-            elif search_type == 'author':
-                all_articles = Summary.objects.filter(authors__icontains=keywords, source__mark=True)
-            else:
-                return render(request, 'index.html')
-        else:
-            return render(request, 'index.html')
+        # if keywords.rsplit():
+        #     if search_type == 'title':
+        #         temp_articles = Summary.objects.filter(title__icontains=keywords, source__mark=True)
+        #         if temp_articles:
+        #             all_articles = temp_articles
+        #         else:
+        #             all_articles = Summary.objects.all()
+        #             seg_list = jieba.posseg.cut(keywords)  # 进行分词
+        #             for seg, seg_tpye in seg_list:
+        #                 if 'n' in seg_tpye or 'v' in seg_tpye:
+        #                     # 将动词和名次进行查找，并取查找后的交集
+        #                     all_articles = all_articles & Summary.objects.filter(title__icontains=seg,
+        #                                                                          source__mark=True)
+        #     elif search_type == 'author':
+        #         all_articles = Summary.objects.filter(authors__icontains=keywords, source__mark=True)
+        #     else:
+        #         return render(request, 'index.html')
+        # else:
+        #     return render(request, 'index.html')
 
-        # 分页功能
-        try:
-            page = request.GET.get('page', 1)
-        except PageNotAnInteger:
-            page = 1
-        p = Paginator(all_articles, 12, request=request)
-        articles = p.page(page)
+        # # 分页功能
+        # try:
+        #     page = request.GET.get('page', 1)
+        # except PageNotAnInteger:
+        #     page = 1
+        # p = Paginator(all_articles, 12, request=request)
+        # articles = p.page(page)
 
         return render(request, 'result.html', {
-            'all_articles': articles,
+            # 'all_articles': articles,
             'search_type': search_type,
             'keywords': keywords,
-            'result_count': all_articles.count()
+            # 'result_count': all_articles.count()
         })
 
 
 class GetDetailInfo(View):
+
     def get(self, request, getdetailinfo_id):
         summary_id = int(getdetailinfo_id)
         # 在Excel中插入数据，文件名为detail_id字段
