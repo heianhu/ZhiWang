@@ -3,124 +3,152 @@
 {% load staticfiles %}
 <head>
 
-<meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>搜索结果</title>
-<link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
-<link href="{% static 'css/result.css' %}" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="{% static 'css/1118houseSecond.css' %}">
+    <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>搜索结果</title>
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'css/result.css' %}" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="{% static 'css/1118houseSecond.css' %}">
 
 </head>
 <body>
 <div id="container">
-	<div id="hd" class="ue-clear">
-    	<a href="/"><div class="logo"></div></a>
+    <div id="hd" class="ue-clear">
+        <a href="/">
+            <div class="logo"></div>
+        </a>
         <div class="inputArea">
 
-{#        	<input id="searchInput" type="text" class="searchInput" value="{{ keywords }}"/>#}
+            {#        	<input id="searchInput" type="text" class="searchInput" value="{{ keywords }}"/>#}
 
             <div class="l_box01">
 
-		<div class="l_adsch" id="J_search_option">
+                <div class="l_adsch" id="J_search_option">
 
-			<dl class="l_adsch_dl clearfix">
-				<dt></dt>
-				<dd>
-					<ul class="clearfix">
-						<select id="txt_2_sel" name="txt_2_sel" onchange="disableWordTimes(this);return false;" class="selectW1">
-                        <option value="SU" selected="">主题</option>
-                        <option value="TI">篇名</option>
-                        <option value="KY">关键词</option>
-                        <option value="AB">摘要</option>
-                        <option value="FT">全文</option>
-                        <option value="RF">参考文献</option>
-                        <option value="CLC$=|?">中图分类号</option>
-                    </select>
-                    <input value="" id="txt_2_value1" name="txt_2_value1" size="10" maxlength="120" type="text" onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;document.getElementById(&#39;currentid&#39;).value=this.id;" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
-                    <select id="txt_2_freq1" name="txt_2_freq1" onchange="DeleteXls(this)">
-                        <option value="" selected="">词频</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                    </select>
+                    <dl class="l_adsch_dl clearfix">
+                        <dt></dt>
+                        <dd>
+                            <ul class="clearfix">
+                                <select id="txt_2_sel" name="txt_2_sel" onchange="disableWordTimes(this);return false;"
+                                        class="selectW1">
+                                    <option value="SU" selected="">主题</option>
+                                    <option value="TI">篇名</option>
+                                    <option value="KY">关键词</option>
+                                    <option value="AB">摘要</option>
+                                    <option value="FT">全文</option>
+                                    <option value="RF">参考文献</option>
+                                    <option value="CLC$=|?">中图分类号</option>
+                                </select>
+                                <input value="" id="txt_2_value1" name="txt_2_value1" size="10" maxlength="120"
+                                       type="text"
+                                       onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;document.getElementById(&#39;currentid&#39;).value=this.id;"
+                                       onkeypress="SignVal(this,&#39;sign&#39;,event)"
+                                       onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
+                                <select id="txt_2_freq1" name="txt_2_freq1" onchange="DeleteXls(this)">
+                                    <option value="" selected="">词频</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
 
-                    <select id="txt_2_relation" name="txt_2_relation">
-                        <option value="#CNKI_AND" selected="">并含</option>
-                        <option value="#CNKI_OR">或含</option>
-                        <option value="#CNKI_NOT">不含</option>
-                    </select>
-                    <input value="" id="txt_2_value2" name="txt_2_value2" size="10" maxlength="120" type="text" onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;document.getElementById(&#39;currentid&#39;).value=this.id;" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
-                    <select id="txt_2_freq2" name="txt_2_freq2" onchange="DeleteXls(this)">
-                        <option value="" selected="">词频</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                    </select>
-                     <select id="txt_2_special1" name="txt_2_special1" onchange="">
-                        <option value="%">模糊</option>
-                        <option value="=" selected="">精确</option>
-                    </select>
-					</ul>
-				</dd>
+                                <select id="txt_2_relation" name="txt_2_relation">
+                                    <option value="#CNKI_AND" selected="">并含</option>
+                                    <option value="#CNKI_OR">或含</option>
+                                    <option value="#CNKI_NOT">不含</option>
+                                </select>
+                                <input value="" id="txt_2_value2" name="txt_2_value2" size="10" maxlength="120"
+                                       type="text"
+                                       onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;document.getElementById(&#39;currentid&#39;).value=this.id;"
+                                       onkeypress="SignVal(this,&#39;sign&#39;,event)"
+                                       onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
+                                <select id="txt_2_freq2" name="txt_2_freq2" onchange="DeleteXls(this)">
+                                    <option value="" selected="">词频</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                                <select id="txt_2_special1" name="txt_2_special1" onchange="">
+                                    <option value="%">模糊</option>
+                                    <option value="=" selected="">精确</option>
+                                </select>
+                            </ul>
+                        </dd>
 
-			</dl>
+                    </dl>
 
 
-
-			<dl class="l_adsch_dl clearfix">
-				<dt></dt>
-				<dd>
-					<ul class="clearfix">
-						<select id="au_1_sel" name="au_1_sel" class="selectW1">
-            <option value="AU" selected="">作者</option>
-            <option value="FI">第一作者</option>
-          </select>
-          <span class="showPlaceholder">
-            <input type="text" id="au_1_value1" name="au_1_value1" size="30" maxlength="120" value="" onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
+                    <dl class="l_adsch_dl clearfix">
+                        <dt></dt>
+                        <dd>
+                            <ul class="clearfix">
+                                <select id="au_1_sel" name="au_1_sel" class="selectW1">
+                                    <option value="AU" selected="">作者</option>
+                                    <option value="FI">第一作者</option>
+                                </select>
+                                <span class="showPlaceholder">
+            <input type="text" id="au_1_value1" name="au_1_value1" size="30" maxlength="120" value=""
+                   onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;"
+                   onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)"
+                   onkeyup="SignVal1(this)">
           </span>
-          <select id="au_1_special1" name="au_1_special1" onchange="">
-            <option value="%">模糊</option>
-            <option value="=" selected="">精确</option>
-          </select>
-          <label class="sL1">作者单位：</label>
-          <span class="showPlaceholder">
-            <input type="text" id="au_1_value2" name="au_1_value2" size="30" maxlength="120" value="" onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
+                                <select id="au_1_special1" name="au_1_special1" onchange="">
+                                    <option value="%">模糊</option>
+                                    <option value="=" selected="">精确</option>
+                                </select>
+                                <label class="sL1">作者单位：</label>
+                                <span class="showPlaceholder">
+            <input type="text" id="au_1_value2" name="au_1_value2" size="30" maxlength="120" value=""
+                   onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;"
+                   onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)"
+                   onkeyup="SignVal1(this)">
           </span>
-          <input id="au_1_sel2" name="au_1_sel2" type="hidden" value="AF">
-          <select id="au_1_special2" name="au_1_special2" onchange="">
-            <option value="%" selected="">模糊</option>
-            <option value="=">精确</option>
-          </select>
+                                <input id="au_1_sel2" name="au_1_sel2" type="hidden" value="AF">
+                                <select id="au_1_special2" name="au_1_special2" onchange="">
+                                    <option value="%" selected="">模糊</option>
+                                    <option value="=">精确</option>
+                                </select>
 
-					</ul>
-				</dd>
-			</dl>
+                            </ul>
+                        </dd>
+                    </dl>
 
-			<dl class="l_adsch_dl clearfix">
-				<dt></dt>
-				<dd>
-					<ul class="clearfix">
+                    <dl class="l_adsch_dl clearfix">
+                        <dt></dt>
+                        <dd>
+                            <ul class="clearfix">
 
-						 <label for="year_R">发表时间：</label>
-              <span id="publishdate" style="">
+                                <label for="year_R">发表时间：</label>
+                                <span id="publishdate" style="">
                   <label>从</label>
-                  <input id="publishdate_from" name="publishdate_from" size="20" maxlength="20" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" value="" onclick="this.value = &#39;&#39;;getDateString(this, oCalendarChs);ChangeYearOrTime(this,&#39;publishdate&#39;,&#39;updatedateN&#39;);" onchange="RenewDateOpt(&#39;publishdate_from&#39;,&#39;date_opt&#39;,&#39;publishdate_to&#39;);ChangeYearOrTime(this,&#39;publishdate&#39;,&#39;updatedateN&#39;);" type="text" style="">
+                  <input id="publishdate_from" name="publishdate_from" size="20" maxlength="20"
+                         onkeypress="SignVal(this,&#39;sign&#39;,event)"
+                         onpaste="return SignVal(this,&#39;value&#39;,event)" value=""
+                         onclick="this.value = &#39;&#39;;getDateString(this, oCalendarChs);ChangeYearOrTime(this,&#39;publishdate&#39;,&#39;updatedateN&#39;);"
+                         onchange="RenewDateOpt(&#39;publishdate_from&#39;,&#39;date_opt&#39;,&#39;publishdate_to&#39;);ChangeYearOrTime(this,&#39;publishdate&#39;,&#39;updatedateN&#39;);"
+                         type="text" style="">
                   <label>到</label>
-                  <input id="publishdate_to" name="publishdate_to" size="20" maxlength="20" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" value="" onclick="this.value = &#39;&#39;;getDateString(this, oCalendarChs);ChangeYearOrTime(this,&#39;publishdate&#39;,&#39;updatedateN&#39;);" onchange="RenewDateOpt(&#39;publishdate_from&#39;,&#39;date_opt&#39;,&#39;publishdate_to&#39;);ChangeYearOrTime(this,&#39;publishdate&#39;,&#39;updatedateN&#39;);" type="text" style="">
+                  <input id="publishdate_to" name="publishdate_to" size="20" maxlength="20"
+                         onkeypress="SignVal(this,&#39;sign&#39;,event)"
+                         onpaste="return SignVal(this,&#39;value&#39;,event)" value=""
+                         onclick="this.value = &#39;&#39;;getDateString(this, oCalendarChs);ChangeYearOrTime(this,&#39;publishdate&#39;,&#39;updatedateN&#39;);"
+                         onchange="RenewDateOpt(&#39;publishdate_from&#39;,&#39;date_opt&#39;,&#39;publishdate_to&#39;);ChangeYearOrTime(this,&#39;publishdate&#39;,&#39;updatedateN&#39;);"
+                         type="text" style="">
               </span>
-              <label for="updatedateN_R" class="sL1">更新时间：</label>
-              <span id="updatedateN">
-                  <select id="updatedateN_opt" name="updatedateN_opt" onchange="ChangeDateOpt(this,&#39;updatedateN&#39;,&#39;updatedateN_from&#39;,&#39;updatedateN_to&#39;);ChangeYearOrTime(this,&#39;publishdate&#39;,&#39;updatedateN&#39;);" class="selectW1" style="color: rgb(102, 102, 102);">
+                                <label for="updatedateN_R" class="sL1">更新时间：</label>
+                                <span id="updatedateN">
+                  <select id="updatedateN_opt" name="updatedateN_opt"
+                          onchange="ChangeDateOpt(this,&#39;updatedateN&#39;,&#39;updatedateN_from&#39;,&#39;updatedateN_to&#39;);ChangeYearOrTime(this,&#39;publishdate&#39;,&#39;updatedateN&#39;);"
+                          class="selectW1" style="color: rgb(102, 102, 102);">
                       <option value="">不限</option>
                       <option value="week">最近一周</option>
                       <option value="month">最近一月</option>
@@ -132,145 +160,154 @@
                   <input type="hidden" name="updatedateN_from" id="updatedateN_from" value="">
                   <input type="hidden" name="updatedateN_to" id="updatedateN_to" value="">
               </span>
-					</ul>
-				</dd>
-			</dl>
+                            </ul>
+                        </dd>
+                    </dl>
 
 
-			<dl class="l_adsch_dl clearfix">
-				<dt></dt>
-				<dd>
-					<ul class="clearfix">
-						 <label class="sW1">文献来源：</label>
-            <input id="magazine_value1" class="inputW1" value="" type="text" size="88" onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;document.getElementById(&#39;hidMagezineCode&#39;).value=&#39;&#39;;ClearDisabled(&#39;magazine_special1&#39;);" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)" name="magazine_value1">
-            <select id="magazine_special1" name="magazine_special1">
-              <option value="%" selected="">模糊</option>
-              <option value="=">精确</option>
-            </select>
+                    <dl class="l_adsch_dl clearfix">
+                        <dt></dt>
+                        <dd>
+                            <ul class="clearfix">
+                                <label class="sW1">文献来源：</label>
+                                <input id="magazine_value1" class="inputW1" value="" type="text" size="88"
+                                       onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;document.getElementById(&#39;hidMagezineCode&#39;).value=&#39;&#39;;ClearDisabled(&#39;magazine_special1&#39;);"
+                                       onkeypress="SignVal(this,&#39;sign&#39;,event)"
+                                       onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)"
+                                       name="magazine_value1">
+                                <select id="magazine_special1" name="magazine_special1">
+                                    <option value="%" selected="">模糊</option>
+                                    <option value="=">精确</option>
+                                </select>
 
-					</ul>
-				</dd>
-			</dl>
-
-
-			<dl class="l_adsch_dl clearfix">
-				<dt></dt>
-				<dd>
-					<ul class="clearfix">
-
-						<dd class="dd01">
-              <label class="sW1">支持基金：</label>
-            <input id="base_value1" class="inputW1" value="" type="text" size="88" onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;document.getElementById(&#39;hidFundCode&#39;).value=&#39;&#39;;ClearDisabled(&#39;base_special1&#39;);" name="base_value1" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
-            <select id="base_special1" name="base_special1" onchange="">
-              <option value="%" selected="">模糊</option>
-              <option value="=">精确</option>
-            </select>
-            <input id="hidFundCode" type="hidden" value="">
-            <a href="Javascript:OpenWindow(&#39;../popup/Fund_Select.aspx?NameCtlID=base_value1&amp;CodeCtlID=hidFundCode&#39;,&#39;win_Fund_Select&#39;,&#39;width=800,height=500,scrollbars=1&#39;)">
-            </a>
-          </dd>
-					</ul>
-				</dd>
-			</dl>
+                            </ul>
+                        </dd>
+                    </dl>
 
 
-			<dl class="l_adsch_dl clearfix">
-				<dt></dt>
-				<dd>
-					<ul class="clearfix">
+                    <dl class="l_adsch_dl clearfix">
+                        <dt></dt>
+                        <dd>
+                            <ul class="clearfix">
 
-						<dd class="dd01">
-          <label class="sW1"></label>
-
-          <input type="hidden" id="@checksearchtype" name="@checksearchtype" value="( 标识=2 or FILETYPE=XML)">
-          <input id="checkType1" name="checkType1" type="checkbox" value="标识=2" onclick="checkType();">
-          <label for="checkType1" class="cRed">网络首发</label>
-          <input id="checkType2" name="checkType2" type="checkbox" value="FILETYPE=XML" onclick="checkType();">
-          <label for="checkType2" class="cRed">增强出版</label>
-          <input id="checkType3" name="checkType3" type="checkbox" value="FILETYPE=DS" onclick="checkType();">
-          <label for="checkType3" class="cRed">数据论文</label>
-
-
-          <input id="txt_extensionCKB" name="txt_extensionCKB" type="checkbox" value="ZYW" onclick="checkCEExtensionR(this);DeleteFreq(this);">
-          <label for="txt_extensionCKB">中英文扩展</label>
-          <input type="hidden" id="CKB_extension" name="CKB_extension" value="ZYW">
-          <input id="txt_extensionCKB_R" name="txt_extensionCKB_R" type="checkbox" value="TYC" onclick="checkCEExtensionR(this);DeleteFreq(this);">
-          <label for="txt_extensionCKB_R">同义词扩展</label>
-          <input id="jsSearchBtn" type="button"  class="searchButton" onclick=""/>
-
-
-        </dd>
-					</ul>
-				</dd>
-			</dl>
+                        <dd class="dd01">
+                            <label class="sW1">支持基金：</label>
+                            <input id="base_value1" class="inputW1" value="" type="text" size="88"
+                                   onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;document.getElementById(&#39;hidFundCode&#39;).value=&#39;&#39;;ClearDisabled(&#39;base_special1&#39;);"
+                                   name="base_value1" onkeypress="SignVal(this,&#39;sign&#39;,event)"
+                                   onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
+                            <select id="base_special1" name="base_special1" onchange="">
+                                <option value="%" selected="">模糊</option>
+                                <option value="=">精确</option>
+                            </select>
+                            <input id="hidFundCode" type="hidden" value="">
+                            <a href="Javascript:OpenWindow(&#39;../popup/Fund_Select.aspx?NameCtlID=base_value1&amp;CodeCtlID=hidFundCode&#39;,&#39;win_Fund_Select&#39;,&#39;width=800,height=500,scrollbars=1&#39;)">
+                            </a>
+                        </dd>
+                        </ul>
+                        </dd>
+                    </dl>
 
 
+                    <dl class="l_adsch_dl clearfix">
+                        <dt></dt>
+                        <dd>
+                            <ul class="clearfix">
+
+                        <dd class="dd01">
+                            <label class="sW1"></label>
+
+                            <input type="hidden" id="@checksearchtype" name="@checksearchtype"
+                                   value="( 标识=2 or FILETYPE=XML)">
+                            <input id="checkType1" name="checkType1" type="checkbox" value="标识=2"
+                                   onclick="checkType();">
+                            <label for="checkType1" class="cRed">网络首发</label>
+                            <input id="checkType2" name="checkType2" type="checkbox" value="FILETYPE=XML"
+                                   onclick="checkType();">
+                            <label for="checkType2" class="cRed">增强出版</label>
+                            <input id="checkType3" name="checkType3" type="checkbox" value="FILETYPE=DS"
+                                   onclick="checkType();">
+                            <label for="checkType3" class="cRed">数据论文</label>
 
 
+                            <input id="txt_extensionCKB" name="txt_extensionCKB" type="checkbox" value="ZYW"
+                                   onclick="checkCEExtensionR(this);DeleteFreq(this);">
+                            <label for="txt_extensionCKB">中英文扩展</label>
+                            <input type="hidden" id="CKB_extension" name="CKB_extension" value="ZYW">
+                            <input id="txt_extensionCKB_R" name="txt_extensionCKB_R" type="checkbox" value="TYC"
+                                   onclick="checkCEExtensionR(this);DeleteFreq(this);">
+                            <label for="txt_extensionCKB_R">同义词扩展</label>
+                        <dd>
+                            <input id="jsSearchBtn" type="button" value="搜索" onclick=""/>
+                        </dd>
 
 
+                        </dd>
+                        </ul>
+                        </dd>
+                    </dl>
 
 
-		</div>
-	</div>
+                </div>
+            </div>
         </div>
 
     </div>
-{#    <div class="nav">#}
-{#    	<ul class="searchList">#}
-{#             <a class="searchItem {% ifequal search_type 'title' %}current{% endifequal %}" data-type="title" href="?keywords={{ keywords }}&s_type=title">题目</a>#}
-{#             <a class="searchItem {% ifequal search_type 'author' %}current{% endifequal %}" data-type="author" href="?keywords={{ keywords }}&s_type=author">作者</a>#}
-{##}
-{#        </ul>#}
-{#    </div>#}
-	<div id="bd" class="ue-clear">
+    {#    <div class="nav">#}
+    {#    	<ul class="searchList">#}
+    {#             <a class="searchItem {% ifequal search_type 'title' %}current{% endifequal %}" data-type="title" href="?keywords={{ keywords }}&s_type=title">题目</a>#}
+    {#             <a class="searchItem {% ifequal search_type 'author' %}current{% endifequal %}" data-type="author" href="?keywords={{ keywords }}&s_type=author">作者</a>#}
+    {##}
+    {#        </ul>#}
+    {#    </div>#}
+    <div id="bd" class="ue-clear">
         <div id="main">
 
             <div class="resultArea">
-            	<p class="resultTotal">
+                <p class="resultTotal">
                     <span class="info">找到约&nbsp;<span class="totalResult">0</span>&nbsp;条结果</span>
                 </p>
 
                 <div class="resultList">
-                {# 搜索结果#}
-{#              {% for article in all_articles.object_list %}#}
-{#                    <div class="result_article_title">Title: <a target="_blank" href="{{ article.url }}">{{ article.title }}</a>  </div>#}
-{#                    <div>Authors: {{ article.authors }}</div>#}
-{#                    <div><a href="{% url 'retrieve:getdetailinfo' article.id  %}">下载链接 </a>  </div>#}
-{##}
-{#                    <br>#}
-{#                {% endfor %}#}
+                    {# 搜索结果#}
+                    {#              {% for article in all_articles.object_list %}#}
+                    {#                    <div class="result_article_title">Title: <a target="_blank" href="{{ article.url }}">{{ article.title }}</a>  </div>#}
+                    {#                    <div>Authors: {{ article.authors }}</div>#}
+                    {#                    <div><a href="{% url 'retrieve:getdetailinfo' article.id  %}">下载链接 </a>  </div>#}
+                    {##}
+                    {#                    <br>#}
+                    {#                {% endfor %}#}
 
-                <div class="resultItem">
+                    <div class="resultItem">
+
+                    </div>
 
                 </div>
 
-            </div>
-
                 <!-- 分页 -->
-            <div class="resultTotal">
-                <ul class="pagination ue-clear">
-                    {% if all_articles.has_previous %}
-                        <li class="long"><a href="?{{ all_articles.previous_page_number.querystring }}">上一页</a></li>
-                    {% endif %}
-
-                    {% for page in all_articles.pages %}
-                        {% if page %}
-                            {% ifequal page all_articles.number %}
-                                <li class=""><a>{{ page }}</a></li>
-                            {% else %}
-                                <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
-                            {% endifequal %}
-                        {% else %}
-                            <li class="none"><a>...</a></li>
+                <div class="resultTotal">
+                    <ul class="pagination ue-clear">
+                        {% if all_articles.has_previous %}
+                            <li class="long"><a href="?{{ all_articles.previous_page_number.querystring }}">上一页</a></li>
                         {% endif %}
-                    {% endfor %}
-                    {% if all_articles.has_next %}
-                        <li class="long"><a href="?{{ all_articles.next_page_number.querystring }}">下一页</a></li>
-                    {% endif %}
 
-                </ul>
-            </div>
+                        {% for page in all_articles.pages %}
+                            {% if page %}
+                                {% ifequal page all_articles.number %}
+                                    <li class=""><a>{{ page }}</a></li>
+                                {% else %}
+                                    <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
+                                {% endifequal %}
+                            {% else %}
+                                <li class="none"><a>...</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if all_articles.has_next %}
+                            <li class="long"><a href="?{{ all_articles.next_page_number.querystring }}">下一页</a></li>
+                        {% endif %}
+
+                    </ul>
+                </div>
             </div>
 
 
@@ -288,83 +325,82 @@
     {#var search_url = "/retrieve/"#}
 
 
+    $.each($('.subfieldContext'), function (i, item) {
+        $(this).find('li:gt(2)').hide().end().find('li:last').show();
+    });
 
-
-	$.each($('.subfieldContext'), function(i, item){
-		$(this).find('li:gt(2)').hide().end().find('li:last').show();
-	});
-
-	function removeByValue(arr, val) {
-      for(var i=0; i<arr.length; i++) {
-        if(arr[i] == val) {
-          arr.splice(i, 1);
-          break;
+    function removeByValue(arr, val) {
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i] == val) {
+                arr.splice(i, 1);
+                break;
+            }
         }
-      }
     }
-	$('.subfieldContext .more').click(function(e){
-		var $more = $(this).parent('.subfieldContext').find('.more');
-		if($more.hasClass('show')){
 
-			if($(this).hasClass('define')){
-				$(this).parent('.subfieldContext').find('.more').removeClass('show').find('.text').text('自定义');
-			}else{
-				$(this).parent('.subfieldContext').find('.more').removeClass('show').find('.text').text('更多');
-			}
-			$(this).parent('.subfieldContext').find('li:gt(2)').hide().end().find('li:last').show();
-	    }else{
-			$(this).parent('.subfieldContext').find('.more').addClass('show').find('.text').text('收起');
-			$(this).parent('.subfieldContext').find('li:gt(2)').show();
-		}
+    $('.subfieldContext .more').click(function (e) {
+        var $more = $(this).parent('.subfieldContext').find('.more');
+        if ($more.hasClass('show')) {
 
-	});
-
-	$('.sideBarShowHide a').click(function(e) {
-		if($('#main').hasClass('sideBarHide')){
-			$('#main').removeClass('sideBarHide');
-			$('#container').removeClass('sideBarHide');
-		}else{
-			$('#main').addClass('sideBarHide');
-			$('#container').addClass('sideBarHide');
-		}
+            if ($(this).hasClass('define')) {
+                $(this).parent('.subfieldContext').find('.more').removeClass('show').find('.text').text('自定义');
+            } else {
+                $(this).parent('.subfieldContext').find('.more').removeClass('show').find('.text').text('更多');
+            }
+            $(this).parent('.subfieldContext').find('li:gt(2)').hide().end().find('li:last').show();
+        } else {
+            $(this).parent('.subfieldContext').find('.more').addClass('show').find('.text').text('收起');
+            $(this).parent('.subfieldContext').find('li:gt(2)').show();
+        }
 
     });
-	//var key_words = "java"
-	//分页
-	//$(".pagination").pagination({{ total_nums }}, {
-	//	current_page :{{ page|add:'-1' }}, //当前页码
-	//	items_per_page :10,
-	//	display_msg :true,
-	//	callback :pageselectCallback
-	//});
-	//function pageselectCallback(page_id, jq) {
-	//	window.location.href=search_url+'?q='+key_words+'&p='+page_id
-	//}
 
-	setHeight();
-	$(window).resize(function(){
-		setHeight();
-	});
+    $('.sideBarShowHide a').click(function (e) {
+        if ($('#main').hasClass('sideBarHide')) {
+            $('#main').removeClass('sideBarHide');
+            $('#container').removeClass('sideBarHide');
+        } else {
+            $('#main').addClass('sideBarHide');
+            $('#container').addClass('sideBarHide');
+        }
 
-	function setHeight(){
-		if($('#container').outerHeight() < $(window).height()){
-			$('#container').height($(window).height()-33);
-		}
-	}
+    });
+    //var key_words = "java"
+    //分页
+    //$(".pagination").pagination({{ total_nums }}, {
+    //	current_page :{{ page|add:'-1' }}, //当前页码
+    //	items_per_page :10,
+    //	display_msg :true,
+    //	callback :pageselectCallback
+    //});
+    //function pageselectCallback(page_id, jq) {
+    //	window.location.href=search_url+'?q='+key_words+'&p='+page_id
+    //}
+
+    setHeight();
+    $(window).resize(function () {
+        setHeight();
+    });
+
+    function setHeight() {
+        if ($('#container').outerHeight() < $(window).height()) {
+            $('#container').height($(window).height() - 33);
+        }
+    }
 </script>
 <script type="text/javascript">
-    $('.searchList').on('click', '.searchItem', function(){
+    $('.searchList').on('click', '.searchItem', function () {
         $('.searchList .searchItem').removeClass('current');
         $(this).addClass('current');
     });
 
     // 联想下拉显示隐藏
-    $('.searchInput').on('focus', function(){
+    $('.searchInput').on('focus', function () {
         $('.dataList').show()
     });
 
     // 联想下拉点击
-    $('.dataList').on('click', 'li', function(){
+    $('.dataList').on('click', 'li', function () {
         var text = $(this).text();
         $('.searchInput').val(text);
         $('.dataList').hide()
@@ -374,20 +410,20 @@
 </script>
 
 
-    <script>
+<script>
     var searchArr;
     //定义一个search的，判断浏览器有无数据存储（搜索历史）
-    if(localStorage.search){
-    //如果有，转换成 数组的形式存放到searchArr的数组里（localStorage以字符串的形式存储，所以要把它转换成数组的形式）
-        searchArr= localStorage.search.split(",")
-    }else{
-    //如果没有，则定义searchArr为一个空的数组
+    if (localStorage.search) {
+        //如果有，转换成 数组的形式存放到searchArr的数组里（localStorage以字符串的形式存储，所以要把它转换成数组的形式）
+        searchArr = localStorage.search.split(",")
+    } else {
+        //如果没有，则定义searchArr为一个空的数组
         searchArr = [];
     }
     //把存储的数据显示出来作为搜索历史
     MapSearchArr();
 
-    function add_search(){
+    function add_search() {
         var val = $(".searchInput").val();
         //if (val.length>=2){
         //    //点击搜索按钮时，去重
@@ -398,37 +434,36 @@
         //    MapSearchArr();
         //var search_url = "/retrieve/"
 
-        window.location.href=search_url+'?keywords='+val+"&s_type="+$(".searchItem.current").attr('data-type')
+        window.location.href = search_url + '?keywords=' + val + "&s_type=" + $(".searchItem.current").attr('data-type')
 
     }
 
 
-
-
-    function MapSearchArr(){
+    function MapSearchArr() {
         var tmpHtml = "";
         var arrLen = 0
-        if (searchArr.length > 6){
+        if (searchArr.length > 6) {
             arrLen = 6
-        }else {
+        } else {
             arrLen = searchArr.length
         }
-        for (var i=0;i<arrLen;i++){
-            tmpHtml += '<li><a href="/search?q='+searchArr[i]+'">'+searchArr[i]+'</a></li>'
+        for (var i = 0; i < arrLen; i++) {
+            tmpHtml += '<li><a href="/search?q=' + searchArr[i] + '">' + searchArr[i] + '</a></li>'
         }
         $(".mySearch .historyList").append(tmpHtml);
     }
+
     //去重
-    function KillRepeat(val){
+    function KillRepeat(val) {
         var kill = 0;
-        for (var i=0;i<searchArr.length;i++){
-            if(val===searchArr[i]){
-                kill ++;
+        for (var i = 0; i < searchArr.length; i++) {
+            if (val === searchArr[i]) {
+                kill++;
             }
         }
-        if(kill<1){
+        if (kill < 1) {
             searchArr.unshift(val);
-        }else {
+        } else {
             removeByValue(searchArr, val)
             searchArr.unshift(val)
         }
@@ -437,47 +472,47 @@
 
 {#用ajax的搜索按钮#}
 <script>
-    $(function(){
-        $('#jsSearchBtn').on('click', function(){
+    $(function () {
+        $('#jsSearchBtn').on('click', function () {
             $.ajax({
                 cache: false,
                 type: "POST",
-                url:"{% url 'retrieve' %}",
-                data:{
+                url: "{% url 'retrieve' %}",
+                data: {
 
-                    'txt_2_sel': $('#txt_2_sel').val(),{# 主题选择 #}
-                    'txt_2_value1': $('#txt_2_value1').val(),{# 主题输入框 #}
-                    'txt_2_special1': $('#txt_2_special1').val(),{# 主题精确or模糊 #}
+                    'txt_2_sel': $('#txt_2_sel').val(), {# 主题选择 #}
+                    'txt_2_value1': $('#txt_2_value1').val(), {# 主题输入框 #}
+                    'txt_2_special1': $('#txt_2_special1').val(), {# 主题精确or模糊 #}
                     'au_1_sel': $('#au_1_sel').val(), {# 作者选择 #}
-                    'au_1_value1': $('#au_1_value1').val(),   {# 作者输入框 #}
+                    'au_1_value1': $('#au_1_value1').val(), {# 作者输入框 #}
                     'au_1_special1': $('#au_1_special1').val(), {# 作者精确or模糊 #}
-                    'publishdate_from': $('#publishdate_from').val(),{# 发表时间 from 输入框 #}
-                    'publishdate_to': $('#publishdate_to').val(),{# 发表时间 to 输入框 #}
-                    'magazine_value1': $('#magazine_value1').val(),{# 文献来源输入框 #}
-                    'magazine_special1': $('#magazine_special1').val(),{# 文献来源精确or模糊 #}
+                    'publishdate_from': $('#publishdate_from').val(), {# 发表时间 from 输入框 #}
+                    'publishdate_to': $('#publishdate_to').val(), {# 发表时间 to 输入框 #}
+                    'magazine_value1': $('#magazine_value1').val(), {# 文献来源输入框 #}
+                    'magazine_special1': $('#magazine_special1').val(), {# 文献来源精确or模糊 #}
                 },
                 async: true,
-                beforeSend:function(xhr, settings){
-            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-        },
-                success: function(data) {
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (data) {
 
-                    if(data.status == 'success'){
+                    if (data.status == 'success') {
                         alert('success!');
                         {#var title = data[0]['title'];#}
 
                         $('.totalResult').html(data.result_count)
 
                         $(".resultItem").remove();
-                        $.each(data.data, function( index, value ) {
+                        $.each(data.data, function (index, value) {
 
-                            $('.resultList').append("<div class=\"resultItem\">  <div class=\"result_article_title\">Title: <a target=\"_blank\" href=\"\">"+value["title"]+"</a>  </div>\n" +
-                                "                    <div>Authors:"+value["authors"]+" </div>\n" +
-                                "                    <div><a href=\""+"/retrieve/download/"+ value['id']+"\">下载链接 </a>  </div>" +
+                            $('.resultList').append("<div class=\"resultItem\">  <div class=\"result_article_title\">Title: <a target=\"_blank\" href=\"\">" + value["title"] + "</a>  </div>\n" +
+                                "                    <div>Authors:" + value["authors"] + " </div>\n" +
+                                "                    <div><a href=\"" + "/retrieve/download/" + value['id'] + "\">下载链接 </a>  </div>" +
                                 "                    </div>")
-                            });
+                        });
 
-                    }else if(data.status == 'fail'){
+                    } else if (data.status == 'fail') {
                         {#$('#jsCompanyTips').html(data.msg)#}
                         alert('fail!');
 

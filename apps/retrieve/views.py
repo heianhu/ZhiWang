@@ -3,6 +3,7 @@ from django.views.generic import View
 from crawl_data.models import Summary, Detail, Authors, Periodicals, References
 from crawl_data.models import ReferencesCBBD, ReferencesCCND, ReferencesCDFD, ReferencesCJFQ
 from crawl_data.models import ReferencesCPFD, ReferencesCMFD, ReferencesCRLDENG, ReferencesSSJD
+from django.db.models import Q
 import jieba
 import jieba.posseg
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
@@ -24,19 +25,44 @@ class IndexView(View):
 
 class Search(View):
     def post(self, request):
-        txt_2_sel = request.POST.get('txt_2_sel', '')
-        txt_2_value1 = request.POST.get('txt_2_value1', '')
-        txt_2_special1 = request.POST.get('txt_2_special1', '')
-        au_1_sel = request.POST.get('au_1_sel', '')
-        au_1_value1 = request.POST.get('au_1_value1', '')
-        au_1_special1 = request.POST.get('au_1_special1', '')
-        publishdate_from = request.POST.get('publishdate_from', '')
-        publishdate_to = request.POST.get('publishdate_to', '')
-        magazine_value1 = request.POST.get('magazine_value1', '')
-        magazine_special1 = request.POST.get('magazine_special1', '')
-
-
-        all_articles = Summary.objects.filter(title__icontains=keywords, source__mark=True)[:10]
+        """
+            'txt_2_sel': $('#txt_2_sel').val(),{# 主题选择 #}
+            'txt_2_value1': $('#txt_2_value1').val(),{# 主题输入框1 #}
+            'txt_2_relation':  $('#txt_2_relation').val(),{# 并行条件选择 #}
+            'txt_2_value2': $('#txt_2_value2').val(),{# 主题输入框2 #}
+            'au_1_sel': $('#au_1_sel').val(), {# 作者选择 #}
+            'au_1_value1': $('#au_1_value1').val(),   {# 作者输入框 #}
+            'magazine_value1': $('#magazine_value1').val(),{# 文献来源输入框 #}
+        :param request:
+        :return:
+        """
+        txt_2_sel = request.POST.get('txt_2_sel', '')  # 主题选择
+        txt_2_value1 = request.POST.get('txt_2_value1', '')  # 主题输入框1
+        txt_2_relation = request.POST.get('txt_2_relation', '')  # 并行条件选择
+        txt_2_value2 = request.POST.get('txt_2_value2', '')  # 主题输入框2
+        # au_1_sel = request.POST.get('au_1_sel', '') # 作者选择  暂时没用
+        au_1_value1 = request.POST.get('au_1_value1', '')  # 作者输入框
+        magazine_value1 = request.POST.get('magazine_value1', '')  # 文献来源输入框
+        txt_2_sel_dic = {  # CNKI_AND CNKI_OR
+            "SU": (Q(title__icontains=txt_2_value1), Q(title__icontains=txt_2_value2)),  # 标题
+            "KY": (Q(detail_keywords__icontains=txt_2_value1), Q(detail_keywords__icontains=txt_2_value2)),  # 关键词
+            "AB": (Q(detail_abstract__icontains=txt_2_value1), Q(detail_abstract__icontains=txt_2_value2)),  # 摘要
+            "CLC$=|?": (Q(issn_number=txt_2_value1), Q(issn_number=txt_2_value1))  # 中图分类号
+        }
+        else_sel = Q(authors__icontains=au_1_value1) & \
+                   (Q(source__issn_number__icontains=magazine_value1) | Q(source__name__icontains=magazine_value1))
+        if txt_2_relation == 'CNKI_AND':
+            all_articles = Summary.objects.filter(
+                (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel)
+        elif txt_2_relation == 'CNKI_OR':
+            all_articles = Summary.objects.filter(
+                (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel)
+        elif txt_2_relation == 'CNKI_NOT':
+            all_articles = Summary.objects.filter(
+                txt_2_sel_dic[txt_2_sel][0] & else_sel
+            ).exclude(txt_2_sel_dic[txt_2_sel][1])
+        else:
+            return render(request, 'index.html')
         result_count = all_articles.count()
         data = list(all_articles.values())
         return JsonResponse({'status': 'success',
@@ -103,7 +129,6 @@ class GetDetailInfo(View):
                   'SU', 'BP', 'EP', 'AR', 'DI', 'D2', 'PG', 'P2', 'WC', 'SC', 'GA', 'UT', 'ER', 'EF']
 
         values = {field: [i, ] for i, field in enumerate(fields)}
-
         article_summary = Summary.objects.get(id=summary_id)
         article_detail = Detail.objects.get(id=article_summary.detail_id)
         # 文件名
