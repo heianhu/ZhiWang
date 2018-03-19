@@ -24,7 +24,17 @@ class IndexView(View):
 
 class Search(View):
     def post(self, request):
-        keywords = request.POST.get('keywords', '')
+        txt_2_sel = request.POST.get('txt_2_sel', '')
+        txt_2_value1 = request.POST.get('txt_2_value1', '')
+        txt_2_special1 = request.POST.get('txt_2_special1', '')
+        au_1_sel = request.POST.get('au_1_sel', '')
+        au_1_value1 = request.POST.get('au_1_value1', '')
+        au_1_special1 = request.POST.get('au_1_special1', '')
+        publishdate_from = request.POST.get('publishdate_from', '')
+        publishdate_to = request.POST.get('publishdate_to', '')
+        magazine_value1 = request.POST.get('magazine_value1', '')
+        magazine_special1 = request.POST.get('magazine_special1', '')
+
 
         all_articles = Summary.objects.filter(title__icontains=keywords, source__mark=True)[:10]
         result_count = all_articles.count()

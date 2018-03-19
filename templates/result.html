@@ -17,8 +17,7 @@
     	<a href="/"><div class="logo"></div></a>
         <div class="inputArea">
 
-            <input id="jsSearchBtn" type="button" class="searchButton" onclick=""/>
-        	<input id="searchInput" type="text" class="searchInput" value="{{ keywords }}"/>
+{#        	<input id="searchInput" type="text" class="searchInput" value="{{ keywords }}"/>#}
 
             <div class="l_box01">
 
@@ -197,6 +196,8 @@
           <input type="hidden" id="CKB_extension" name="CKB_extension" value="ZYW">
           <input id="txt_extensionCKB_R" name="txt_extensionCKB_R" type="checkbox" value="TYC" onclick="checkCEExtensionR(this);DeleteFreq(this);">
           <label for="txt_extensionCKB_R">同义词扩展</label>
+          <input id="jsSearchBtn" type="button"  class="searchButton" onclick=""/>
+
 
         </dd>
 					</ul>
@@ -442,7 +443,19 @@
                 cache: false,
                 type: "POST",
                 url:"{% url 'retrieve' %}",
-                data:{ 'keywords': $('#txt_2_value1').val()},
+                data:{
+
+                    'txt_2_sel': $('#txt_2_sel').val(),{# 主题选择 #}
+                    'txt_2_value1': $('#txt_2_value1').val(),{# 主题输入框 #}
+                    'txt_2_special1': $('#txt_2_special1').val(),{# 主题精确or模糊 #}
+                    'au_1_sel': $('#au_1_sel').val(), {# 作者选择 #}
+                    'au_1_value1': $('#au_1_value1').val(),   {# 作者输入框 #}
+                    'au_1_special1': $('#au_1_special1').val(), {# 作者精确or模糊 #}
+                    'publishdate_from': $('#publishdate_from').val(),{# 发表时间 from 输入框 #}
+                    'publishdate_to': $('#publishdate_to').val(),{# 发表时间 to 输入框 #}
+                    'magazine_value1': $('#magazine_value1').val(),{# 文献来源输入框 #}
+                    'magazine_special1': $('#magazine_special1').val(),{# 文献来源精确or模糊 #}
+                },
                 async: true,
                 beforeSend:function(xhr, settings){
             xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
