@@ -12,6 +12,7 @@ from django.http import Http404
 from openpyxl import Workbook
 import json
 
+
 # Create your views here.
 
 class IndexView(View):
@@ -23,7 +24,6 @@ class IndexView(View):
 
 class Search(View):
     def post(self, request):
-
         keywords = request.POST.get('keywords', '')
 
         all_articles = Summary.objects.filter(title__icontains=keywords, source__mark=True)[:10]
@@ -137,14 +137,21 @@ class GetDetailInfo(View):
             all_refers.append(ReferencesCCND.objects.filter(id__in=refers[6]))
             all_refers.append(ReferencesCPFD.objects.filter(id__in=refers[7]))
 
-            # 对每一条结果取title值
-            all_refers_title = (refer.title for queryset in all_refers for refer in queryset)
-            # # 合并所有title
-            # title = ';'.join(all_refers_title)
-            # values['CR'][1] = title
+            # # 对每一条结果取title值
+            # all_refers_title = (refer.title for queryset in all_refers for refer in queryset)
+            # # 将每个title分别填入
+            # for refers_title in all_refers_title:
+            #     values['CR'].append(refers_title)
+
+            # 对每一条结果逐条获取数据
+            all_refers = (refer for queryset in all_refers for refer in queryset)
             # 将每个title分别填入
-            for refers_title in all_refers_title:
-                values['CR'].append(refers_title)
+            for refers in all_refers:
+                try:
+                    temp_refers_info = (refers.title, refers.authors, refers.source, refers.issuing_time)
+                except AttributeError:
+                    temp_refers_info = (refers.title, refers.info, refers.issuing_time)
+                values['CR'].append(temp_refers_info)
 
         wb = Workbook()
         sheet = wb.get_active_sheet()
@@ -155,7 +162,7 @@ class GetDetailInfo(View):
         for key, (i, *all_value) in values.items():
             sheet.cell(row=i + 1, column=1).value = key
             for _, v in enumerate(all_value):
-                sheet.cell(row=i + 1, column=2 + _).value = v
+                sheet.cell(row=i + 1, column=2 + _).value = ''.join(v)
 
         # 保存并返回下载
         filename = '{0}.xlsx'.format(article_detail.detail_id)
