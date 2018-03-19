@@ -6,7 +6,7 @@ html{*overflow:auto;}
 /*input搜索区域*/
 .inputArea{float:left;position:relative;}
 .inputArea .searchInput{border:1px solid #bfbfbf;padding:0 15px;outline:none;height:35px;*line-height:35px;width:350px; background:url(../img/inputbg.png);font-size:14px;}
-.inputArea .searchButton{position:absolute;left:382px;top:0;*top:1px;*left:381px;width:106px;height:38px;background:url(../img/btn_min.png) no-repeat;border:none;cursor:pointer;}
+.inputArea .searchButton{left:382px;top:0;*top:1px;*left:381px;width:106px;height:38px;background:url(../img/btn_min.png) no-repeat;border:none;cursor:pointer;}
 
 /*返回高级搜索*/
 .inputArea .advanced{position:absolute;font-size:14px;left:500px;top:12px;width:60px;text-decoration:underline;}
