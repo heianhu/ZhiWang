@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import View
 from crawl_data.models import Summary, Detail, Authors, Periodicals, References
 from crawl_data.models import ReferencesCBBD, ReferencesCCND, ReferencesCDFD, ReferencesCJFQ
@@ -7,7 +7,7 @@ from django.db.models import Q
 import jieba
 import jieba.posseg
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponse, FileResponse, JsonResponse
+from django.http import HttpResponse, FileResponse, JsonResponse, HttpResponseRedirect
 from django.utils.http import urlquote
 from django.http import Http404
 from openpyxl import Workbook
@@ -19,7 +19,6 @@ import json
 class IndexView(View):
     def get(self, request):
         return render(request, 'index.html', {
-
         })
 
 
@@ -43,32 +42,20 @@ class Search(View):
         # au_1_sel = request.POST.get('au_1_sel', '') # 作者选择  暂时没用
         au_1_value1 = request.POST.get('au_1_value1', '')  # 作者输入框
         magazine_value1 = request.POST.get('magazine_value1', '')  # 文献来源输入框
-        txt_2_sel_dic = {  # CNKI_AND CNKI_OR
-            "SU": (Q(title__icontains=txt_2_value1), Q(title__icontains=txt_2_value2)),  # 标题
-            "KY": (Q(detail_keywords__icontains=txt_2_value1), Q(detail_keywords__icontains=txt_2_value2)),  # 关键词
-            "AB": (Q(detail_abstract__icontains=txt_2_value1), Q(detail_abstract__icontains=txt_2_value2)),  # 摘要
-            "CLC$=|?": (Q(issn_number=txt_2_value1), Q(issn_number=txt_2_value1))  # 中图分类号
-        }
-        else_sel = Q(authors__icontains=au_1_value1) & \
-                   (Q(source__issn_number__icontains=magazine_value1) | Q(source__name__icontains=magazine_value1))
-        if txt_2_relation == 'CNKI_AND':
-            all_articles = Summary.objects.filter(
-                (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel)
-        elif txt_2_relation == 'CNKI_OR':
-            all_articles = Summary.objects.filter(
-                (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel)
-        elif txt_2_relation == 'CNKI_NOT':
-            all_articles = Summary.objects.filter(
-                txt_2_sel_dic[txt_2_sel][0] & else_sel
-            ).exclude(txt_2_sel_dic[txt_2_sel][1])
-        else:
-            return render(request, 'index.html')
-        result_count = all_articles.count()
-        data = list(all_articles.values())
-        return JsonResponse({'status': 'success',
-                             'data': data,
-                             'result_count': result_count
-                             }, content_type='application/json')
+
+        request.session['txt_2_sel'] = txt_2_sel
+        request.session['txt_2_value1'] = txt_2_value1
+        request.session['txt_2_relation'] = txt_2_relation
+        request.session['txt_2_value2'] = txt_2_value2
+        request.session['au_1_value1'] = au_1_value1
+        request.session['magazine_value1'] = magazine_value1
+        # self.get(request)
+        return redirect('retrieve')
+
+        # return JsonResponse({'status': 'success',
+        #                      'data': data,
+        #                      'result_count': result_count
+        #                      }, content_type='application/json')
 
     def get(self, request):
         """
@@ -78,43 +65,55 @@ class Search(View):
         :return:
         """
         # 获取关键词和搜索类型
-        keywords = request.GET.get('keywords', '')
-        search_type = request.GET.get('s_type', '')
+        try:
+            txt_2_sel = request.session['txt_2_sel']
+            txt_2_value1 = request.session['txt_2_value1']
+            txt_2_relation = request.session['txt_2_relation']
+            txt_2_value2 = request.session['txt_2_value2']
+            au_1_value1 = request.session['au_1_value1']
+            magazine_value1 = request.session['magazine_value1']
+            txt_2_sel_dic = {  # CNKI_AND CNKI_OR
+                "SU": (Q(title__icontains=txt_2_value1), Q(title__icontains=txt_2_value2)),  # 标题
+                "KY": (Q(detail_keywords__icontains=txt_2_value1), Q(detail_keywords__icontains=txt_2_value2)),  # 关键词
+                "AB": (Q(detail_abstract__icontains=txt_2_value1), Q(detail_abstract__icontains=txt_2_value2)),  # 摘要
+                "CLC$=|?": (Q(issn_number=txt_2_value1), Q(issn_number=txt_2_value1))  # 中图分类号
+            }
+            else_sel = Q(authors__icontains=au_1_value1) & \
+                       (Q(source__issn_number__icontains=magazine_value1) | Q(source__name__icontains=magazine_value1))
 
-        # if keywords.rsplit():
-        #     if search_type == 'title':
-        #         temp_articles = Summary.objects.filter(title__icontains=keywords, source__mark=True)
-        #         if temp_articles:
-        #             all_articles = temp_articles
-        #         else:
-        #             all_articles = Summary.objects.all()
-        #             seg_list = jieba.posseg.cut(keywords)  # 进行分词
-        #             for seg, seg_tpye in seg_list:
-        #                 if 'n' in seg_tpye or 'v' in seg_tpye:
-        #                     # 将动词和名次进行查找，并取查找后的交集
-        #                     all_articles = all_articles & Summary.objects.filter(title__icontains=seg,
-        #                                                                          source__mark=True)
-        #     elif search_type == 'author':
-        #         all_articles = Summary.objects.filter(authors__icontains=keywords, source__mark=True)
-        #     else:
-        #         return render(request, 'index.html')
-        # else:
-        #     return render(request, 'index.html')
+            if txt_2_relation == 'CNKI_AND':
+                all_articles = Summary.objects.filter(
+                    (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel)
+            elif txt_2_relation == 'CNKI_OR':
+                all_articles = Summary.objects.filter(
+                    (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel)
+            elif txt_2_relation == 'CNKI_NOT':
+                all_articles = Summary.objects.filter(
+                    txt_2_sel_dic[txt_2_sel][0] & else_sel
+                ).exclude(txt_2_sel_dic[txt_2_sel][1])
+            else:
+                return render(request, 'index.html')
+            result_count = all_articles.count()
+            # data = list(all_articles.values())
 
-        # # 分页功能
-        # try:
-        #     page = request.GET.get('page', 1)
-        # except PageNotAnInteger:
-        #     page = 1
-        # p = Paginator(all_articles, 12, request=request)
-        # articles = p.page(page)
+            # 分页功能
+            try:
+                page = request.GET.get('page', 1)
+            except PageNotAnInteger:
+                page = 1
+            p = Paginator(all_articles, 12, request=request)
+            articles = p.page(page)
 
-        return render(request, 'result.html', {
-            # 'all_articles': articles,
-            'search_type': search_type,
-            'keywords': keywords,
-            # 'result_count': all_articles.count()
-        })
+            # del request.session['txt_2_sel']
+
+            return render(request, 'index.html', {
+                'all_articles': articles,
+                # 'search_type': search_type,
+                'keywords': txt_2_value1,
+                'result_count': result_count
+            })
+        except KeyError:
+            return render(request, 'index.html')
 
 
 class GetDetailInfo(View):
