@@ -34,7 +34,7 @@
                                     <option value="CNKI_OR">或含</option>
                                     <option value="CNKI_NOT">不含</option>
                                 </select>
-                                <input value="" id="txt_2_value2" name="txt_2_value2" size="10" maxlength="120" type="text" onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;document.getElementById(&#39;currentid&#39;).value=this.id;" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
+                                <input value="" id="txt_2_value2" name="txt_2_value2" size="10" maxlength="120" type="text">
 					        </ul>
 				        </dd>
                     </dl>
@@ -46,7 +46,7 @@
                                     <option value="AU" selected="">作者</option>
                                 </select>
                                 <span class="showPlaceholder">
-                                    <input type="text" id="au_1_value1" name="au_1_value1" size="30" maxlength="120" value="" onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
+                                    <input type="text" id="au_1_value1" name="au_1_value1" size="30" maxlength="120" value="">
                                 </span>
                                 <select id="au_special" name="au_special">
                                     <option value="%" selected="">模糊</option>
@@ -54,10 +54,9 @@
                                 </select>
                                 <label class="sL1">作者单位：</label>
                                 <span class="showPlaceholder">
-                                    <input type="text" id="au_1_value2" name="au_1_value2" size="30" maxlength="120" value="">
+                                    <input type="text" id="org_1_value" name="org_1_value" size="30" maxlength="120" value="">
                                 </span>
-                                <input id="au_1_sel2" name="au_1_sel2" type="hidden" value="AF">
-                                <select id="au_1_special2" name="au_1_special2" onchange="">
+                                <select id="org_1_special2" name="org_1_special2" onchange="">
                                     <option value="%" selected="">模糊</option>
                                     <option value="=">精确</option>
                                 </select>
@@ -68,7 +67,7 @@
                         <dt></dt>
                         <dd>
                             <ul class="clearfix">
-                                <label for="year_R">发表时间：</label>
+                                <label for="year_R">发表时间(年)：</label>
                                 <span id="publishdate" style="">
                                     <label>从</label>
                                     <input name="publishdate_from" size="20" maxlength="20" value="" type="text" style="">

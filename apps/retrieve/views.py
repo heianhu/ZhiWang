@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from retrieve.models import SearchFilter
-from crawl_data.models import Summary, Detail, Authors, Periodicals, References
-from crawl_data.models import ReferencesCBBD, ReferencesCCND, ReferencesCDFD, ReferencesCJFQ
-from crawl_data.models import ReferencesCPFD, ReferencesCMFD, ReferencesCRLDENG, ReferencesSSJD
+from crawl_data.models import Summary, Detail, Authors, Periodicals, References, ReferencesCBBD, ReferencesCCND, \
+    ReferencesCDFD, ReferencesCJFQ, ReferencesCPFD, ReferencesCMFD, ReferencesCRLDENG, ReferencesSSJD, Organization
 from django.db.models import Q
 import jieba
 import jieba.posseg
@@ -13,6 +12,8 @@ from django.utils.http import urlquote
 from django.http import Http404
 from openpyxl import Workbook
 import json
+import time
+import datetime
 
 
 # Create your views here.
@@ -45,32 +46,23 @@ class Search(View):
             txt_2_value2=request.POST.get('txt_2_value2', ''),  # 主题输入框2
             # au_1_sel = request.POST.get('au_1_sel', '') # 作者选择  暂时没用
             au_1_value1=request.POST.get('au_1_value1', ''),  # 作者输入框
+            au_special=request.POST.get('au_special', ''),  # 作者模糊/精准
+            org_1_value=request.POST.get('org_1_value', ''),  # 组织
+            org_1_special2=request.POST.get('org_1_special2', ''),  # 组织模糊/精准
+            publishdate_from=request.POST.get('publishdate_from', ''),  # 起始年
+            publishdate_to=request.POST.get('publishdate_to', ''),  # 截止年
             magazine_value1=request.POST.get('magazine_value1', ''),  # 文献来源输入框
+            magazine_special=request.POST.get('magazine_special', '')  # 文献模糊/精准
         )
 
         search_filter = SearchFilter()
         search_filter.session_id = request.session.session_key
         # queryId = datetime.now()
-        queryId = str( time.time() ).replace('.', '')
+        queryId = str(time.time()).replace('.', '')
         search_filter.time = queryId
-        s = str(para)
-        print(s)
-        search_filter.filterPara = s
+        search_filter.filterPara = str(para)
         search_filter.save()
-        #
-        # request.session['txt_2_sel'] = txt_2_sel
-        # request.session['txt_2_value1'] = txt_2_value1
-        # request.session['txt_2_relation'] = txt_2_relation
-        # request.session['txt_2_value2'] = txt_2_value2
-        # request.session['au_1_value1'] = au_1_value1
-        # request.session['magazine_value1'] = magazine_value1
-        # self.get(request)
         return redirect('/retrieve?queryId={}'.format(queryId))
-
-        # return JsonResponse({'status': 'success',
-        #                      'data': data,
-        #                      'result_count': result_count
-        #                      }, content_type='application/json')
 
     def get(self, request):
         """
@@ -90,21 +82,16 @@ class Search(View):
 
         search_filter = eval(search_filter.filterPara)
 
-
         try:
-            # txt_2_sel = request.session['txt_2_sel']
-            # txt_2_value1 = request.session['txt_2_value1']
-            # txt_2_relation = request.session['txt_2_relation']
-            # txt_2_value2 = request.session['txt_2_value2']
-            # au_1_value1 = request.session['au_1_value1']
-            # magazine_value1 = request.session['magazine_value1']
-
-            txt_2_sel = search_filter.get('txt_2_sel','')
-            txt_2_value1 = search_filter.get('txt_2_value1','')
-            txt_2_relation = search_filter.get('txt_2_relation','')
-            txt_2_value2 = search_filter.get('txt_2_value2','')
-            au_1_value1 = search_filter.get('au_1_value1','')
-            magazine_value1 = search_filter.get('magazine_value1','')
+            txt_2_sel = search_filter.get('txt_2_sel', '')
+            txt_2_value1 = search_filter.get('txt_2_value1', '')
+            txt_2_relation = search_filter.get('txt_2_relation', '')
+            txt_2_value2 = search_filter.get('txt_2_value2', '')
+            au_1_value1 = search_filter.get('au_1_value1', '')
+            org_1_value = search_filter.get('org_1_value', '')
+            publishdate_from = search_filter.get('publishdate_from', '')
+            publishdate_to = search_filter.get('publishdate_to', '')
+            magazine_value1 = search_filter.get('magazine_value1', '')
 
             txt_2_sel_dic = {  # CNKI_AND CNKI_OR
                 "SU": (Q(title__icontains=txt_2_value1), Q(title__icontains=txt_2_value2)),  # 标题
@@ -112,8 +99,24 @@ class Search(View):
                 "AB": (Q(detail_abstract__icontains=txt_2_value1), Q(detail_abstract__icontains=txt_2_value2)),  # 摘要
                 "CLC$=|?": (Q(issn_number=txt_2_value1), Q(issn_number=txt_2_value1))  # 中图分类号
             }
+            org_id = Organization.objects.filter(organization_name__icontains=org_1_value)[0]
+            org_id = str(org_id.id)
+
+            if publishdate_from and publishdate_to:
+                publishdate_from = publishdate_from.split('-')
+                date_from = datetime.datetime(int(publishdate_from[0]), int(publishdate_from[1]),
+                                              int(publishdate_from[2]), 0, 0)
+                publishdate_to = publishdate_to.split('-')
+                date_to = datetime.datetime(int(publishdate_to[0]), int(publishdate_to[1]), int(publishdate_to[2]),
+                                            0, 0)
+                date_filter = Q(issuing_time__range=(date_from, date_to))
+            else:
+                date_filter = Q()
+
             else_sel = Q(authors__icontains=au_1_value1) & \
-                       (Q(source__issn_number__icontains=magazine_value1) | Q(source__name__icontains=magazine_value1))
+                       (Q(source__issn_number__icontains=magazine_value1) | Q(source__name__icontains=magazine_value1)) \
+                       & (Q(detail__organizations__icontains=org_1_value) | Q(detail__organizations__icontains=org_id)) \
+                       & date_filter
 
             if txt_2_relation == 'CNKI_AND':
                 all_articles = Summary.objects.filter(
@@ -130,7 +133,7 @@ class Search(View):
 
             result_count = all_articles.count()
 
-            start = (int(curr_page)-1)*10
+            start = (int(curr_page) - 1) * 10
             end = start + 20
             # all_articles = all_articles[start: end]
             # data = list(all_articles.values())
@@ -142,7 +145,6 @@ class Search(View):
                 page = 1
             p = Paginator(all_articles, 12, request=request)
             articles = p.page(page)
-
 
             return render(request, 'index.html', {
                 'all_articles': articles,
