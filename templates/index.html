@@ -71,6 +71,8 @@
             <div class="resultArea">
                 <p class="resultTotal">
                     <span class="info">找到约&nbsp;<span class="totalResult">0</span>&nbsp;条结果</span>
+                  <a id="downloadAll" href=""> </a>
+
                 </p>
                 <div class="resultList">
                 {# 搜索结果#}
@@ -312,6 +314,12 @@
                                 "                    <div><a href=\""+"/retrieve/download/"+ value['id']+"\">下载链接 </a>  </div>" +
                                 "                    </div>")
                             });
+
+
+                        $('#downloadAll').html('下载全部')
+
+
+
 
                     }else if(data.status == 'fail'){
                         {#$('#jsCompanyTips').html(data.msg)#}
