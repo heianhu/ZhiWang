@@ -11,6 +11,8 @@
 </head>
 <body>
 <div id="container">
+<form action="{% url 'retrieve' %}" method="post">
+    {% csrf_token %}
 	<div id="hd" class="ue-clear">
     	<a href="/"><div class="logo"></div></a>
         <div class="inputArea">
@@ -26,7 +28,7 @@
                                     <option value="AB">摘要</option>
                                     <option value="CLC$=|?">中图分类号</option>
                                 </select>
-                                <input value="" id="txt_2_value1" name="txt_2_value1" size="10" maxlength="120" type="text" onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;document.getElementById(&#39;currentid&#39;).value=this.id;" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
+                                <input value="{{ keywords }}" id="txt_2_value1" name="txt_2_value1" size="10" maxlength="120" type="text">
                                 <select id="txt_2_relation" name="txt_2_relation">
                                     <option value="CNKI_AND" selected="">并含</option>
                                     <option value="CNKI_OR">或含</option>
@@ -46,26 +48,57 @@
                                 <span class="showPlaceholder">
                                     <input type="text" id="au_1_value1" name="au_1_value1" size="30" maxlength="120" value="" onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)">
                                 </span>
+                                <select id="au_special" name="au_special">
+                                    <option value="%" selected="">模糊</option>
+                                    <option value="=">精确</option>
+                                </select>
+                                <label class="sL1">作者单位：</label>
+                                <span class="showPlaceholder">
+                                    <input type="text" id="au_1_value2" name="au_1_value2" size="30" maxlength="120" value="">
+                                </span>
+                                <input id="au_1_sel2" name="au_1_sel2" type="hidden" value="AF">
+                                <select id="au_1_special2" name="au_1_special2" onchange="">
+                                    <option value="%" selected="">模糊</option>
+                                    <option value="=">精确</option>
+                                </select>
                             </ul>
 				        </dd>
 			        </dl>
-
+                    <dl class="l_adsch_dl clearfix">
+                        <dt></dt>
+                        <dd>
+                            <ul class="clearfix">
+                                <label for="year_R">发表时间：</label>
+                                <span id="publishdate" style="">
+                                    <label>从</label>
+                                    <input name="publishdate_from" size="20" maxlength="20" value="" type="text" style="">
+                                    <label>到</label>
+                                    <input name="publishdate_to" size="20" maxlength="20" value="" type="text" style="">
+                                </span>
+                            </ul>
+                        </dd>
+                    </dl>
                     <dl class="l_adsch_dl clearfix">
                         <dt></dt>
                         <dd>
                             <ul class="clearfix">
                                 <label class="sW1">文献来源：</label>
-                                <input id="magazine_value1" class="inputW1" value="" type="text" size="88" onfocus="if(KeywordVal(this.value)==false) this.value=&#39;&#39;;document.getElementById(&#39;hidMagezineCode&#39;).value=&#39;&#39;;ClearDisabled(&#39;magazine_special1&#39;);" onkeypress="SignVal(this,&#39;sign&#39;,event)" onpaste="return SignVal(this,&#39;value&#39;,event)" onkeyup="SignVal1(this)" name="magazine_value1">
+                                <input id="magazine_value1" class="inputW1" value="" type="text" size="88" name="magazine_value1">
+                                <select id="magazine_special" name="magazine_special">
+                                    <option value="%" selected="">模糊</option>
+                                    <option value="=">精确</option>
+                                </select>
 					        </ul>
 				        </dd>
                         <dd>
-                            <input id="jsSearchBtn" type="button" value="搜索" onclick=""/>
+                            <input id="jsSearchBtn" type="submit" value="搜索" onclick=""/>
                         </dd>
 			        </dl>
                 </div>
             </div>
         </div>
     </div>
+</form>
     <div id="bd" class="ue-clear">
         <div id="main">
             <div class="resultArea">
@@ -76,13 +109,12 @@
                 </p>
                 <div class="resultList">
                 {# 搜索结果#}
-{#              {% for article in all_articles.object_list %}#}
-{#                    <div class="result_article_title">Title: <a target="_blank" href="{{ article.url }}">{{ article.title }}</a>  </div>#}
-{#                    <div>Authors: {{ article.authors }}</div>#}
-{#                    <div><a href="{% url 'retrieve:getdetailinfo' article.id  %}">下载链接 </a>  </div>#}
-{##}
-{#                    <br>#}
-{#                {% endfor %}#}
+                    {% for article in all_articles.object_list %}
+                        <div class="result_article_title">Title: <a target="_blank" href="{{ article.url }}">{{ article.title }}</a>  </div>
+                        <div>Authors: {{ article.authors }}</div>
+                        <div><a href="{% url 'retrieve:getdetailinfo' article.id  %}">下载链接 </a>  </div>
+                        <br>
+                    {% endfor %}
                     <div class="resultItem">
                     </div>
                 </div>
@@ -120,7 +152,7 @@
 <script type="text/javascript" src="{% static 'js/global.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/pagination.js' %}"></script>
 <script type="text/javascript">
-    var search_url = "{% url 'retrieve' %}"
+    {#var search_url = "{% url 'retrieve' %}"#}
     {#var search_url = "/retrieve/"#}
 
 
@@ -272,64 +304,60 @@
 </script>
 
 {#用ajax的搜索按钮#}
-<script>
-    $(function(){
-        $('#jsSearchBtn').on('click', function(){
-            $.ajax({
-                cache: false,
-                type: "POST",
-                url:"{% url 'retrieve' %}",
-                data:{
-
-                    'txt_2_sel': $('#txt_2_sel').val(),{# 主题选择 #}
-                    'txt_2_value1': $('#txt_2_value1').val(),{# 主题输入框1 #}
+{#<script>#}
+{#    $(function(){#}
+{#        $('#jsSearchBtn').on('click', function(){#}
+{#            $.ajax({#}
+{#                cache: false,#}
+{#                type: "POST",#}
+{#                url:"{% url 'retrieve' %}",#}
+{#                data:{#}
+{##}
+{#                    'txt_2_sel': $('#txt_2_sel').val(),{# 主题选择 #}
+{#                    'txt_2_value1': $('#txt_2_value1').val(),{# 主题输入框1 #}
                     {#'txt_2_special1': $('#txt_2_special1').val(),{# 主题精确or模糊 #}
-                    'txt_2_relation':  $('#txt_2_relation').val(),{# 并行条件选择 #}
-                    'txt_2_value2': $('#txt_2_value2').val(),{# 主题输入框2 #}
-                    'au_1_sel': $('#au_1_sel').val(), {# 作者选择 #}
-                    'au_1_value1': $('#au_1_value1').val(),   {# 作者输入框 #}
+{#                    'txt_2_relation':  $('#txt_2_relation').val(),{# 并行条件选择 #}
+{#                    'txt_2_value2': $('#txt_2_value2').val(),{# 主题输入框2 #}
+{#                    'au_1_sel': $('#au_1_sel').val(), {# 作者选择 #}
+{#                    'au_1_value1': $('#au_1_value1').val(),   {# 作者输入框 #}
                     {#'au_1_special1': $('#au_1_special1').val(), {# 作者精确or模糊 #}
                     {#'publishdate_from': $('#publishdate_from').val(),{# 发表时间 from 输入框 #}
                     {#'publishdate_to': $('#publishdate_to').val(),{# 发表时间 to 输入框 #}
-                    'magazine_value1': $('#magazine_value1').val(),{# 文献来源输入框 #}
+{#                    'magazine_value1': $('#magazine_value1').val(),{# 文献来源输入框 #}
                     {#'magazine_special1': $('#magazine_special1').val(),{# 文献来源精确or模糊 #}
-                },
-                async: true,
-                beforeSend:function(xhr, settings){
-            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-        },
-                success: function(data) {
-
-                    if(data.status == 'success'){
-                        alert('success!');
+{#                },#}
+{#                async: true,#}
+{#                beforeSend:function(xhr, settings){#}
+{#            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");#}
+{#        },#}
+{#                success: function(data) {#}
+{##}
+{#                    if(data.status == 'success'){#}
+{#                        alert('success!');#}
                         {#var title = data[0]['title'];#}
 
-                        $('.totalResult').html(data.result_count)
+{##}
+{#                        $('.totalResult').html(data.result_count)#}
+{##}
+{#                        $(".resultItem").remove();#}
+{#                        $.each(data.data, function( index, value ) {#}
+{##}
+{#                            $('.resultList').append("<div class=\"resultItem\">  <div class=\"result_article_title\">Title: <a target=\"_blank\" href=\"\">"+value["title"]+"</a>  </div>\n" +#}
+{#                                "                    <div>Authors:"+value["authors"]+" </div>\n" +#}
+{#                                "                    <div><a href=\""+"/retrieve/download/"+ value['id']+"\">下载链接 </a>  </div>" +#}
+{#                                "                    </div>")#}
+{#                            });#}
+{##}
+{#                    }else if(data.status == 'fail'){#}
 
-                        $(".resultItem").remove();
-                        $.each(data.data, function( index, value ) {
-
-                            $('.resultList').append("<div class=\"resultItem\">  <div class=\"result_article_title\">Title: <a target=\"_blank\" href=\"\">"+value["title"]+"</a>  </div>\n" +
-                                "                    <div>Authors:"+value["authors"]+" </div>\n" +
-                                "                    <div><a href=\""+"/retrieve/download/"+ value['id']+"\">下载链接 </a>  </div>" +
-                                "                    </div>")
-                            });
-
-
-                        $('#downloadAll').html('下载全部')
-
-
-
-
-                    }else if(data.status == 'fail'){
                         {#$('#jsCompanyTips').html(data.msg)#}
-                        alert('fail!');
-
-                    }
-                },
-            });
-        });
-    })
-
-</script>
+{#                        alert('fail!');#}
+{##}
+{#                    }#}
+{#                },#}
+{#            });#}
+{#        });#}
+{#    })#}
+{##}
+{#</script>#}
 </html>
