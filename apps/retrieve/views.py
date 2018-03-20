@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views.generic import View
+from retrieve.models import SearchFilter
 from crawl_data.models import Summary, Detail, Authors, Periodicals, References
 from crawl_data.models import ReferencesCBBD, ReferencesCCND, ReferencesCDFD, ReferencesCJFQ
 from crawl_data.models import ReferencesCPFD, ReferencesCMFD, ReferencesCRLDENG, ReferencesSSJD
@@ -18,6 +19,7 @@ import json
 
 class IndexView(View):
     def get(self, request):
+        request.session.save()
         return render(request, 'index.html', {
         })
 
@@ -35,22 +37,35 @@ class Search(View):
         :param request:
         :return:
         """
-        txt_2_sel = request.POST.get('txt_2_sel', '')  # 主题选择
-        txt_2_value1 = request.POST.get('txt_2_value1', '')  # 主题输入框1
-        txt_2_relation = request.POST.get('txt_2_relation', '')  # 并行条件选择
-        txt_2_value2 = request.POST.get('txt_2_value2', '')  # 主题输入框2
-        # au_1_sel = request.POST.get('au_1_sel', '') # 作者选择  暂时没用
-        au_1_value1 = request.POST.get('au_1_value1', '')  # 作者输入框
-        magazine_value1 = request.POST.get('magazine_value1', '')  # 文献来源输入框
 
-        request.session['txt_2_sel'] = txt_2_sel
-        request.session['txt_2_value1'] = txt_2_value1
-        request.session['txt_2_relation'] = txt_2_relation
-        request.session['txt_2_value2'] = txt_2_value2
-        request.session['au_1_value1'] = au_1_value1
-        request.session['magazine_value1'] = magazine_value1
+        para = dict(
+            txt_2_sel=request.POST.get('txt_2_sel', ''),  # 主题选择
+            txt_2_value1=request.POST.get('txt_2_value1', ''),  # 主题输入框1
+            txt_2_relation=request.POST.get('txt_2_relation', ''),  # 并行条件选择
+            txt_2_value2=request.POST.get('txt_2_value2', ''),  # 主题输入框2
+            # au_1_sel = request.POST.get('au_1_sel', '') # 作者选择  暂时没用
+            au_1_value1=request.POST.get('au_1_value1', ''),  # 作者输入框
+            magazine_value1=request.POST.get('magazine_value1', ''),  # 文献来源输入框
+        )
+
+        search_filter = SearchFilter()
+        search_filter.session_id = request.session.session_key
+        # queryId = datetime.now()
+        queryId = str( time.time() ).replace('.', '')
+        search_filter.time = queryId
+        s = str(para)
+        print(s)
+        search_filter.filterPara = s
+        search_filter.save()
+        #
+        # request.session['txt_2_sel'] = txt_2_sel
+        # request.session['txt_2_value1'] = txt_2_value1
+        # request.session['txt_2_relation'] = txt_2_relation
+        # request.session['txt_2_value2'] = txt_2_value2
+        # request.session['au_1_value1'] = au_1_value1
+        # request.session['magazine_value1'] = magazine_value1
         # self.get(request)
-        return redirect('retrieve')
+        return redirect('/retrieve?queryId={}'.format(queryId))
 
         # return JsonResponse({'status': 'success',
         #                      'data': data,
@@ -65,13 +80,32 @@ class Search(View):
         :return:
         """
         # 获取关键词和搜索类型
+        queryId = request.GET.get('queryId', '')
+        curr_page = request.GET.get('page', '1')
+        session_key = request.session.session_key
         try:
-            txt_2_sel = request.session['txt_2_sel']
-            txt_2_value1 = request.session['txt_2_value1']
-            txt_2_relation = request.session['txt_2_relation']
-            txt_2_value2 = request.session['txt_2_value2']
-            au_1_value1 = request.session['au_1_value1']
-            magazine_value1 = request.session['magazine_value1']
+            search_filter = SearchFilter.objects.get(time=queryId, session_id=session_key)
+        except KeyError:
+            return render(request, 'index.html')
+
+        search_filter = eval(search_filter.filterPara)
+
+
+        try:
+            # txt_2_sel = request.session['txt_2_sel']
+            # txt_2_value1 = request.session['txt_2_value1']
+            # txt_2_relation = request.session['txt_2_relation']
+            # txt_2_value2 = request.session['txt_2_value2']
+            # au_1_value1 = request.session['au_1_value1']
+            # magazine_value1 = request.session['magazine_value1']
+
+            txt_2_sel = search_filter.get('txt_2_sel','')
+            txt_2_value1 = search_filter.get('txt_2_value1','')
+            txt_2_relation = search_filter.get('txt_2_relation','')
+            txt_2_value2 = search_filter.get('txt_2_value2','')
+            au_1_value1 = search_filter.get('au_1_value1','')
+            magazine_value1 = search_filter.get('magazine_value1','')
+
             txt_2_sel_dic = {  # CNKI_AND CNKI_OR
                 "SU": (Q(title__icontains=txt_2_value1), Q(title__icontains=txt_2_value2)),  # 标题
                 "KY": (Q(detail_keywords__icontains=txt_2_value1), Q(detail_keywords__icontains=txt_2_value2)),  # 关键词
@@ -93,7 +127,12 @@ class Search(View):
                 ).exclude(txt_2_sel_dic[txt_2_sel][1])
             else:
                 return render(request, 'index.html')
+
             result_count = all_articles.count()
+
+            start = (int(curr_page)-1)*10
+            end = start + 20
+            # all_articles = all_articles[start: end]
             # data = list(all_articles.values())
 
             # 分页功能
@@ -104,7 +143,6 @@ class Search(View):
             p = Paginator(all_articles, 12, request=request)
             articles = p.page(page)
 
-            # del request.session['txt_2_sel']
 
             return render(request, 'index.html', {
                 'all_articles': articles,
