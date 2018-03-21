@@ -124,7 +124,7 @@ class Search(View):
                        Q(detail__detail_keywords__icontains=txt_2_value2)),  # 关键词
                 "AB": (Q(detail__detail_abstract__icontains=txt_2_value1),
                        Q(detail__detail_abstract__icontains=txt_2_value2)),  # 摘要
-                "CLC$=|?": (Q(issn_number=txt_2_value1), Q(issn_number=txt_2_value1))  # 中图分类号
+                "CLC$=|?": (Q(source__issn_number=txt_2_value1), Q(source__issn_number=txt_2_value1))  # 中图分类号
             }
             org_id = Organization.objects.filter(organization_name__icontains=org_1_value)[0]
             org_id = str(org_id.id)
