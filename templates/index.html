@@ -101,14 +101,18 @@
     <div id="bd" class="ue-clear">
         <div id="main">
             <div class="resultArea">
+                {% if request.path|slice:'2' == '/r' %}
                 <p class="resultTotal">
                     <span class="info">找到约&nbsp;<span class="totalResult">{{ result_count }}</span>&nbsp;条结果</span>
-                  <input id="downloadSel" type="button" value="下载已选"> </input>
-               <span> <form method="get" action="{% url 'retrieve:downloadall' request.GET.queryId %}">
-                {% csrf_token %}
-                   <input id="downloadAll" type="submit" value="下载全部"> </input> </form></span>
-
+                    <input id="downloadSel" type="button" value="下载已选"> </input>
+                        <span>
+                            <form method="get" action="{% url 'retrieve:downloadall' request.GET.queryId %}">
+                                {% csrf_token %}
+                                <input id="downloadAll" type="submit" value="下载全部">
+                            </form>
+                        </span>
                 </p>
+                {% endif %}
                 <div class="resultList">
                 {# 搜索结果#}
 {#                    {% for article in all_articles %}#}
