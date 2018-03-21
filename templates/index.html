@@ -22,19 +22,19 @@
                         <dt></dt>
                         <dd>
                             <ul class="clearfix">
-                                <select id="txt_2_sel" name="txt_2_sel" onchange="disableWordTimes(this);return false;" class="selectW1">
-                                    <option value="SU" selected="">标题</option>
-                                    <option value="KY">关键词</option>
-                                    <option value="AB">摘要</option>
-                                    <option value="CLC$=|?">中图分类号</option>
+                                <select id="txt_2_sel" name="txt_2_sel" class="selectW1">
+                                    <option value="SU" {% if txt_2_sel == 'SU' %}selected=""{% endif %}>标题</option>
+                                    <option value="KY" {% if txt_2_sel == 'KY' %}selected=""{% endif %}>关键词</option>
+                                    <option value="AB" {% if txt_2_sel == 'AB' %}selected=""{% endif %}>摘要</option>
+                                    <option value="CLC$=|?" {% if txt_2_sel == 'CLC$=|?' %}selected=""{% endif %}>中图分类号</option>
                                 </select>
-                                <input value="{{ keywords }}" id="txt_2_value1" name="txt_2_value1" size="10" maxlength="120" type="text">
+                                <input value="{{ txt_2_value1 }}" id="txt_2_value1" name="txt_2_value1" size="10" maxlength="120" type="text">
                                 <select id="txt_2_relation" name="txt_2_relation">
-                                    <option value="CNKI_AND" selected="">并含</option>
-                                    <option value="CNKI_OR">或含</option>
-                                    <option value="CNKI_NOT">不含</option>
+                                    <option value="CNKI_AND" {% if txt_2_relation == 'CNKI_AND' %}selected=""{% endif %}>并含</option>
+                                    <option value="CNKI_OR" {% if txt_2_relation == 'CNKI_OR' %}selected=""{% endif %}>或含</option>
+                                    <option value="CNKI_NOT" {% if txt_2_relation == 'CNKI_NOT' %}selected=""{% endif %}>不含</option>
                                 </select>
-                                <input value="" id="txt_2_value2" name="txt_2_value2" size="10" maxlength="120" type="text">
+                                <input value="{{ txt_2_value2 }}" id="txt_2_value2" name="txt_2_value2" size="10" maxlength="120" type="text">
 					        </ul>
 				        </dd>
                     </dl>
@@ -46,19 +46,19 @@
                                     <option value="AU" selected="">作者</option>
                                 </select>
                                 <span class="showPlaceholder">
-                                    <input type="text" id="au_1_value1" name="au_1_value1" size="30" maxlength="120" value="">
+                                    <input type="text" id="au_1_value1" name="au_1_value1" size="30" maxlength="120" value="{{ au_1_value1 }}">
                                 </span>
                                 <select id="au_special" name="au_special">
-                                    <option value="%" selected="">模糊</option>
-                                    <option value="=">精确</option>
+                                    <option value="%" {% if au_special == '%' %}selected=""{% endif %}>模糊</option>
+                                    <option value="=" {% if au_special == '=' %}selected=""{% endif %}>精确</option>
                                 </select>
                                 <label class="sL1">作者单位：</label>
                                 <span class="showPlaceholder">
-                                    <input type="text" id="org_1_value" name="org_1_value" size="30" maxlength="120" value="">
+                                    <input type="text" id="org_1_value" name="org_1_value" size="30" maxlength="120" value="{{ org_1_value }}">
                                 </span>
                                 <select id="org_1_special2" name="org_1_special2" onchange="">
-                                    <option value="%" selected="">模糊</option>
-                                    <option value="=">精确</option>
+                                    <option value="%" {% if org_1_special2 == '%' %}selected=""{% endif %}>模糊</option>
+                                    <option value="=" {% if org_1_special2 == '=' %}selected=""{% endif %}>精确</option>
                                 </select>
                             </ul>
 				        </dd>
@@ -70,9 +70,9 @@
                                 <label for="year_R">发表时间(年)：</label>
                                 <span id="publishdate" style="">
                                     <label>从</label>
-                                    <input name="publishdate_from" size="20" maxlength="20" value="" type="text" style="">
+                                    <input name="publishdate_from" size="20" maxlength="20" value="{{ publishdate_from }}" type="text" style="">
                                     <label>到</label>
-                                    <input name="publishdate_to" size="20" maxlength="20" value="" type="text" style="">
+                                    <input name="publishdate_to" size="20" maxlength="20" value="{{ publishdate_to }}" type="text" style="">
                                 </span>
                             </ul>
                         </dd>
@@ -82,10 +82,10 @@
                         <dd>
                             <ul class="clearfix">
                                 <label class="sW1">文献来源：</label>
-                                <input id="magazine_value1" class="inputW1" value="" type="text" size="88" name="magazine_value1">
+                                <input id="magazine_value1" class="inputW1" value="{{ magazine_value1 }}" type="text" size="88" name="magazine_value1">
                                 <select id="magazine_special" name="magazine_special">
-                                    <option value="%" selected="">模糊</option>
-                                    <option value="=">精确</option>
+                                    <option value="%" {% if magazine_special == '%' %}selected=""{% endif %}>模糊</option>
+                                    <option value="=" {% if magazine_special == '=' %}selected=""{% endif %}>精确</option>
                                 </select>
 					        </ul>
 				        </dd>
@@ -103,14 +103,14 @@
             <div class="resultArea">
                 {% if request.path|slice:'2' == '/r' %}
                 <p class="resultTotal">
-                    <span class="info">找到约&nbsp;<span class="totalResult">{{ result_count }}</span>&nbsp;条结果</span>
-                    <input id="downloadSel" type="button" value="下载已选"> </input>
-                        <span>
+                    <span class="info">找到约&nbsp;<span class="totalResult">{{ result_count }}</span>&nbsp;条结果</span><br>
+                    <span>
+                        <input id="downloadSel" type="button" value="下载已选"> </input>
                             <form method="get" action="{% url 'retrieve:downloadall' request.GET.queryId %}">
                                 {% csrf_token %}
                                 <input id="downloadAll" type="submit" value="下载全部">
                             </form>
-                        </span>
+                    </span>
                 </p>
                 {% endif %}
                 <div class="resultList">
