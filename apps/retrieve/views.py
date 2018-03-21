@@ -30,70 +30,6 @@ class IndexView(View):
         })
 
 
-def get_query_set(search_filter):
-    """
-    由搜索条件获取查询数据集
-    :param search_filter:搜索条件 dict
-    :return: 结果数据集 queryset
-    """
-    try:
-        txt_2_sel = search_filter.get('txt_2_sel', '')
-        txt_2_value1 = search_filter.get('txt_2_value1', '')
-        txt_2_relation = search_filter.get('txt_2_relation', '')
-        txt_2_value2 = search_filter.get('txt_2_value2', '')
-        au_1_value1 = search_filter.get('au_1_value1', '')
-        org_1_value = search_filter.get('org_1_value', '')
-        publishdate_from = search_filter.get('publishdate_from', '')
-        publishdate_to = search_filter.get('publishdate_to', '')
-        magazine_value1 = search_filter.get('magazine_value1', '')
-
-        txt_2_sel_dic = {  # CNKI_AND CNKI_OR
-            "SU": (Q(title__icontains=txt_2_value1), Q(title__icontains=txt_2_value2)),  # 标题
-            "KY": (Q(detail_keywords__icontains=txt_2_value1), Q(detail_keywords__icontains=txt_2_value2)),  # 关键词
-            "AB": (Q(detail_abstract__icontains=txt_2_value1), Q(detail_abstract__icontains=txt_2_value2)),  # 摘要
-            "CLC$=|?": (Q(issn_number=txt_2_value1), Q(issn_number=txt_2_value1))  # 中图分类号
-        }
-        org_id = Organization.objects.filter(organization_name__icontains=org_1_value)[0]
-        org_id = str(org_id.id)
-
-        if publishdate_from and publishdate_to:
-            publishdate_from = publishdate_from.split('-')
-            date_from = datetime.datetime(int(publishdate_from[0]), int(publishdate_from[1]),
-                                          int(publishdate_from[2]), 0, 0)
-            publishdate_to = publishdate_to.split('-')
-            date_to = datetime.datetime(int(publishdate_to[0]), int(publishdate_to[1]), int(publishdate_to[2]),
-                                        0, 0)
-            date_filter = Q(issuing_time__range=(date_from, date_to))
-        else:
-            date_filter = Q()
-
-        else_sel = Q(authors__icontains=au_1_value1) & \
-                   (Q(source__issn_number__icontains=magazine_value1) | Q(source__name__icontains=magazine_value1)) \
-                   & (Q(detail__organizations__icontains=org_1_value) | Q(detail__organizations__icontains=org_id)) \
-                   & date_filter
-
-        if txt_2_relation == 'CNKI_AND':
-            all_articles = Summary.objects.filter(
-                (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel)
-        elif txt_2_relation == 'CNKI_OR':
-            all_articles = Summary.objects.filter(
-                (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel)
-        elif txt_2_relation == 'CNKI_NOT':
-            all_articles = Summary.objects.filter(
-                txt_2_sel_dic[txt_2_sel][0] & else_sel
-            ).exclude(txt_2_sel_dic[txt_2_sel][1])
-        else:
-            response = render_to_response('404.html', {})
-            response.status_code = 404
-            return response
-    except KeyError:
-        response = render_to_response('404.html', {})
-        response.status_code = 404
-        return response
-
-    return all_articles
-
-
 class Search(View):
     def post(self, request):
         """
@@ -151,7 +87,7 @@ class Search(View):
 
         search_filter = eval(search_filter.filterPara)
 
-        all_articles = get_query_set(search_filter)
+        all_articles = Search.get_query_set(search_filter)
 
         result_count = all_articles.count()
 
@@ -169,6 +105,70 @@ class Search(View):
             # 'keywords': txt_2_value1,
             'result_count': result_count
         })
+
+    @staticmethod
+    def get_query_set(search_filter):
+        """
+        由搜索条件获取查询数据集
+        :param search_filter:搜索条件 dict
+        :return: 结果数据集 queryset
+        """
+        try:
+            txt_2_sel = search_filter.get('txt_2_sel', '')
+            txt_2_value1 = search_filter.get('txt_2_value1', '')
+            txt_2_relation = search_filter.get('txt_2_relation', '')
+            txt_2_value2 = search_filter.get('txt_2_value2', '')
+            au_1_value1 = search_filter.get('au_1_value1', '')
+            org_1_value = search_filter.get('org_1_value', '')
+            publishdate_from = search_filter.get('publishdate_from', '')
+            publishdate_to = search_filter.get('publishdate_to', '')
+            magazine_value1 = search_filter.get('magazine_value1', '')
+
+            txt_2_sel_dic = {  # CNKI_AND CNKI_OR
+                "SU": (Q(title__icontains=txt_2_value1), Q(title__icontains=txt_2_value2)),  # 标题
+                "KY": (Q(detail_keywords__icontains=txt_2_value1), Q(detail_keywords__icontains=txt_2_value2)),  # 关键词
+                "AB": (Q(detail_abstract__icontains=txt_2_value1), Q(detail_abstract__icontains=txt_2_value2)),  # 摘要
+                "CLC$=|?": (Q(issn_number=txt_2_value1), Q(issn_number=txt_2_value1))  # 中图分类号
+            }
+            org_id = Organization.objects.filter(organization_name__icontains=org_1_value)[0]
+            org_id = str(org_id.id)
+
+            if publishdate_from and publishdate_to:
+                publishdate_from = publishdate_from.split('-')
+                date_from = datetime.datetime(int(publishdate_from[0]), int(publishdate_from[1]),
+                                              int(publishdate_from[2]), 0, 0)
+                publishdate_to = publishdate_to.split('-')
+                date_to = datetime.datetime(int(publishdate_to[0]), int(publishdate_to[1]), int(publishdate_to[2]),
+                                            0, 0)
+                date_filter = Q(issuing_time__range=(date_from, date_to))
+            else:
+                date_filter = Q()
+
+            else_sel = Q(authors__icontains=au_1_value1) & \
+                       (Q(source__issn_number__icontains=magazine_value1) | Q(source__name__icontains=magazine_value1)) \
+                       & (Q(detail__organizations__icontains=org_1_value) | Q(detail__organizations__icontains=org_id)) \
+                       & date_filter
+
+            if txt_2_relation == 'CNKI_AND':
+                all_articles = Summary.objects.filter(
+                    (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel)
+            elif txt_2_relation == 'CNKI_OR':
+                all_articles = Summary.objects.filter(
+                    (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel)
+            elif txt_2_relation == 'CNKI_NOT':
+                all_articles = Summary.objects.filter(
+                    txt_2_sel_dic[txt_2_sel][0] & else_sel
+                ).exclude(txt_2_sel_dic[txt_2_sel][1])
+            else:
+                response = render_to_response('404.html', {})
+                response.status_code = 404
+                return response
+        except KeyError:
+            response = render_to_response('404.html', {})
+            response.status_code = 404
+            return response
+
+        return all_articles
 
 
 class GetDetailInfo(View):
@@ -248,7 +248,7 @@ class DownloadAll(View):
 
         search_filter = eval(search_filter.filterPara)
 
-        all_articles = get_query_set(search_filter)
+        all_articles = Search.get_query_set(search_filter)
 
         ids = all_articles.values_list("id")
         ids = map(lambda x: x[0], ids)
