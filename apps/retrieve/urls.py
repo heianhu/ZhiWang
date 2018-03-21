@@ -3,9 +3,12 @@
 __author__ = 'heianhu'
 
 from django.conf.urls import url, include
-from .views import Search, GetDetailInfo
+from .views import Search, GetDetailInfo, DownloadSel, DownloadZip
 
 
 urlpatterns = [
     url(r'^download/(?P<getdetailinfo_id>\d+)/$', GetDetailInfo.as_view(), name='getdetailinfo'),
+    url(r'^downloadSel/$', DownloadSel.as_view(), name='downloadSel'),
+    url(r'^downloadzip/(?P<zip_name>\d+)/$', DownloadZip.as_view(), name='downloadzip'),
+
 ]

@@ -103,20 +103,24 @@
         <div id="main">
             <div class="resultArea">
                 <p class="resultTotal">
-                    <span class="info">找到约&nbsp;<span class="totalResult">0</span>&nbsp;条结果</span>
-                  <a id="downloadAll" href=""> </a>
+                    <span class="info">找到约&nbsp;<span class="totalResult">{{ result_count }}</span>&nbsp;条结果</span>
+                  <input id="downloadSel" type="button" value="下载已选"> </input>
+                  <a id="downloadAll" href="#">下载全部 </a>
 
                 </p>
                 <div class="resultList">
                 {# 搜索结果#}
+{#                    {% for article in all_articles %}#}
                     {% for article in all_articles.object_list %}
+                     <div class="resultItem">
+                         <input type="checkbox" class="needDownload">
                         <div class="result_article_title">Title: <a target="_blank" href="{{ article.url }}">{{ article.title }}</a>  </div>
                         <div>Authors: {{ article.authors }}</div>
-                        <div><a href="{% url 'retrieve:getdetailinfo' article.id  %}">下载链接 </a>  </div>
+                        <div><a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id  %}">下载链接 </a>  </div>
                         <br>
+                     </div>
                     {% endfor %}
-                    <div class="resultItem">
-                    </div>
+
                 </div>
 
                 <!-- 分页 -->
@@ -362,4 +366,62 @@
 {#    })#}
 {##}
 {#</script>#}
+
+
+{# 下载已选按钮 #}
+<script>
+    $(function(){
+
+        $('#downloadSel').on('click', function(){
+
+            var result=new Array(), ids='';
+
+            $(".resultItem").each(function(){
+                if ($(this).children('.needDownload').attr("checked")){
+                    var link = $(this).children().children('.downloadLink').attr("href")
+                    link = link.split('/').slice(3)
+                    {#alert('1');#}
+                    result.push(link );
+                }
+
+
+
+            });
+
+            var ids=result.join(',');
+
+            if(ids==''){
+
+                alert('没有选中任何选项！');
+
+                return false;
+
+            }
+
+
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url:"{% url 'retrieve:downloadSel' %}",
+                data:{
+                    ids:ids
+                },
+                async: true,
+                beforeSend:function(xhr, settings){
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function(data) {
+                    if(data.status == 'success'){
+                        alert('开始下载!');
+                        window.location.href='downloadzip/' + data.data
+                    }else if(data.status == 'fail'){
+                        alert('fail!');
+                    }
+
+                },
+            });
+        })
+    })
+
+</script>
 </html>
