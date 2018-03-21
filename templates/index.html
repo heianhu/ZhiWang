@@ -104,7 +104,9 @@
                 <p class="resultTotal">
                     <span class="info">找到约&nbsp;<span class="totalResult">{{ result_count }}</span>&nbsp;条结果</span>
                   <input id="downloadSel" type="button" value="下载已选"> </input>
-                  <a id="downloadAll" href="#">下载全部 </a>
+               <span> <form method="get" action="{% url 'retrieve:downloadall' request.GET.queryId %}">
+                {% csrf_token %}
+                   <input id="downloadAll" type="submit" value="下载全部"> </input> </form></span>
 
                 </p>
                 <div class="resultList">
@@ -423,4 +425,38 @@
     })
 
 </script>
+
+
+{# 下载全部按钮 #}
+{#<script>#}
+{#    $(function(){#}
+{##}
+{#        $('#').on('click', function(){#}
+{#            var queryid = getUrlParam('queryid');#}
+{#            $.ajax({#}
+{#                cache: false,#}
+{#                type: "POST",#}
+{#                url:"",#}
+{##}
+{#                data:{#}
+{#                    queryid:queryid#}
+{#                },#}
+{#                async: true,#}
+{#                beforeSend:function(xhr, settings){#}
+{#                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");#}
+{#                },#}
+{#                success: function(data) {#}
+{#                    if(data.status == 'success'){#}
+{#                        alert('开始下载!');#}
+{#                        window.location.href='downloadzip/' + data.data#}
+{#                    }else if(data.status == 'fail'){#}
+{#                        alert('fail!');#}
+{#                    }#}
+{##}
+{#                },#}
+{#            });#}
+{#        })#}
+{#    })#}
+{##}
+{#</script>#}
 </html>

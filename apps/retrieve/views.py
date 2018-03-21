@@ -29,6 +29,68 @@ class IndexView(View):
         return render(request, 'index.html', {
         })
 
+def get_query_set(search_filter):
+    """
+    由搜索条件获取查询数据集
+    :param search_filter:搜索条件 dict
+    :return: 结果数据集 queryset
+    """
+    try:
+        txt_2_sel = search_filter.get('txt_2_sel', '')
+        txt_2_value1 = search_filter.get('txt_2_value1', '')
+        txt_2_relation = search_filter.get('txt_2_relation', '')
+        txt_2_value2 = search_filter.get('txt_2_value2', '')
+        au_1_value1 = search_filter.get('au_1_value1', '')
+        org_1_value = search_filter.get('org_1_value', '')
+        publishdate_from = search_filter.get('publishdate_from', '')
+        publishdate_to = search_filter.get('publishdate_to', '')
+        magazine_value1 = search_filter.get('magazine_value1', '')
+
+        txt_2_sel_dic = {  # CNKI_AND CNKI_OR
+            "SU": (Q(title__icontains=txt_2_value1), Q(title__icontains=txt_2_value2)),  # 标题
+            "KY": (Q(detail_keywords__icontains=txt_2_value1), Q(detail_keywords__icontains=txt_2_value2)),  # 关键词
+            "AB": (Q(detail_abstract__icontains=txt_2_value1), Q(detail_abstract__icontains=txt_2_value2)),  # 摘要
+            "CLC$=|?": (Q(issn_number=txt_2_value1), Q(issn_number=txt_2_value1))  # 中图分类号
+        }
+        org_id = Organization.objects.filter(organization_name__icontains=org_1_value)[0]
+        org_id = str(org_id.id)
+
+        if publishdate_from and publishdate_to:
+            publishdate_from = publishdate_from.split('-')
+            date_from = datetime.datetime(int(publishdate_from[0]), int(publishdate_from[1]),
+                                          int(publishdate_from[2]), 0, 0)
+            publishdate_to = publishdate_to.split('-')
+            date_to = datetime.datetime(int(publishdate_to[0]), int(publishdate_to[1]), int(publishdate_to[2]),
+                                        0, 0)
+            date_filter = Q(issuing_time__range=(date_from, date_to))
+        else:
+            date_filter = Q()
+
+        else_sel = Q(authors__icontains=au_1_value1) & \
+                   (Q(source__issn_number__icontains=magazine_value1) | Q(source__name__icontains=magazine_value1)) \
+                   & (Q(detail__organizations__icontains=org_1_value) | Q(detail__organizations__icontains=org_id)) \
+                   & date_filter
+
+        if txt_2_relation == 'CNKI_AND':
+            all_articles = Summary.objects.filter(
+                (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel)
+        elif txt_2_relation == 'CNKI_OR':
+            all_articles = Summary.objects.filter(
+                (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel)
+        elif txt_2_relation == 'CNKI_NOT':
+            all_articles = Summary.objects.filter(
+                txt_2_sel_dic[txt_2_sel][0] & else_sel
+            ).exclude(txt_2_sel_dic[txt_2_sel][1])
+        else:
+            response = render_to_response('404.html', {})
+            response.status_code = 404
+            return response
+    except KeyError:
+        response = render_to_response('404.html', {})
+        response.status_code = 404
+        return response
+
+    return all_articles
 
 class Search(View):
     def post(self, request):
@@ -79,89 +141,42 @@ class Search(View):
         # 获取关键词和搜索类型
         queryId = request.GET.get('queryId', '')
         curr_page = request.GET.get('page', '1')
-        session_key = request.session.session_key
+        session_id = request.session.session_key
         try:
-            search_filter = SearchFilter.objects.get(time=queryId, session_id=session_key)
+            search_filter = SearchFilter.objects.get(time=queryId, session_id=session_id)
         except KeyError:
             return render(request, 'index.html')
 
         search_filter = eval(search_filter.filterPara)
 
+        all_articles = get_query_set(search_filter)
+
+        result_count = all_articles.count()
+
+
+        # 分页功能
         try:
-            txt_2_sel = search_filter.get('txt_2_sel', '')
-            txt_2_value1 = search_filter.get('txt_2_value1', '')
-            txt_2_relation = search_filter.get('txt_2_relation', '')
-            txt_2_value2 = search_filter.get('txt_2_value2', '')
-            au_1_value1 = search_filter.get('au_1_value1', '')
-            org_1_value = search_filter.get('org_1_value', '')
-            publishdate_from = search_filter.get('publishdate_from', '')
-            publishdate_to = search_filter.get('publishdate_to', '')
-            magazine_value1 = search_filter.get('magazine_value1', '')
+            page = request.GET.get('page', 1)
+        except PageNotAnInteger:
+            page = 1
+        p = Paginator(all_articles, 12, request=request)
+        articles = p.page(page)
 
-            txt_2_sel_dic = {  # CNKI_AND CNKI_OR
-                "SU": (Q(title__icontains=txt_2_value1), Q(title__icontains=txt_2_value2)),  # 标题
-                "KY": (Q(detail_keywords__icontains=txt_2_value1), Q(detail_keywords__icontains=txt_2_value2)),  # 关键词
-                "AB": (Q(detail_abstract__icontains=txt_2_value1), Q(detail_abstract__icontains=txt_2_value2)),  # 摘要
-                "CLC$=|?": (Q(issn_number=txt_2_value1), Q(issn_number=txt_2_value1))  # 中图分类号
-            }
-            org_id = Organization.objects.filter(organization_name__icontains=org_1_value)[0]
-            org_id = str(org_id.id)
+        return render(request, 'index.html', {
+            'all_articles': articles,
+            # 'search_type': search_type,
+            # 'keywords': txt_2_value1,
+            'result_count': result_count
+        })
 
-            if publishdate_from and publishdate_to:
-                publishdate_from = publishdate_from.split('-')
-                date_from = datetime.datetime(int(publishdate_from[0]), int(publishdate_from[1]),
-                                              int(publishdate_from[2]), 0, 0)
-                publishdate_to = publishdate_to.split('-')
-                date_to = datetime.datetime(int(publishdate_to[0]), int(publishdate_to[1]), int(publishdate_to[2]),
-                                            0, 0)
-                date_filter = Q(issuing_time__range=(date_from, date_to))
-            else:
-                date_filter = Q()
-
-            else_sel = Q(authors__icontains=au_1_value1) & \
-                       (Q(source__issn_number__icontains=magazine_value1) | Q(source__name__icontains=magazine_value1)) \
-                       & (Q(detail__organizations__icontains=org_1_value) | Q(detail__organizations__icontains=org_id)) \
-                       & date_filter
-
-            if txt_2_relation == 'CNKI_AND':
-                all_articles = Summary.objects.filter(
-                    (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel)
-            elif txt_2_relation == 'CNKI_OR':
-                all_articles = Summary.objects.filter(
-                    (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel)
-            elif txt_2_relation == 'CNKI_NOT':
-                all_articles = Summary.objects.filter(
-                    txt_2_sel_dic[txt_2_sel][0] & else_sel
-                ).exclude(txt_2_sel_dic[txt_2_sel][1])
-            else:
-                return render(request, 'index.html')
-
-            result_count = all_articles.count()
-            # result_count = 1
-            # all_articles = all_articles[start:end]
-
-
-            # data = list(all_articles.values())
-
-            # 分页功能
-            try:
-                page = request.GET.get('page', 1)
-            except PageNotAnInteger:
-                page = 1
-            p = Paginator(all_articles, 12, request=request)
-            articles = p.page(page)
-
-            return render(request, 'index.html', {
-                'all_articles': articles,
-                # 'search_type': search_type,
-                'keywords': txt_2_value1,
-                'result_count': result_count
-            })
-        except KeyError:
-            return render(request, 'index.html')
 
 
 def write_to_excel(getdetailinfo_id):
+    """
+    将指定id的文章写入excel
+    :param getdetailinfo_id:文章summary中的id号
+    :return: 生成的excel文件名(文章detail中的detail_id),失败时返回None
+    """
     summary_id = int(getdetailinfo_id)
     # 在Excel中插入数据，文件名为detail_id字段
 
@@ -253,11 +268,34 @@ def write_to_excel(getdetailinfo_id):
     wb.save('media/' + filename)
     return filename
 
+def compress_excel(ids):
+    """
+    将批量id的文章写入excel，然后压缩成一个zip文件
+    :param ids: summary文章id列表
+    :return: 生成的zip文件名(不包含路径)
+    """
+    files = []
+    for id in ids:
+        filename = write_to_excel(id)
+        files.append('media/{0}'.format(filename))
+
+    import zipfile
+    timestamp = str(time.time()).replace('.', '')
+    zip_name = '{0}.zip'.format(timestamp)
+    jungle_zip = zipfile.ZipFile('media/{0}'.format(zip_name), 'w')
+    for file in files:
+        jungle_zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
+    jungle_zip.close()
+
+    return zip_name
 
 class GetDetailInfo(View):
-
     def get(self, request, getdetailinfo_id):
-
+        """
+        处理下载单个文章
+        :param getdetailinfo_id: summary文章的id
+        :return: excel文件流
+        """
         filename = write_to_excel(getdetailinfo_id)
         if not filename:
             response = render_to_response('404.html', {})
@@ -275,28 +313,29 @@ class GetDetailInfo(View):
 class DownloadSel(View):
 
     def post(self, request):
+        """
+        处理下载选择的多篇文章，由前端ajax发起请求
+        生成多个excel文件并压缩zip
+        :return: 生成的zip文件前缀
+        """
         ids = request.POST.get('ids', '')
+        # 将id转为整形列表并去除空白项
         ids = [int(id) for id in ids.split(',') if id]
-        files = []
-        for id in ids:
-            filename = write_to_excel(id)
-            files.append('media/{0}'.format(filename))
 
-        import zipfile
-        timestamp = str(time.time()).replace('.','')
-        zip_name = '{0}.zip'.format(timestamp)
-        jungle_zip = zipfile.ZipFile('media/{0}'.format(zip_name), 'w')
-        for file in files:
-            jungle_zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
-        jungle_zip.close()
-
+        zip_name = compress_excel(ids)
 
         return JsonResponse({'status': 'success',
-                         'data': zip_name.replace('.zip',''),
-                         }, content_type='application/json')
+                             # 返回的data值将成为前端js请求下载压缩文件的url的参数
+                             'data': zip_name.replace('.zip', ''),
+                            }, content_type='application/json')
 
 class DownloadZip(View):
     def get(self, request, zip_name):
+        """
+        处理下载zip文件请求
+        :param zip_name: 不带后缀的zip文件名
+        :return: 文件流
+        """
         zip_name = 'media/{0}.zip'.format(zip_name)
         file = open(zip_name, 'rb')
         response = FileResponse(file)
@@ -305,4 +344,36 @@ class DownloadZip(View):
 
         return response
 
+
+class DownloadAll(View):
+    def get(self, request, query_id):
+        """
+        处理"下载全部"按钮
+        :param queryId: 由查询条件生成的queryid
+        :return:
+        """
+        session_id = request.session.session_key
+
+        try:
+            search_filter = SearchFilter.objects.get(time=query_id, session_id=session_id)
+        except KeyError:
+            response = render_to_response('404.html', {})
+            response.status_code = 404
+            return response
+
+        search_filter = eval(search_filter.filterPara)
+
+        all_articles = get_query_set(search_filter)
+
+        ids = all_articles.values_list("id")
+        ids = map(lambda x: x[0], ids)
+        zip_name = compress_excel(ids)
+
+        file = open('media/{0}'.format(zip_name), 'rb')
+        response = FileResponse(file)
+
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment;filename="{}"'.format(urlquote(zip_name))
+
+        return response
 
