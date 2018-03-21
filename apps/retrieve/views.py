@@ -22,10 +22,6 @@ class IndexView(View):
     def get(self, request):
         if not request.session.session_key:
             request.session.save()
-        # try:
-        #     request.session.save()
-        # except:
-        #     pass
         return render(request, 'index.html', {
         })
 
@@ -62,7 +58,6 @@ class Search(View):
 
         search_filter = SearchFilter()
         search_filter.session_id = request.session.session_key
-        # queryId = datetime.now()
         queryId = str(time.time()).replace('.', '')
         search_filter.time = queryId
         search_filter.filterPara = str(para)
@@ -98,13 +93,12 @@ class Search(View):
             page = 1
         p = Paginator(all_articles, 12, request=request)
         articles = p.page(page)
-
-        return render(request, 'index.html', {
+        search_filter.update({
             'all_articles': articles,
-            # 'search_type': search_type,
-            # 'keywords': txt_2_value1,
             'result_count': result_count
         })
+
+        return render(request, 'index.html', search_filter)
 
     @staticmethod
     def get_query_set(search_filter):
@@ -126,8 +120,10 @@ class Search(View):
 
             txt_2_sel_dic = {  # CNKI_AND CNKI_OR
                 "SU": (Q(title__icontains=txt_2_value1), Q(title__icontains=txt_2_value2)),  # 标题
-                "KY": (Q(detail_keywords__icontains=txt_2_value1), Q(detail_keywords__icontains=txt_2_value2)),  # 关键词
-                "AB": (Q(detail_abstract__icontains=txt_2_value1), Q(detail_abstract__icontains=txt_2_value2)),  # 摘要
+                "KY": (Q(detail__detail_keywords__icontains=txt_2_value1),
+                       Q(detail__detail_keywords__icontains=txt_2_value2)),  # 关键词
+                "AB": (Q(detail__detail_abstract__icontains=txt_2_value1),
+                       Q(detail__detail_abstract__icontains=txt_2_value2)),  # 摘要
                 "CLC$=|?": (Q(issn_number=txt_2_value1), Q(issn_number=txt_2_value1))  # 中图分类号
             }
             org_id = Organization.objects.filter(organization_name__icontains=org_1_value)[0]
@@ -151,13 +147,13 @@ class Search(View):
 
             if txt_2_relation == 'CNKI_AND':
                 all_articles = Summary.objects.filter(
-                    (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel)
+                    (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel, source__mark=True)
             elif txt_2_relation == 'CNKI_OR':
                 all_articles = Summary.objects.filter(
-                    (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel)
+                    (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel, source__mark=True)
             elif txt_2_relation == 'CNKI_NOT':
                 all_articles = Summary.objects.filter(
-                    txt_2_sel_dic[txt_2_sel][0] & else_sel
+                    txt_2_sel_dic[txt_2_sel][0] & else_sel, source__mark=True
                 ).exclude(txt_2_sel_dic[txt_2_sel][1])
             else:
                 response = render_to_response('404.html', {})
