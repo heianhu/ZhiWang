@@ -102,7 +102,7 @@ def write_to_excel(getdetailinfo_id):
 
     # 保存并返回下载
     filename = '{0}.xlsx'.format(article_detail.detail_id)
-    wb.save('media/' + filename)
+    wb.save('media/excel/single/' + filename)
     return filename
 
 
@@ -115,11 +115,11 @@ def compress_excel(ids):
     files = []
     for id in ids:
         filename = write_to_excel(id)
-        files.append('media/{0}'.format(filename))
+        files.append('media/excel/single/{0}'.format(filename))
 
     timestamp = str(time.time()).replace('.', '')
     zip_name = '{0}.zip'.format(timestamp)
-    jungle_zip = zipfile.ZipFile('media/{0}'.format(zip_name), 'w')
+    jungle_zip = zipfile.ZipFile('media/excel/{0}'.format(zip_name), 'w')
     for file in files:
         jungle_zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
     jungle_zip.close()
