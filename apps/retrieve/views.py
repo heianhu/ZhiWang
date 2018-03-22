@@ -11,7 +11,7 @@ from django.http import HttpResponse, FileResponse, JsonResponse, HttpResponseRe
 from django.utils.http import urlquote
 from django.http import Http404
 import json
-import time
+import time, os
 import datetime
 from retrieve.utils import write_to_excel, compress_excel
 
@@ -179,7 +179,7 @@ class GetDetailInfo(View):
             response = render_to_response('404.html', {})
             response.status_code = 404
             return response
-        file = open('media/{0}'.format(filename), 'rb')
+        file = open('media/excel/single/{0}'.format(filename), 'rb')
         response = FileResponse(file)
 
         response['Content-Type'] = 'application/octet-stream'
@@ -216,11 +216,13 @@ class DownloadZip(View):
         :param zip_name: 不带后缀的zip文件名
         :return: 文件流
         """
-        zip_name = 'media/{0}.zip'.format(zip_name)
-        file = open(zip_name, 'rb')
+
+        # 将勾选下载的压缩包归档到select文件夹
+        os.rename('media/excel/{0}.zip'.format(zip_name),'media/excel/select/{0}.zip'.format(zip_name))
+        file = open('media/excel/select/{0}.zip'.format(zip_name), 'rb')
         response = FileResponse(file)
         response['Content-Type'] = 'application/octet-stream'
-        response['Content-Disposition'] = 'attachment;filename="{}"'.format(urlquote(zip_name))
+        response['Content-Disposition'] = 'attachment;filename="{}"'.format(urlquote('downloadfile.zip'))
 
         return response
 
@@ -233,10 +235,14 @@ class DownloadAll(View):
         :param query_id: 由查询条件生成的queryid
         :return:
         """
+
         session_id = request.session.session_key
 
         try:
             search_filter = SearchFilter.objects.get(time=query_id, session_id=session_id)
+            # 将搜索条件哈希，作为zip文件名
+            hash_str = hash(search_filter.filterPara)
+
         except KeyError:
             response = render_to_response('404.html', {})
             response.status_code = 404
@@ -244,16 +250,24 @@ class DownloadAll(View):
 
         search_filter = eval(search_filter.filterPara)
 
-        all_articles = Search.get_query_set(search_filter)
+        hash_filename = '{0}.zip'.format(hash_str)
 
-        ids = all_articles.values_list("id")
-        ids = map(lambda x: x[0], ids)
-        zip_name = compress_excel(ids)
+        # zip文件未生成过,如果生成过了直接返回该文件
+        if not os.path.isfile('media/excel/all/{0}'.format(hash_filename)):
+            all_articles = Search.get_query_set(search_filter)
 
-        file = open('media/{0}'.format(zip_name), 'rb')
+            ids = all_articles.values_list("id")
+            # values_list返回的是单元素的元组构成的列表:[(123,),(456,)]，对其每个元素取第一项
+            ids = map(lambda x: x[0], ids)
+            zip_name = compress_excel(ids)
+
+            # 将按时间戳生成的zip文件名改为按searchfilter哈希结果的文件名,并归档到all文件夹中
+            os.rename('media/excel/{0}'.format(zip_name), 'media/excel/all/{0}'.format(hash_filename))
+
+        file = open('media/excel/all/{0}'.format(hash_filename), 'rb')
         response = FileResponse(file)
 
         response['Content-Type'] = 'application/octet-stream'
-        response['Content-Disposition'] = 'attachment;filename="{}"'.format(urlquote(zip_name))
+        response['Content-Disposition'] = 'attachment;filename="{}"'.format(urlquote('downloadfile.zip'))
 
         return response
