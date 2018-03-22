@@ -52,11 +52,12 @@ class CrawlCnkiSummary(object):
 
         if self.use_Chrome:
             # 使用Chrome
-            chrome_options = Options()
             # 设置Chrome无界面化
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--disable-gpu')
-            driver = webdriver.Chrome(chrome_options=chrome_options)  # 指定使用的浏览器，初始化webdriver
+            # chrome_options = Options()
+            # chrome_options.add_argument('--headless')
+            # chrome_options.add_argument('--disable-gpu')
+            # driver = webdriver.Chrome(chrome_options=chrome_options)  # 指定使用的浏览器，初始化webdriver
+            driver = webdriver.Chrome()  # 指定使用的浏览器，初始化webdriver
         else:
             desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
             desired_capabilities["phantomjs.page.settings.userAgent"] = \
@@ -70,9 +71,13 @@ class CrawlCnkiSummary(object):
         select = Select(driver.find_element_by_id('magazine_special1'))  # 通过Select来定义该元素是下拉框
         select.select_by_index(1)  # 通过下拉元素的位置来选择
         elem.send_keys(Keys.RETURN)  # 相当于回车键，提交
-        time.sleep(3)
+        time.sleep(2)
         driver.get(
             url=self._root_url + '/kns/brief/brief.aspx?curpage=1&RecordsPerPage=20&QueryID=20&ID=&turnpage=1&dbPrefix=CJFQ&PageName=ASP.brief_result_aspx#J_ORDER&')
+        # 根据时间排序
+        driver.find_elements_by_class_name("Btn5")[1].click()
+        time.sleep(2)
+
         t_selector = Selector(text=driver.page_source)
         pagenums = t_selector.css('.countPageMark::text').extract()
         try:
@@ -83,9 +88,7 @@ class CrawlCnkiSummary(object):
 
         have_done = 0  # 监测是否已经提取过该概览
         for i in range(1, pagenums + 1):
-            if have_done > 5:
-                # 如果有5个连续的url已重复表示之后的也都有收录过了
-                break
+
             print(keyword.issn_number + ":" + str(i))
             # 遍历每一页
             driver.get(
@@ -96,6 +99,10 @@ class CrawlCnkiSummary(object):
             summarys = t_selector.css('.GridTableContent tr')[1:]
             # 获取每一个细节
             for i in summarys:
+                if have_done >= 5:
+                    # 如果有5个连续的url已重复表示之后的也都有收录过了
+                    driver.quit()
+                    return
                 url = i.css('.fz14::attr(href)').extract()[0]
 
                 # 改成正常的url
@@ -106,6 +113,7 @@ class CrawlCnkiSummary(object):
                 filename = re.search('filename=((.*?))&', url).group(1)
                 dbname = re.search('dbname=((.*?))&', url).group(1)
                 have_url = Summary.objects.filter(Q(url__icontains=filename) & Q(url__icontains=dbname))
+                print(have_done)
                 if have_url:
                     # 如果有收录过该url，则跳过本次，计数器+1
                     have_done += 1
