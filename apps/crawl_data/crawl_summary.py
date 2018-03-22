@@ -15,6 +15,7 @@ from datetime import datetime
 import time
 import re
 from django.db.models import Q
+from django.db import IntegrityError
 
 pathname = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.extend([pathname, ])
@@ -32,14 +33,26 @@ class CrawlCnkiSummary(object):
         :param use_Chrome: True使用Chrome，False使用PhantomJS
         :param executable_path: PhantomJS路径
         """
-
+        self.split_word = re.compile(r'(QueryID=0&|CurRec=\d+&|DbCode=[a-zA-Z]+&)', flags=re.I)
+        self.re_issuing_time = re.compile('((?!0000)[0-9]{4}[-/]((0[1-9]|1[0-2])[-/](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[-/](29|30)|(0[13578]|1[02])[-/]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[-/]02[-/]29)')
         self.use_Chrome = use_Chrome
         self.executable_path = executable_path
 
     def test(self):
-        summary = Summary()
-        summary.abstract = 'ok'
-        print(summary.abstract)
+        # summary = Summary()
+        # summary.abstract = 'ok'
+        # print(summary.abstract)
+        summarys = Summary.objects.all()
+        all_count = summarys.count()
+        count = 1
+        for summary in summarys:
+            print(str(count) + '/' + str(all_count))
+            count += 1
+            summary.url = self.split_word.sub('', summary.url)
+            try:
+                summary.save()
+            except IntegrityError:
+                summary.delete()
 
     def get_periodicals_summary(self, keyword):
         """
@@ -87,13 +100,13 @@ class CrawlCnkiSummary(object):
             pagenums = 1
 
         have_done = 0  # 监测是否已经提取过该概览
-        for i in range(1, pagenums + 1):
+        for num in range(1, pagenums + 1):
 
-            print(keyword.issn_number + ":" + str(i))
+            print(keyword.issn_number + ":" + str(num))
             # 遍历每一页
             driver.get(
                 self._root_url + "/kns/brief/brief.aspx?curpage={0}&RecordsPerPage=20&QueryID=20&ID=&turnpage={0}&dbPrefix=CJFQ&DisplayMode=listmode&tpagemode=L&PageName=ASP.brief_result_aspx#J_ORDER&"
-                .format(i)
+                .format(num)
             )
             t_selector = Selector(text=driver.page_source)
             summarys = t_selector.css('.GridTableContent tr')[1:]
@@ -108,12 +121,10 @@ class CrawlCnkiSummary(object):
                 # 改成正常的url
                 url = url.split('/kns')[-1]
                 url = 'http://kns.cnki.net/KCMS' + url
-
+                url = ''.join(url.split())  # 有些url中含有空格
+                url = self.split_word.sub('', url)
                 # 查询是否已经有该url
-                filename = re.search('filename=((.*?))&', url).group(1)
-                dbname = re.search('dbname=((.*?))&', url).group(1)
-                have_url = Summary.objects.filter(Q(url__icontains=filename) & Q(url__icontains=dbname))
-                print(have_done)
+                have_url = Summary.objects.filter(url=url)
                 if have_url:
                     # 如果有收录过该url，则跳过本次，计数器+1
                     have_done += 1
@@ -133,9 +144,7 @@ class CrawlCnkiSummary(object):
                     authors = authors[:255]
                 # source = i.css('.cjfdyxyz a::text').extract()[0]
                 issuing_time = i.css('.cjfdyxyz + td::text').extract()[0]
-                issuing_time = re.search(
-                    '((?!0000)[0-9]{4}[-/]((0[1-9]|1[0-2])[-/](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[-/](29|30)|(0[13578]|1[02])[-/]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[-/]02[-/]29)',
-                    issuing_time)
+                issuing_time = self.re_issuing_time.search(issuing_time)
                 if issuing_time is None:
                     issuing_time = '1900-01-01'
                 else:
