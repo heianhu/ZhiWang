@@ -4,13 +4,14 @@ from django.db.models import Q  # 数据库中用多操作
 import re
 
 from crawl_data.models import Summary, Periodicals, Detail
-from items import DetailItem, ReferencesCJFQItem, ReferencesCMFDItem, ReferencesCDFDItem, ReferencesCBBDItem, \
+from crawl_data.crawl_ZhiWang_Periodicals.crawl_ZhiWang_Periodicals.items import DetailItem, ReferencesCJFQItem, ReferencesCMFDItem, ReferencesCDFDItem, ReferencesCBBDItem, \
     ReferencesSSJDItem, ReferencesCRLDENGItem, ReferencesItem, ReferencesCCNDItem, ReferencesCPFDItem
 from crawl_data.models import ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD, ReferencesCBBD, ReferencesSSJD, \
     ReferencesCRLDENG, References, ReferencesCCND, ReferencesCPFD
 
 
 class CrawlDetailSpider(scrapy.Spider):
+    _re_filename = re.compile('filename=((.*?))&')
     name = 'crawl_detail'
     header = {
         'Host': 'kns.cnki.net',
@@ -25,6 +26,8 @@ class CrawlDetailSpider(scrapy.Spider):
         """
         periodicals = Periodicals.objects.filter(mark=True)  # 找到标记的期刊
         summarys = Summary.objects.filter(Q(have_detail=False) & Q(source__in=periodicals))  # 标记且没有爬去过的
+        # periodicals = Periodicals.objects.filter(issn_number='1004-6577')  # 找到指定的期刊
+        summarys = Summary.objects.filter(Q(have_detail=False) & Q(source__in=periodicals))  # 标记且没有爬去过的
         print(summarys.count())
         count = 0
         for summary in summarys:
@@ -32,7 +35,7 @@ class CrawlDetailSpider(scrapy.Spider):
             count += 1
             # 去重
             # 有些文章在不同的期刊中投放了两次，导致之前爬去过，现在又来了一遍，只要将这次的summary指向之前的detail即可
-            paper_id = re.search('filename=((.*?))&', summary.url).group(1)  # 文章ID Detail.detail_id
+            paper_id = self._re_filename.search(summary.url).group(1)  # 文章ID Detail.detail_id
             detail = Detail.objects.filter(detail_id=paper_id)
             if detail:
                 print('Duplicate')
@@ -244,7 +247,6 @@ class CrawlDetailSpider(scrapy.Spider):
         :param response:
         :return:
         """
-
         detail = response.meta.get('detail')
         cur_page = response.meta.get('cur_page')
         references_url = response.url.split('page=')[0] + 'page=' + str(cur_page + 1)
@@ -491,7 +493,7 @@ class CrawlDetailSpider(scrapy.Spider):
             # print('CCND_list:', CCND_list)
             # print('CPFD_list:', CPFD_list)
 
-            if len(CDFD_list + CMFD_list + CBBD_list + SSJD_list + CRLDENG_list + CCND_list + CPFD_list) == 0:
+            if len(CJFQ_list + CDFD_list + CMFD_list + CBBD_list + SSJD_list + CRLDENG_list + CCND_list + CPFD_list) == 0:
                 references = References.objects.filter(id=76438)[0]
             else:
                 references = References()
@@ -502,6 +504,7 @@ class CrawlDetailSpider(scrapy.Spider):
                 references.SSJD = ' '.join(SSJD_list)
                 references.CRLDENG = ' '.join(CRLDENG_list)
                 references.CCND = ' '.join(CCND_list)
+                references.CJFQ = ' '.join(CJFQ_list)
                 references.save()
             detail.references = references
             detail.save()
