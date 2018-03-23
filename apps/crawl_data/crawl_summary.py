@@ -21,7 +21,7 @@ pathname = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 sys.path.extend([pathname, ])
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ZhiWang.settings")
 application = get_wsgi_application()
-from crawl_data.models import Summary, Periodicals
+from crawl_data.models import Summary, Periodicals, References
 
 
 class CrawlCnkiSummary(object):
@@ -34,25 +34,27 @@ class CrawlCnkiSummary(object):
         :param executable_path: PhantomJS路径
         """
         self.split_word = re.compile(r'(QueryID=0&|CurRec=\d+&|DbCode=[a-zA-Z]+&)', flags=re.I)
-        self.re_issuing_time = re.compile('((?!0000)[0-9]{4}[-/]((0[1-9]|1[0-2])[-/](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[-/](29|30)|(0[13578]|1[02])[-/]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[-/]02[-/]29)')
+        self.re_issuing_time = re.compile(
+            '((?!0000)[0-9]{4}[-/]((0[1-9]|1[0-2])[-/](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[-/](29|30)|(0[13578]|1[02])[-/]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[-/]02[-/]29)')
         self.use_Chrome = use_Chrome
         self.executable_path = executable_path
 
     def test(self):
-        # summary = Summary()
-        # summary.abstract = 'ok'
-        # print(summary.abstract)
-        summarys = Summary.objects.all()
-        all_count = summarys.count()
-        count = 1
-        for summary in summarys:
-            print(str(count) + '/' + str(all_count))
-            count += 1
-            summary.url = self.split_word.sub('', summary.url)
-            try:
-                summary.save()
-            except IntegrityError:
-                summary.delete()
+        summary = Summary()
+        summary.abstract = 'ok'
+        print(summary.abstract)
+
+        # summarys = Summary.objects.all()
+        # all_count = summarys.count()
+        # count = 1
+        # for summary in summarys:
+        #     print(str(count) + '/' + str(all_count))
+        #     count += 1
+        #     summary.url = ''.join(summary.url.split())
+        #     try:
+        #         summary.save()
+        #     except IntegrityError:
+        #         summary.delete()
 
     def get_periodicals_summary(self, keyword):
         """
@@ -66,11 +68,11 @@ class CrawlCnkiSummary(object):
         if self.use_Chrome:
             # 使用Chrome
             # 设置Chrome无界面化
-            # chrome_options = Options()
-            # chrome_options.add_argument('--headless')
-            # chrome_options.add_argument('--disable-gpu')
-            # driver = webdriver.Chrome(chrome_options=chrome_options)  # 指定使用的浏览器，初始化webdriver
-            driver = webdriver.Chrome()  # 指定使用的浏览器，初始化webdriver
+            chrome_options = Options()
+            chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--disable-gpu')
+            driver = webdriver.Chrome(chrome_options=chrome_options)  # 指定使用的浏览器，初始化webdriver
+            # driver = webdriver.Chrome()  # 指定使用的浏览器，初始化webdriver
         else:
             desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
             desired_capabilities["phantomjs.page.settings.userAgent"] = \
@@ -169,15 +171,18 @@ class CrawlCnkiSummary(object):
                 summary.save()
         driver.quit()
 
-    def crawl_periodicals_summary(self, start_num=0, mark=False):
+    def crawl_periodicals_summary(self, *args, start_num=0, mark=False, issn_number=0):
         """
         爬取期刊概览内容
         :param start_num: periodicals中ID-1
         :param mark: 若mark为True，则爬取数据库中标记(mark=true)的期刊概览内容，False则爬取全部期刊概览内容
+        :param issn_number: issn号
         :return:
         """
         if mark:
             keywords = Periodicals.objects.filter(mark=True)[start_num:]
+        elif issn_number:
+            keywords = Periodicals.objects.filter(issn_number=issn_number)
         else:
             keywords = Periodicals.objects.all()[start_num:]
         count = start_num
