@@ -27,7 +27,7 @@ class RepairReferencesSpider(scrapy.Spider):
         """
         references = References.objects.filter(CJFQ='', CDFD='', CMFD='', CBBD='', SSJD='', CRLDENG='', CCND='',
                                                CPFD='')  # 找到全是空白的数据
-        details = Detail.objects.filter(references__in=references)
+        details = Detail.objects.filter(references__in=references)[19263:]
         # details = Detail.objects.filter(id=306539)
         print(details.count())
         count = 1
@@ -398,7 +398,7 @@ class RepairReferencesSpider(scrapy.Spider):
 
         if page > cur_page:
             # 网页+1继续获取信息
-            yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
+            yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse,
                                  meta={'detail': detail, 'cur_page': cur_page + 1,
                                        'CJFQ_list': CJFQ_list, 'CDFD_list': CDFD_list, 'CMFD_list': CMFD_list,
                                        'CBBD_list': CBBD_list, 'SSJD_list': SSJD_list, 'CRLDENG_list': CRLDENG_list,
