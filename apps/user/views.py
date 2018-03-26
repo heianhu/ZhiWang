@@ -52,7 +52,7 @@ class LoginView(View):
 
     def get(self, request):
         login_form = LoginForm()
-        return render(request, 'login.html', {'login_form': login_form})
+        return render(request, 'login.html', {'form': login_form})
 
     def post(self, request):
         login_form = LoginForm(request.POST)
@@ -66,10 +66,10 @@ class LoginView(View):
                     return redirect('index')
                 else:
                     login_form.add_error(None, error='用户未激活!')
-                    return render(request, 'login.html', {'login_form': login_form})
+                    return render(request, 'login.html', {'form': login_form})
             else:
                 login_form.add_error(None, error='用户名或密码错误!')
-                return render(request, 'login.html', {'login_form': login_form})
+                return render(request, 'login.html', {'form': login_form})
 
         else:
-            return render(request, 'login.html', {'login_form': login_form})
+            return render(request, 'login.html', {'form': login_form})
