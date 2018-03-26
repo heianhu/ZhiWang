@@ -39,7 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crawl_data',
-    'retrieve'
+    'retrieve',
+    'user',
+    'captcha',  # django-simple-captcha  验证码插件
+
 ]
 
 MIDDLEWARE = [
@@ -78,6 +81,8 @@ WSGI_APPLICATION = 'ZhiWang.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = mysettings.DATABASES
+
+AUTH_USER_MODEL = 'user.UserProfile'
 
 
 # Password validation
