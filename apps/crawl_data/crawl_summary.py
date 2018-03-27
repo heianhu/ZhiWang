@@ -44,19 +44,7 @@ class CrawlCnkiSummary(object):
         summary.abstract = 'ok'
         print(summary.abstract)
 
-        # summarys = Summary.objects.all()
-        # all_count = summarys.count()
-        # count = 1
-        # for summary in summarys:
-        #     print(str(count) + '/' + str(all_count))
-        #     count += 1
-        #     summary.url = ''.join(summary.url.split())
-        #     try:
-        #         summary.save()
-        #     except IntegrityError:
-        #         summary.delete()
-
-    def get_periodicals_summary(self, keyword):
+    def get_periodicals_summary(self, keyword, *args, first=True):
         """
         获取期刊概览
         因为在url中不能调用排序功能，所以目前只能拿到前6000个
@@ -90,7 +78,15 @@ class CrawlCnkiSummary(object):
         driver.get(
             url=self._root_url + '/kns/brief/brief.aspx?curpage=1&RecordsPerPage=20&QueryID=20&ID=&turnpage=1&dbPrefix=CJFQ&PageName=ASP.brief_result_aspx#J_ORDER&')
         # 根据时间排序
-        driver.find_elements_by_class_name("Btn5")[1].click()
+        if first:
+            # 第一次来先将时间由新到旧排序
+            driver.find_elements_by_class_name("Btn5")[1].click()
+        else:
+            # 第二次来将时间由旧到新排序
+            driver.find_elements_by_class_name("Btn5")[1].click()
+            time.sleep(1)
+            driver.find_elements_by_class_name("Btn5")[1].click()
+
         time.sleep(2)
 
         t_selector = Selector(text=driver.page_source)
@@ -190,3 +186,4 @@ class CrawlCnkiSummary(object):
             count += 1
             print(count, i.issn_number)
             self.get_periodicals_summary(i)
+            self.get_periodicals_summary(i, first=False)
