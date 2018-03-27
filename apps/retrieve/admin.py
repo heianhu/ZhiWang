@@ -1,3 +1,13 @@
 from django.contrib import admin
 
-# Register your models here.
+from django.contrib import admin
+
+from .models import SearchFilter
+
+
+class SearchFilterAdmin(admin.ModelAdmin):
+
+    list_display = ['username', 'filterPara', 'time']
+
+
+admin.site.register(SearchFilter, SearchFilterAdmin)  # 将其注册

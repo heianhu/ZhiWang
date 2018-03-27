@@ -50,8 +50,14 @@ class Search(View):
             au_special=request.POST.get('au_special', ''),  # 作者模糊/精准
             org_1_value=request.POST.get('org_1_value', ''),  # 组织
             org_1_special2=request.POST.get('org_1_special2', ''),  # 组织模糊/精准
-            publishdate_from=request.POST.get('publishdate_from', ''),  # 起始年
-            publishdate_to=request.POST.get('publishdate_to', ''),  # 截止年
+            # 出版日期合在一个input中传入了
+            publishdate=request.POST.get('publishdate', ''),
+
+            # publishdate_from = request.POST.get('publishdate', '').split(' - ')[0],
+            # publishdate_to = request.POST.get('publishdate', '').split(' - ')[1],
+
+            # publishdate_from=request.POST.get('publishdate_from', ''),  # 起始年
+            # publishdate_to=request.POST.get('publishdate_to', ''),  # 截止年
             magazine_value1=request.POST.get('magazine_value1', ''),  # 文献来源输入框
             magazine_special=request.POST.get('magazine_special', '')  # 文献模糊/精准
         )
@@ -114,8 +120,10 @@ class Search(View):
             txt_2_value2 = search_filter.get('txt_2_value2', '')
             au_1_value1 = search_filter.get('au_1_value1', '')
             org_1_value = search_filter.get('org_1_value', '')
-            publishdate_from = search_filter.get('publishdate_from', '')
-            publishdate_to = search_filter.get('publishdate_to', '')
+            # 出版日期合在一个input中传入了
+            publishdate = search_filter.get('publishdate', '')
+            # publishdate_from = search_filter.get('publishdate_from', '')
+            # publishdate_to = search_filter.get('publishdate_to', '')
             magazine_value1 = search_filter.get('magazine_value1', '')
 
             txt_2_sel_dic = {  # CNKI_AND CNKI_OR
@@ -129,13 +137,23 @@ class Search(View):
             org_id = Organization.objects.filter(organization_name__icontains=org_1_value)[0]
             org_id = str(org_id.id)
 
-            if publishdate_from and publishdate_to:
-                publishdate_from = publishdate_from.split('-')
-                date_from = datetime.datetime(int(publishdate_from[0]), int(publishdate_from[1]),
-                                              int(publishdate_from[2]), 0, 0)
-                publishdate_to = publishdate_to.split('-')
-                date_to = datetime.datetime(int(publishdate_to[0]), int(publishdate_to[1]), int(publishdate_to[2]),
+            if publishdate:
+                # publishdate_from = publishdate_from.split('-')
+                # date_from = datetime.datetime(int(publishdate_from[0]), int(publishdate_from[1]),
+                #                               int(publishdate_from[2]), 0, 0)
+                # publishdate_to = publishdate_to.split('-')
+                # date_to = datetime.datetime(int(publishdate_to[0]), int(publishdate_to[1]), int(publishdate_to[2]),
+                #                             0, 0)
+
+                # 现在传入的时间格式是：value="03/27/2018 - 03/27/2018"
+                publishdate_from, publishdate_to = publishdate.split(' - ')
+                publishdate_from = publishdate_from.split('/')
+                publishdate_to = publishdate_to.split('/')
+                date_from = datetime.datetime(int(publishdate_from[2]), int(publishdate_from[0]),
+                                              int(publishdate_from[1]), 0, 0)
+                date_to = datetime.datetime(int(publishdate_to[2]), int(publishdate_to[0]), int(publishdate_to[1]),
                                             0, 0)
+
                 date_filter = Q(issuing_time__range=(date_from, date_to))
             else:
                 date_filter = Q()

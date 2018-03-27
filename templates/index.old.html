@@ -1,0 +1,473 @@
+<!DOCTYPE html >
+<html xmlns="http://www.w3.org/1999/xhtml">
+{% load staticfiles %}
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>国内A、B类期刊搜索</title>
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'css/result.css' %}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{% static 'css/1118houseSecond.css' %}">
+</head>
+<body>
+<div id="container">
+    <div id="hd" class="ue-clear">
+        <a href="/"><div class="logo"></div></a>
+        <div class="inputArea">
+
+            {% if request.user.is_authenticated %}
+                <a>{{ user.username }}</a>
+            {% else %}
+                <button onclick="window.location.href='{% url 'login' %}'" >登录</button>
+                <button onclick="window.location.href='{% url 'register' %}'">注册</button>
+            {% endif %}
+            <div class="l_box01">
+                <form action="{% url 'retrieve' %}" method="post">
+                    {% csrf_token %}
+                    <div class="l_adsch" id="J_search_option">
+                        <dl class="l_adsch_dl clearfix">
+                            <dt></dt>
+                            <dd>
+                                <ul class="clearfix">
+                                    <select id="txt_2_sel" name="txt_2_sel" class="selectW1">
+                                        <option value="SU" {% if txt_2_sel == 'SU' %}selected=""{% endif %}>标题</option>
+                                        <option value="KY" {% if txt_2_sel == 'KY' %}selected=""{% endif %}>关键词</option>
+                                        <option value="AB" {% if txt_2_sel == 'AB' %}selected=""{% endif %}>摘要</option>
+                                        <option value="CLC$=|?" {% if txt_2_sel == 'CLC$=|?' %}selected=""{% endif %}>中图分类号</option>
+                                    </select>
+                                    <input value="{{ txt_2_value1 }}" id="txt_2_value1" name="txt_2_value1" size="10" maxlength="120" type="text">
+                                    <select id="txt_2_relation" name="txt_2_relation">
+                                        <option value="CNKI_AND" {% if txt_2_relation == 'CNKI_AND' %}selected=""{% endif %}>并含</option>
+                                        <option value="CNKI_OR" {% if txt_2_relation == 'CNKI_OR' %}selected=""{% endif %}>或含</option>
+                                        <option value="CNKI_NOT" {% if txt_2_relation == 'CNKI_NOT' %}selected=""{% endif %}>不含</option>
+                                    </select>
+                                    <input value="{{ txt_2_value2 }}" id="txt_2_value2" name="txt_2_value2" size="10" maxlength="120" type="text">
+                                </ul>
+                            </dd>
+                        </dl>
+                        <dl class="l_adsch_dl clearfix">
+                            <dt></dt>
+                            <dd>
+                                <ul class="clearfix">
+                                    <select id="au_1_sel" name="au_1_sel" class="selectW1">
+                                        <option value="AU" selected="">作者</option>
+                                    </select>
+                                    <span class="showPlaceholder">
+                                        <input type="text" id="au_1_value1" name="au_1_value1" size="30" maxlength="120" value="{{ au_1_value1 }}">
+                                    </span>
+                                    <select id="au_special" name="au_special">
+                                        <option value="%" {% if au_special == '%' %}selected=""{% endif %}>模糊</option>
+                                        <option value="=" {% if au_special == '=' %}selected=""{% endif %}>精确</option>
+                                    </select>
+                                    <label class="sL1">作者单位：</label>
+                                    <span class="showPlaceholder">
+                                        <input type="text" id="org_1_value" name="org_1_value" size="30" maxlength="120" value="{{ org_1_value }}">
+                                    </span>
+                                    <select id="org_1_special2" name="org_1_special2" onchange="">
+                                        <option value="%" {% if org_1_special2 == '%' %}selected=""{% endif %}>模糊</option>
+                                        <option value="=" {% if org_1_special2 == '=' %}selected=""{% endif %}>精确</option>
+                                    </select>
+                                </ul>
+                            </dd>
+                        </dl>
+                        <dl class="l_adsch_dl clearfix">
+                            <dt></dt>
+                            <dd>
+                                <ul class="clearfix">
+                                    <label for="year_R">发表时间(年)：</label>
+                                    <span id="publishdate" style="">
+                                        <label>从</label>
+                                        <input name="publishdate_from" size="20" maxlength="20" value="{{ publishdate_from }}" type="text" style="">
+                                        <label>到</label>
+                                        <input name="publishdate_to" size="20" maxlength="20" value="{{ publishdate_to }}" type="text" style="">
+                                    </span>
+                                </ul>
+                            </dd>
+                        </dl>
+                        <dl class="l_adsch_dl clearfix">
+                            <dt></dt>
+                            <dd>
+                                <ul class="clearfix">
+                                    <label class="sW1">文献来源：</label>
+                                    <input id="magazine_value1" class="inputW1" value="{{ magazine_value1 }}" type="text" size="88" name="magazine_value1">
+                                    <select id="magazine_special" name="magazine_special">
+                                        <option value="%" {% if magazine_special == '%' %}selected=""{% endif %}>模糊</option>
+                                        <option value="=" {% if magazine_special == '=' %}selected=""{% endif %}>精确</option>
+                                    </select>
+                                </ul>
+                            </dd>
+                            <dd>
+                                <input id="jsSearchBtn" type="submit" value="搜索" onclick=""/>
+                            </dd>
+                        </dl>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="bd" class="ue-clear">
+        <div id="main">
+            <div class="resultArea">
+                {% if request.path|slice:'2' == '/r' and request.user.is_authenticated%}
+                <p class="resultTotal">
+                    <span class="info">找到约&nbsp;<span class="totalResult">{{ result_count }}</span>&nbsp;条结果</span><br>
+                    <span>
+                        <input id="downloadSel" type="button" value="下载已选"> </input>
+                            <form method="get" action="{% url 'retrieve:downloadall' request.GET.queryId %}">
+                                {% csrf_token %}
+                                <input id="downloadAll" type="submit" value="下载全部">
+                            </form>
+                    </span>
+                </p>
+                {% endif %}
+                <div class="resultList">
+                {# 搜索结果#}
+{#                    {% for article in all_articles %}#}
+                    {% for article in all_articles.object_list %}
+                     <div class="resultItem">
+                         <input type="checkbox" class="needDownload">
+                        <div class="result_article_title">Title: <a target="_blank" href="{{ article.url }}">{{ article.title }}</a>  </div>
+                        <div>Authors: {{ article.authors }}</div>
+                        <div><a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id  %}">下载链接 </a>  </div>
+                        <br>
+                     </div>
+                    {% endfor %}
+
+                </div>
+
+                <!-- 分页 -->
+                <div class="resultTotal">
+                    <ul class="pagination ue-clear">
+                        {% if all_articles.has_previous %}
+                            <li class="long"><a href="?{{ all_articles.previous_page_number.querystring }}">上一页</a></li>
+                        {% endif %}
+
+                        {% for page in all_articles.pages %}
+                            {% if page %}
+                                {% ifequal page all_articles.number %}
+                                    <li class=""><a>{{ page }}</a></li>
+                                {% else %}
+                                    <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
+                                {% endifequal %}
+                            {% else %}
+                                <li class="none"><a>...</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if all_articles.has_next %}
+                            <li class="long"><a href="?{{ all_articles.next_page_number.querystring }}">下一页</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div><!-- End of main -->
+    </div><!--End of bd-->
+</div>
+<div id="foot">Copyright &copy;heianhu.com 版权所有</div>
+</body>
+<script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/global.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/pagination.js' %}"></script>
+<script type="text/javascript">
+    {#var search_url = "{% url 'retrieve' %}"#}
+    {#var search_url = "/retrieve/"#}
+
+
+
+
+	$.each($('.subfieldContext'), function(i, item){
+		$(this).find('li:gt(2)').hide().end().find('li:last').show();
+	});
+
+	function removeByValue(arr, val) {
+      for(var i=0; i<arr.length; i++) {
+        if(arr[i] == val) {
+          arr.splice(i, 1);
+          break;
+        }
+      }
+    }
+	$('.subfieldContext .more').click(function(e){
+		var $more = $(this).parent('.subfieldContext').find('.more');
+		if($more.hasClass('show')){
+
+			if($(this).hasClass('define')){
+				$(this).parent('.subfieldContext').find('.more').removeClass('show').find('.text').text('自定义');
+			}else{
+				$(this).parent('.subfieldContext').find('.more').removeClass('show').find('.text').text('更多');
+			}
+			$(this).parent('.subfieldContext').find('li:gt(2)').hide().end().find('li:last').show();
+	    }else{
+			$(this).parent('.subfieldContext').find('.more').addClass('show').find('.text').text('收起');
+			$(this).parent('.subfieldContext').find('li:gt(2)').show();
+		}
+
+	});
+
+	$('.sideBarShowHide a').click(function(e) {
+		if($('#main').hasClass('sideBarHide')){
+			$('#main').removeClass('sideBarHide');
+			$('#container').removeClass('sideBarHide');
+		}else{
+			$('#main').addClass('sideBarHide');
+			$('#container').addClass('sideBarHide');
+		}
+
+    });
+	//var key_words = "java"
+	//分页
+	//$(".pagination").pagination({{ total_nums }}, {
+	//	current_page :{{ page|add:'-1' }}, //当前页码
+	//	items_per_page :10,
+	//	display_msg :true,
+	//	callback :pageselectCallback
+	//});
+	//function pageselectCallback(page_id, jq) {
+	//	window.location.href=search_url+'?q='+key_words+'&p='+page_id
+	//}
+
+	setHeight();
+	$(window).resize(function(){
+		setHeight();
+	});
+
+	function setHeight(){
+		if($('#container').outerHeight() < $(window).height()){
+			$('#container').height($(window).height()-33);
+		}
+	}
+</script>
+<script type="text/javascript">
+    $('.searchList').on('click', '.searchItem', function(){
+        $('.searchList .searchItem').removeClass('current');
+        $(this).addClass('current');
+    });
+
+    // 联想下拉显示隐藏
+    $('.searchInput').on('focus', function(){
+        $('.dataList').show()
+    });
+
+    // 联想下拉点击
+    $('.dataList').on('click', 'li', function(){
+        var text = $(this).text();
+        $('.searchInput').val(text);
+        $('.dataList').hide()
+    });
+
+    hideElement($('.dataList'), $('.searchInput'));
+</script>
+
+
+    <script>
+    var searchArr;
+    //定义一个search的，判断浏览器有无数据存储（搜索历史）
+    if(localStorage.search){
+    //如果有，转换成 数组的形式存放到searchArr的数组里（localStorage以字符串的形式存储，所以要把它转换成数组的形式）
+        searchArr= localStorage.search.split(",")
+    }else{
+    //如果没有，则定义searchArr为一个空的数组
+        searchArr = [];
+    }
+    //把存储的数据显示出来作为搜索历史
+    MapSearchArr();
+
+    function add_search(){
+        var val = $(".searchInput").val();
+        //if (val.length>=2){
+        //    //点击搜索按钮时，去重
+        //    KillRepeat(val);
+        //    //去重后把数组存储到浏览器localStorage
+        //    localStorage.search = searchArr;
+        //    //然后再把搜索内容显示出来
+        //    MapSearchArr();
+        //var search_url = "/retrieve/"
+
+        window.location.href=search_url+'?keywords='+val+"&s_type="+$(".searchItem.current").attr('data-type')
+
+    }
+
+
+
+
+    function MapSearchArr(){
+        var tmpHtml = "";
+        var arrLen = 0
+        if (searchArr.length > 6){
+            arrLen = 6
+        }else {
+            arrLen = searchArr.length
+        }
+        for (var i=0;i<arrLen;i++){
+            tmpHtml += '<li><a href="/search?q='+searchArr[i]+'">'+searchArr[i]+'</a></li>'
+        }
+        $(".mySearch .historyList").append(tmpHtml);
+    }
+    //去重
+    function KillRepeat(val){
+        var kill = 0;
+        for (var i=0;i<searchArr.length;i++){
+            if(val===searchArr[i]){
+                kill ++;
+            }
+        }
+        if(kill<1){
+            searchArr.unshift(val);
+        }else {
+            removeByValue(searchArr, val)
+            searchArr.unshift(val)
+        }
+    }
+</script>
+
+{#用ajax的搜索按钮#}
+{#<script>#}
+{#    $(function(){#}
+{#        $('#jsSearchBtn').on('click', function(){#}
+{#            $.ajax({#}
+{#                cache: false,#}
+{#                type: "POST",#}
+{#                url:"{% url 'retrieve' %}",#}
+{#                data:{#}
+{##}
+{#                    'txt_2_sel': $('#txt_2_sel').val(),{# 主题选择 #}
+{#                    'txt_2_value1': $('#txt_2_value1').val(),{# 主题输入框1 #}
+                    {#'txt_2_special1': $('#txt_2_special1').val(),{# 主题精确or模糊 #}
+{#                    'txt_2_relation':  $('#txt_2_relation').val(),{# 并行条件选择 #}
+{#                    'txt_2_value2': $('#txt_2_value2').val(),{# 主题输入框2 #}
+{#                    'au_1_sel': $('#au_1_sel').val(), {# 作者选择 #}
+{#                    'au_1_value1': $('#au_1_value1').val(),   {# 作者输入框 #}
+                    {#'au_1_special1': $('#au_1_special1').val(), {# 作者精确or模糊 #}
+                    {#'publishdate_from': $('#publishdate_from').val(),{# 发表时间 from 输入框 #}
+                    {#'publishdate_to': $('#publishdate_to').val(),{# 发表时间 to 输入框 #}
+{#                    'magazine_value1': $('#magazine_value1').val(),{# 文献来源输入框 #}
+                    {#'magazine_special1': $('#magazine_special1').val(),{# 文献来源精确or模糊 #}
+{#                },#}
+{#                async: true,#}
+{#                beforeSend:function(xhr, settings){#}
+{#            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");#}
+{#        },#}
+{#                success: function(data) {#}
+{##}
+{#                    if(data.status == 'success'){#}
+{#                        alert('success!');#}
+                        {#var title = data[0]['title'];#}
+
+{##}
+{#                        $('.totalResult').html(data.result_count)#}
+{##}
+{#                        $(".resultItem").remove();#}
+{#                        $.each(data.data, function( index, value ) {#}
+{##}
+{#                            $('.resultList').append("<div class=\"resultItem\">  <div class=\"result_article_title\">Title: <a target=\"_blank\" href=\"\">"+value["title"]+"</a>  </div>\n" +#}
+{#                                "                    <div>Authors:"+value["authors"]+" </div>\n" +#}
+{#                                "                    <div><a href=\""+"/retrieve/download/"+ value['id']+"\">下载链接 </a>  </div>" +#}
+{#                                "                    </div>")#}
+{#                                                   $('#downloadAll').html('下载全部')#}
+       
+{#                            });#}
+{##}
+{#                    }else if(data.status == 'fail'){#}
+
+                        {#$('#jsCompanyTips').html(data.msg)#}
+{#                        alert('fail!');#}
+{##}
+{#                    }#}
+{#                },#}
+{#            });#}
+{#        });#}
+{#    })#}
+{##}
+{#</script>#}
+
+
+{# 下载已选按钮 #}
+<script>
+    $(function(){
+
+        $('#downloadSel').on('click', function(){
+
+            var result=new Array(), ids='';
+
+            $(".resultItem").each(function(){
+                if ($(this).children('.needDownload').attr("checked")){
+                    var link = $(this).children().children('.downloadLink').attr("href")
+                    link = link.split('/').slice(3)
+                    {#alert('1');#}
+                    result.push(link );
+                }
+
+
+
+            });
+
+            var ids=result.join(',');
+
+            if(ids==''){
+
+                alert('没有选中任何选项！');
+
+                return false;
+
+            }
+
+
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url:"{% url 'retrieve:downloadSel' %}",
+                data:{
+                    ids:ids
+                },
+                async: true,
+                beforeSend:function(xhr, settings){
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function(data) {
+                    if(data.status == 'success'){
+                        alert('开始下载!');
+                        window.location.href='downloadzip/' + data.data
+                    }else if(data.status == 'fail'){
+                        alert('fail!');
+                    }
+
+                },
+            });
+        })
+    })
+
+</script>
+
+
+{# 下载全部按钮 #}
+{#<script>#}
+{#    $(function(){#}
+{##}
+{#        $('#').on('click', function(){#}
+{#            var queryid = getUrlParam('queryid');#}
+{#            $.ajax({#}
+{#                cache: false,#}
+{#                type: "POST",#}
+{#                url:"",#}
+{##}
+{#                data:{#}
+{#                    queryid:queryid#}
+{#                },#}
+{#                async: true,#}
+{#                beforeSend:function(xhr, settings){#}
+{#                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");#}
+{#                },#}
+{#                success: function(data) {#}
+{#                    if(data.status == 'success'){#}
+{#                        alert('开始下载!');#}
+{#                        window.location.href='downloadzip/' + data.data#}
+{#                    }else if(data.status == 'fail'){#}
+{#                        alert('fail!');#}
+{#                    }#}
+{##}
+{#                },#}
+{#            });#}
+{#        })#}
+{#    })#}
+{##}
+{#</script>#}
+</html>

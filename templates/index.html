@@ -1,141 +1,536 @@
-<!DOCTYPE html >
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 {% load staticfiles %}
-<head>
-    <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>国内A、B类期刊搜索</title>
-    <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
-    <link href="{% static 'css/result.css' %}" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="{% static 'css/1118houseSecond.css' %}">
-</head>
-<body>
-<div id="container">
-    <div id="hd" class="ue-clear">
-        <a href="/"><div class="logo"></div></a>
-        <div class="inputArea">
 
-            {% if request.user.is_authenticated %}
-                <a>{{ user.username }}</a>
-            {% else %}
-                <button onclick="window.location.href='{% url 'login' %}'" >登录</button>
-                <button onclick="window.location.href='{% url 'register' %}'">注册</button>
-            {% endif %}
-            <div class="l_box01">
-                <form action="{% url 'retrieve' %}" method="post">
-                    {% csrf_token %}
-                    <div class="l_adsch" id="J_search_option">
-                        <dl class="l_adsch_dl clearfix">
-                            <dt></dt>
-                            <dd>
-                                <ul class="clearfix">
-                                    <select id="txt_2_sel" name="txt_2_sel" class="selectW1">
-                                        <option value="SU" {% if txt_2_sel == 'SU' %}selected=""{% endif %}>标题</option>
-                                        <option value="KY" {% if txt_2_sel == 'KY' %}selected=""{% endif %}>关键词</option>
-                                        <option value="AB" {% if txt_2_sel == 'AB' %}selected=""{% endif %}>摘要</option>
-                                        <option value="CLC$=|?" {% if txt_2_sel == 'CLC$=|?' %}selected=""{% endif %}>中图分类号</option>
-                                    </select>
-                                    <input value="{{ txt_2_value1 }}" id="txt_2_value1" name="txt_2_value1" size="10" maxlength="120" type="text">
-                                    <select id="txt_2_relation" name="txt_2_relation">
-                                        <option value="CNKI_AND" {% if txt_2_relation == 'CNKI_AND' %}selected=""{% endif %}>并含</option>
-                                        <option value="CNKI_OR" {% if txt_2_relation == 'CNKI_OR' %}selected=""{% endif %}>或含</option>
-                                        <option value="CNKI_NOT" {% if txt_2_relation == 'CNKI_NOT' %}selected=""{% endif %}>不含</option>
-                                    </select>
-                                    <input value="{{ txt_2_value2 }}" id="txt_2_value2" name="txt_2_value2" size="10" maxlength="120" type="text">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>国内A、B类期刊搜索</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+    <!-- Font Awesome -->
+     <link rel="stylesheet" href="{% static 'css/font-awesome/css/font-awesome.min.css' %}">
+    <!-- Ionicons -->
+     <link rel="stylesheet" href="{% static 'css/Ionicons/css/ionicons.min.css' %}">
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="{% static 'css/daterangepicker.css' %}">
+    <!-- bootstrap datepicker -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker.min.css' %}">
+    <!-- iCheck for checkboxes and radio inputs -->
+    <link rel="stylesheet" href="{% static 'css/all.css' %}">
+
+    <!-- Theme style -->
+      <link rel="stylesheet" href="{% static 'css/AdminLTE.min.css' %}">
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="{% static 'css/_all-skins.min.css' %}">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Google Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+</head>
+
+<body class="hold-transition skin-blue layout-top-nav ">
+<div class="wrapper">
+
+
+    <header class="main-header">
+        <!-- Logo -->
+        <a href="../index2.html" class="logo">
+            <!-- mini logo for sidebar mini 50x50 pixels -->
+            <span class="logo-mini"><b>A</b>LT</span>
+            <!-- logo for regular state and mobile devices -->
+            <span class="logo-lg"><b>Admin</b>LTE</span>
+        </a>
+        <!-- Header Navbar: style can be found in header.less -->
+        <nav class="navbar navbar-static-top">
+
+
+            <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
+                    <!-- Messages: style can be found in dropdown.less-->
+                    <li class="dropdown messages-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-envelope-o"></i>
+                            <span class="label label-success">4</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="header">You have 4 messages</li>
+                            <li>
+                                <!-- inner menu: contains the actual data -->
+                                <ul class="menu">
+                                    <li><!-- start message -->
+                                        <a href="#">
+                                            <div class="pull-left">
+                                                <img src="../dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+                                            </div>
+                                            <h4>
+                                                Support Team
+                                                <small><i class="fa fa-clock-o"></i> 5 mins</small>
+                                            </h4>
+                                            <p>Why not buy a new awesome theme?</p>
+                                        </a>
+                                    </li>
+                                    <!-- end message -->
+                                    <li>
+                                        <a href="#">
+                                            <div class="pull-left">
+                                                <img src="../dist/img/user3-128x128.jpg" class="img-circle" alt="User Image">
+                                            </div>
+                                            <h4>
+                                                AdminLTE Design Team
+                                                <small><i class="fa fa-clock-o"></i> 2 hours</small>
+                                            </h4>
+                                            <p>Why not buy a new awesome theme?</p>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="pull-left">
+                                                <img src="../dist/img/user4-128x128.jpg" class="img-circle" alt="User Image">
+                                            </div>
+                                            <h4>
+                                                Developers
+                                                <small><i class="fa fa-clock-o"></i> Today</small>
+                                            </h4>
+                                            <p>Why not buy a new awesome theme?</p>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="pull-left">
+                                                <img src="../dist/img/user3-128x128.jpg" class="img-circle" alt="User Image">
+                                            </div>
+                                            <h4>
+                                                Sales Department
+                                                <small><i class="fa fa-clock-o"></i> Yesterday</small>
+                                            </h4>
+                                            <p>Why not buy a new awesome theme?</p>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="pull-left">
+                                                <img src="../dist/img/user4-128x128.jpg" class="img-circle" alt="User Image">
+                                            </div>
+                                            <h4>
+                                                Reviewers
+                                                <small><i class="fa fa-clock-o"></i> 2 days</small>
+                                            </h4>
+                                            <p>Why not buy a new awesome theme?</p>
+                                        </a>
+                                    </li>
                                 </ul>
-                            </dd>
-                        </dl>
-                        <dl class="l_adsch_dl clearfix">
-                            <dt></dt>
-                            <dd>
-                                <ul class="clearfix">
-                                    <select id="au_1_sel" name="au_1_sel" class="selectW1">
-                                        <option value="AU" selected="">作者</option>
-                                    </select>
-                                    <span class="showPlaceholder">
-                                        <input type="text" id="au_1_value1" name="au_1_value1" size="30" maxlength="120" value="{{ au_1_value1 }}">
-                                    </span>
-                                    <select id="au_special" name="au_special">
-                                        <option value="%" {% if au_special == '%' %}selected=""{% endif %}>模糊</option>
-                                        <option value="=" {% if au_special == '=' %}selected=""{% endif %}>精确</option>
-                                    </select>
-                                    <label class="sL1">作者单位：</label>
-                                    <span class="showPlaceholder">
-                                        <input type="text" id="org_1_value" name="org_1_value" size="30" maxlength="120" value="{{ org_1_value }}">
-                                    </span>
-                                    <select id="org_1_special2" name="org_1_special2" onchange="">
-                                        <option value="%" {% if org_1_special2 == '%' %}selected=""{% endif %}>模糊</option>
-                                        <option value="=" {% if org_1_special2 == '=' %}selected=""{% endif %}>精确</option>
-                                    </select>
+                            </li>
+                            <li class="footer"><a href="#">See All Messages</a></li>
+                        </ul>
+                    </li>
+                    <!-- Notifications: style can be found in dropdown.less -->
+                    <li class="dropdown notifications-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-bell-o"></i>
+                            <span class="label label-warning">10</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="header">You have 10 notifications</li>
+                            <li>
+                                <!-- inner menu: contains the actual data -->
+                                <ul class="menu">
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-users text-aqua"></i> 5 new members joined today
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-warning text-yellow"></i> Very long description here that may not fit into the
+                                            page and may cause design problems
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-users text-red"></i> 5 new members joined
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-shopping-cart text-green"></i> 25 sales made
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-user text-light-blue"></i> You changed your username
+                                        </a>
+                                    </li>
                                 </ul>
-                            </dd>
-                        </dl>
-                        <dl class="l_adsch_dl clearfix">
-                            <dt></dt>
-                            <dd>
-                                <ul class="clearfix">
-                                    <label for="year_R">发表时间(年)：</label>
-                                    <span id="publishdate" style="">
-                                        <label>从</label>
-                                        <input name="publishdate_from" size="20" maxlength="20" value="{{ publishdate_from }}" type="text" style="">
-                                        <label>到</label>
-                                        <input name="publishdate_to" size="20" maxlength="20" value="{{ publishdate_to }}" type="text" style="">
-                                    </span>
+                            </li>
+                            <li class="footer"><a href="#">View all</a></li>
+                        </ul>
+                    </li>
+                    <!-- Tasks: style can be found in dropdown.less -->
+                    <li class="dropdown tasks-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-flag-o"></i>
+                            <span class="label label-danger">9</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="header">You have 9 tasks</li>
+                            <li>
+                                <!-- inner menu: contains the actual data -->
+                                <ul class="menu">
+                                    <li><!-- Task item -->
+                                        <a href="#">
+                                            <h3>
+                                                Design some buttons
+                                                <small class="pull-right">20%</small>
+                                            </h3>
+                                            <div class="progress xs">
+                                                <div class="progress-bar progress-bar-aqua" style="width: 20%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                                                    <span class="sr-only">20% Complete</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <!-- end task item -->
+                                    <li><!-- Task item -->
+                                        <a href="#">
+                                            <h3>
+                                                Create a nice theme
+                                                <small class="pull-right">40%</small>
+                                            </h3>
+                                            <div class="progress xs">
+                                                <div class="progress-bar progress-bar-green" style="width: 40%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                                                    <span class="sr-only">40% Complete</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <!-- end task item -->
+                                    <li><!-- Task item -->
+                                        <a href="#">
+                                            <h3>
+                                                Some task I need to do
+                                                <small class="pull-right">60%</small>
+                                            </h3>
+                                            <div class="progress xs">
+                                                <div class="progress-bar progress-bar-red" style="width: 60%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                                                    <span class="sr-only">60% Complete</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <!-- end task item -->
+                                    <li><!-- Task item -->
+                                        <a href="#">
+                                            <h3>
+                                                Make beautiful transitions
+                                                <small class="pull-right">80%</small>
+                                            </h3>
+                                            <div class="progress xs">
+                                                <div class="progress-bar progress-bar-yellow" style="width: 80%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                                                    <span class="sr-only">80% Complete</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <!-- end task item -->
                                 </ul>
-                            </dd>
-                        </dl>
-                        <dl class="l_adsch_dl clearfix">
-                            <dt></dt>
-                            <dd>
-                                <ul class="clearfix">
-                                    <label class="sW1">文献来源：</label>
-                                    <input id="magazine_value1" class="inputW1" value="{{ magazine_value1 }}" type="text" size="88" name="magazine_value1">
-                                    <select id="magazine_special" name="magazine_special">
-                                        <option value="%" {% if magazine_special == '%' %}selected=""{% endif %}>模糊</option>
-                                        <option value="=" {% if magazine_special == '=' %}selected=""{% endif %}>精确</option>
-                                    </select>
-                                </ul>
-                            </dd>
-                            <dd>
-                                <input id="jsSearchBtn" type="submit" value="搜索" onclick=""/>
-                            </dd>
-                        </dl>
-                    </div>
-                </form>
+                            </li>
+                            <li class="footer">
+                                <a href="#">View all tasks</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- User Account: style can be found in dropdown.less -->
+                    {% if request.user.is_authenticated %}
+                    <li class="dropdown user user-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+{#                            <img src="../dist/img/user2-160x160.jpg" class="user-image" alt="User Image">#}
+                            <span class="hidden-xs">{{ user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <!-- User image -->
+                            <li class="user-header">
+                                <img src="../dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+
+                                <p>
+                                    {{ user.username }}
+                                    <small>Member since Nov. 2012</small>
+                                </p>
+                            </li>
+                            <!-- Menu Body -->
+                            <li class="user-body">
+                                <div class="row">
+                                    <div class="col-xs-4 text-center">
+                                        <a href="#">Followers</a>
+                                    </div>
+                                    <div class="col-xs-4 text-center">
+                                        <a href="#">Sales</a>
+                                    </div>
+                                    <div class="col-xs-4 text-center">
+                                        <a href="#">Friends</a>
+                                    </div>
+                                </div>
+                                <!-- /.row -->
+                            </li>
+                            <!-- Menu Footer-->
+                            <li class="user-footer">
+                                <div class="pull-left">
+                                    <a href="#" class="btn btn-default btn-flat">Profile</a>
+                                </div>
+                                <div class="pull-right">
+                                    <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Control Sidebar Toggle Button -->
+                     {% else %}
+                        <li>
+                            <a href='{% url 'login' %}' >登录</a>
+                        </li>
+                        <li>
+                            <a href='{% url 'register' %}'>注册</a>
+                        </li>
+                    {% endif %}
+                    <li>
+                        <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                    </li>
+                </ul>
             </div>
-        </div>
-    </div>
-    <div id="bd" class="ue-clear">
-        <div id="main">
-            <div class="resultArea">
+        </nav>
+    </header>
+    <!-- Left side column. contains the logo and sidebar -->
+
+
+
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+
+            <h1>
+                Widgets
+                <small>Preview page</small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+                <li class="active">搜索结果</li>
+            </ol>
+
+
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+
+
+
+
+            <div class="row">
+
+                <div class="col-md-6">
+
+                    <!-- Input addon -->
+                    <div class="box box-info" _vimium-has-onclick-listener="">
+                        <form action="{% url 'retrieve' %}" method="post">
+                                                {% csrf_token %}
+
+                            <div class="box-header with-border">
+                                <h3 class="box-title">搜索条件</h3>
+                            </div>
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <div class="col-lg-6">
+
+                                        <div class="col-xs-6">
+                                            <select class="form-control" id="txt_2_sel" name="txt_2_sel">
+                                                <option value="SU" {% if txt_2_sel == 'SU' %}selected=""{% endif %}>标题</option>
+                                                <option value="KY" {% if txt_2_sel == 'KY' %}selected=""{% endif %}>关键词</option>
+                                            <option value="AB" {% if txt_2_sel == 'AB' %}selected=""{% endif %}>摘要</option>
+                                        <option value="CLC$=|?" {% if txt_2_sel == 'CLC$=|?' %}selected=""{% endif %}>中图分类号</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group">
+                                            <input value="{{ txt_2_value1 }}" id="txt_2_value1" name="txt_2_value1"  type="text" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+
+                                        <div class="col-xs-4">
+                                            <select name="txt_2_relation" class="form-control">
+                                                <option value="CNKI_AND" {% if txt_2_relation == 'CNKI_AND' %}selected=""{% endif %}>并含</option>
+                                                <option value="CNKI_OR" {% if txt_2_relation == 'CNKI_OR' %}selected=""{% endif %}>或含 </option>
+                                                <option value="CNKI_NOT" {% if txt_2_relation == 'CNKI_NOT' %}selected=""{% endif %}>不含</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group">
+                                            <input value="{{ txt_2_value2 }}" id="txt_2_value2" name="txt_2_value2" type="text" class="form-control">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+                            <div class="box-body">
+
+
+                                <div class="form-group">
+                                    <div class="col-lg-6">
+                                        <div class="col-xs-4">
+                                            <select id="au_1_sel" name="au_1_sel" class="form-control">
+                                                <option value="AU" selected="">作者</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="input-group ">
+                                            <span class="input-group-addon">
+                                              <input name="au_special"   type="checkbox">
+                                            </span>
+                                            <input value="{{ au_1_value1 }}" id="au_1_value1" name="au_1_value1" type="text" class="form-control" placeholder="作者">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+
+                                    <div class="col-xs-4">
+                                        <select  class="form-control">
+                                            <option>作者单位</option>
+                                        </select>
+                                    </div>
+                                    <div class="input-group ">
+                                        <span class="input-group-addon">
+                                          <input name="org_1_special2" type="checkbox">
+                                        </span>
+                                        <input name="org_1_value" id="org_1_value" value="{{ org_1_value }}" type="text" class="form-control" placeholder="作者单位">
+                                    </div>
+                                    </div>
+
+
+                                    </div>
+
+                            </div>
+                            <!-- /.box-body -->
+                            <div class="box-body">
+
+                                <div class="form-group">
+                                    <div class="col-lg-6">
+
+                                    <div class="input-group ">
+                                            <span class="input-group-addon">
+                                              <input name="magazine_special" type="checkbox">
+                                            </span>
+                                        <input name="magazine_value1" id="magazine_value1" type="text" value="{{ magazine_value1 }}" class="form-control" placeholder="文献来源">
+                                    </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+
+                                    <div class="input-group ">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" placeholder="发表日期" name="publishdate" value="{{ publishdate }}"  class="form-control pull-right" id="publishdate" _vimium-has-onclick-listener="">
+                                    </div>
+                                    <!-- /.input group -->
+
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+                            <div class="box-body">
+
+                                <div class="form-group">
+                                    <input id="jsSearchBtn" type="submit" class="btn btn-block btn-primary" value="搜索" onclick=""/>
+
+                                    <!-- <button type="button" class="btn btn-block btn-primary">搜索</button> -->
+
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+                        </form>
+                    </div>
+                    <!-- /.box -->
+
                 {% if request.path|slice:'2' == '/r' and request.user.is_authenticated%}
-                <p class="resultTotal">
-                    <span class="info">找到约&nbsp;<span class="totalResult">{{ result_count }}</span>&nbsp;条结果</span><br>
-                    <span>
-                        <input id="downloadSel" type="button" value="下载已选"> </input>
+                    <div class="box box-widget">
+                <div class="box-header with-border">
+
+                    <div class="box-body clearfix">
+                        <div class="col-lg-4">
+                        <p class="text-muted">约{{ result_count }}条结果，用时0秒</p>
+                        </div>
+                        <div class="col-lg-4">
+                            <button type="button" id="downloadSel" class="btn btn-block btn-default">下载已选</button>
+                        </div>
+                        <div class="col-lg-4">
                             <form method="get" action="{% url 'retrieve:downloadall' request.GET.queryId %}">
                                 {% csrf_token %}
-                                <input id="downloadAll" type="submit" value="下载全部">
+                                <input class="btn btn-block btn-default" id="downloadAll" type="submit" value="下载全部">
                             </form>
-                    </span>
-                </p>
-                {% endif %}
-                <div class="resultList">
-                {# 搜索结果#}
-{#                    {% for article in all_articles %}#}
-                    {% for article in all_articles.object_list %}
-                     <div class="resultItem">
-                         <input type="checkbox" class="needDownload">
-                        <div class="result_article_title">Title: <a target="_blank" href="{{ article.url }}">{{ article.title }}</a>  </div>
-                        <div>Authors: {{ article.authors }}</div>
-                        <div><a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id  %}">下载链接 </a>  </div>
-                        <br>
+{#                            <button type="button" class="btn btn-block btn-default">下载全部</button>#}
+                        </div>
+
                      </div>
-                    {% endfor %}
+                         <!-- /.box-body -->
+                {% endif %}
+
+
 
                 </div>
+                <!-- /.box -->
+            </div>
 
-                <!-- 分页 -->
+
+                    {# 搜索结果#}
+                    {% for article in all_articles.object_list %}
+
+                <div class="box box-widget">
+                <div class="box-header with-border">
+                <!--<div class="user-block">-->
+                <span class="username"><a href="{{ article.url }}">{{ article.title }}</a></span>
+                <span class="description"> {{ article.authors }}</span>
+                <span class="description pull-right"> {{ article.issuing_time }}</span>
+                <!--</div>-->
+
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                <!-- post text -->
+
+                <p>恢复高考制度40年来,持续推进高考改革,为国家选才、学生成长、促进社会公平、提升人力资本素质、服务国家现代化建设作出了
+                    重要的历史贡献。认识考试招生制度不能局限于教育内部联系,还要从政治经济、历史文化等方面加以认识,要从教育内外部因素的
+                    综合作用中深化认识。面向未来,考试招生制度改革要与推进国家治理体系和治理能力现代化相适应,要与高等教育普及化发展阶段
+                    相适应,要把考试内容和考试方式的改革作为主要任务。必须加深对考试招生工作规律的认识和把握,更加自觉有为地奋力建设中国
+                    特色现代考试招生制度。 </p>
+
+
+
+
+                <!-- Social sharing buttons -->
+                <a href="{% url 'retrieve:getdetailinfo' article.id  %}"><i class="fa fa-share"></i>下载链接 </a>
+                  <label> <input type="checkbox" >选择</label>
+{#                    <button type="button" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-up"></i> Like</button>#}
+                </div>
+                <!-- /.box-body -->
+
+
+                </div>
+                <!-- /.box -->
+                    {% endfor %}
+                 <!-- 分页 -->
                 <div class="resultTotal">
                     <ul class="pagination ue-clear">
                         {% if all_articles.has_previous %}
@@ -158,226 +553,76 @@
                         {% endif %}
                     </ul>
                 </div>
+
+
+
+                </div>
+                <!-- /.col -->
+
+
+
+                <div class="modal fade" id="modal-default" style="display: none;">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">×</span></button>
+                                <h4 class="modal-title">Default Modal</h4>
+                            </div>
+                            <div class="modal-body">
+                                <p>结果较多，确定下载全部？</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+
             </div>
-        </div><!-- End of main -->
-    </div><!--End of bd-->
+            <!-- /.row -->
+
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <footer class="main-footer">
+        <div class="pull-right hidden-xs">
+            <b>Version</b> 2.4.0
+        </div>
+        <strong>Copyright &copy; 2014-2016 <a href="https://adminlte.io">Almsaeed Studio</a>.</strong> All rights
+        reserved.
+    </footer>
+
 </div>
-<div id="foot">Copyright &copy;heianhu.com 版权所有</div>
-</body>
-<script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/global.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/pagination.js' %}"></script>
-<script type="text/javascript">
-    {#var search_url = "{% url 'retrieve' %}"#}
-    {#var search_url = "/retrieve/"#}
 
 
+<!-- jQuery 3 -->
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
 
+<!-- date-range-picker -->
+<script src="{% static 'js/moment.min.js' %}"></script>
+<script src="{% static 'js/daterangepicker.js' %}"></script>
 
-	$.each($('.subfieldContext'), function(i, item){
-		$(this).find('li:gt(2)').hide().end().find('li:last').show();
-	});
-
-	function removeByValue(arr, val) {
-      for(var i=0; i<arr.length; i++) {
-        if(arr[i] == val) {
-          arr.splice(i, 1);
-          break;
-        }
-      }
-    }
-	$('.subfieldContext .more').click(function(e){
-		var $more = $(this).parent('.subfieldContext').find('.more');
-		if($more.hasClass('show')){
-
-			if($(this).hasClass('define')){
-				$(this).parent('.subfieldContext').find('.more').removeClass('show').find('.text').text('自定义');
-			}else{
-				$(this).parent('.subfieldContext').find('.more').removeClass('show').find('.text').text('更多');
-			}
-			$(this).parent('.subfieldContext').find('li:gt(2)').hide().end().find('li:last').show();
-	    }else{
-			$(this).parent('.subfieldContext').find('.more').addClass('show').find('.text').text('收起');
-			$(this).parent('.subfieldContext').find('li:gt(2)').show();
-		}
-
-	});
-
-	$('.sideBarShowHide a').click(function(e) {
-		if($('#main').hasClass('sideBarHide')){
-			$('#main').removeClass('sideBarHide');
-			$('#container').removeClass('sideBarHide');
-		}else{
-			$('#main').addClass('sideBarHide');
-			$('#container').addClass('sideBarHide');
-		}
-
-    });
-	//var key_words = "java"
-	//分页
-	//$(".pagination").pagination({{ total_nums }}, {
-	//	current_page :{{ page|add:'-1' }}, //当前页码
-	//	items_per_page :10,
-	//	display_msg :true,
-	//	callback :pageselectCallback
-	//});
-	//function pageselectCallback(page_id, jq) {
-	//	window.location.href=search_url+'?q='+key_words+'&p='+page_id
-	//}
-
-	setHeight();
-	$(window).resize(function(){
-		setHeight();
-	});
-
-	function setHeight(){
-		if($('#container').outerHeight() < $(window).height()){
-			$('#container').height($(window).height()-33);
-		}
-	}
+<!-- FastClick -->
+<script src="{% static 'js/fastclick.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'js/adminlte.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'js/demo.js' %}"></script>
+<!-- Page script -->
+<script>
+    $(function () {
+        //Date range picker
+        $('#publishdate').daterangepicker()
+    })
 </script>
-<script type="text/javascript">
-    $('.searchList').on('click', '.searchItem', function(){
-        $('.searchList .searchItem').removeClass('current');
-        $(this).addClass('current');
-    });
-
-    // 联想下拉显示隐藏
-    $('.searchInput').on('focus', function(){
-        $('.dataList').show()
-    });
-
-    // 联想下拉点击
-    $('.dataList').on('click', 'li', function(){
-        var text = $(this).text();
-        $('.searchInput').val(text);
-        $('.dataList').hide()
-    });
-
-    hideElement($('.dataList'), $('.searchInput'));
-</script>
-
-
-    <script>
-    var searchArr;
-    //定义一个search的，判断浏览器有无数据存储（搜索历史）
-    if(localStorage.search){
-    //如果有，转换成 数组的形式存放到searchArr的数组里（localStorage以字符串的形式存储，所以要把它转换成数组的形式）
-        searchArr= localStorage.search.split(",")
-    }else{
-    //如果没有，则定义searchArr为一个空的数组
-        searchArr = [];
-    }
-    //把存储的数据显示出来作为搜索历史
-    MapSearchArr();
-
-    function add_search(){
-        var val = $(".searchInput").val();
-        //if (val.length>=2){
-        //    //点击搜索按钮时，去重
-        //    KillRepeat(val);
-        //    //去重后把数组存储到浏览器localStorage
-        //    localStorage.search = searchArr;
-        //    //然后再把搜索内容显示出来
-        //    MapSearchArr();
-        //var search_url = "/retrieve/"
-
-        window.location.href=search_url+'?keywords='+val+"&s_type="+$(".searchItem.current").attr('data-type')
-
-    }
-
-
-
-
-    function MapSearchArr(){
-        var tmpHtml = "";
-        var arrLen = 0
-        if (searchArr.length > 6){
-            arrLen = 6
-        }else {
-            arrLen = searchArr.length
-        }
-        for (var i=0;i<arrLen;i++){
-            tmpHtml += '<li><a href="/search?q='+searchArr[i]+'">'+searchArr[i]+'</a></li>'
-        }
-        $(".mySearch .historyList").append(tmpHtml);
-    }
-    //去重
-    function KillRepeat(val){
-        var kill = 0;
-        for (var i=0;i<searchArr.length;i++){
-            if(val===searchArr[i]){
-                kill ++;
-            }
-        }
-        if(kill<1){
-            searchArr.unshift(val);
-        }else {
-            removeByValue(searchArr, val)
-            searchArr.unshift(val)
-        }
-    }
-</script>
-
-{#用ajax的搜索按钮#}
-{#<script>#}
-{#    $(function(){#}
-{#        $('#jsSearchBtn').on('click', function(){#}
-{#            $.ajax({#}
-{#                cache: false,#}
-{#                type: "POST",#}
-{#                url:"{% url 'retrieve' %}",#}
-{#                data:{#}
-{##}
-{#                    'txt_2_sel': $('#txt_2_sel').val(),{# 主题选择 #}
-{#                    'txt_2_value1': $('#txt_2_value1').val(),{# 主题输入框1 #}
-                    {#'txt_2_special1': $('#txt_2_special1').val(),{# 主题精确or模糊 #}
-{#                    'txt_2_relation':  $('#txt_2_relation').val(),{# 并行条件选择 #}
-{#                    'txt_2_value2': $('#txt_2_value2').val(),{# 主题输入框2 #}
-{#                    'au_1_sel': $('#au_1_sel').val(), {# 作者选择 #}
-{#                    'au_1_value1': $('#au_1_value1').val(),   {# 作者输入框 #}
-                    {#'au_1_special1': $('#au_1_special1').val(), {# 作者精确or模糊 #}
-                    {#'publishdate_from': $('#publishdate_from').val(),{# 发表时间 from 输入框 #}
-                    {#'publishdate_to': $('#publishdate_to').val(),{# 发表时间 to 输入框 #}
-{#                    'magazine_value1': $('#magazine_value1').val(),{# 文献来源输入框 #}
-                    {#'magazine_special1': $('#magazine_special1').val(),{# 文献来源精确or模糊 #}
-{#                },#}
-{#                async: true,#}
-{#                beforeSend:function(xhr, settings){#}
-{#            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");#}
-{#        },#}
-{#                success: function(data) {#}
-{##}
-{#                    if(data.status == 'success'){#}
-{#                        alert('success!');#}
-                        {#var title = data[0]['title'];#}
-
-{##}
-{#                        $('.totalResult').html(data.result_count)#}
-{##}
-{#                        $(".resultItem").remove();#}
-{#                        $.each(data.data, function( index, value ) {#}
-{##}
-{#                            $('.resultList').append("<div class=\"resultItem\">  <div class=\"result_article_title\">Title: <a target=\"_blank\" href=\"\">"+value["title"]+"</a>  </div>\n" +#}
-{#                                "                    <div>Authors:"+value["authors"]+" </div>\n" +#}
-{#                                "                    <div><a href=\""+"/retrieve/download/"+ value['id']+"\">下载链接 </a>  </div>" +#}
-{#                                "                    </div>")#}
-{#                                                   $('#downloadAll').html('下载全部')#}
-       
-{#                            });#}
-{##}
-{#                    }else if(data.status == 'fail'){#}
-
-                        {#$('#jsCompanyTips').html(data.msg)#}
-{#                        alert('fail!');#}
-{##}
-{#                    }#}
-{#                },#}
-{#            });#}
-{#        });#}
-{#    })#}
-{##}
-{#</script>#}
 
 
 {# 下载已选按钮 #}
@@ -436,38 +681,5 @@
     })
 
 </script>
-
-
-{# 下载全部按钮 #}
-{#<script>#}
-{#    $(function(){#}
-{##}
-{#        $('#').on('click', function(){#}
-{#            var queryid = getUrlParam('queryid');#}
-{#            $.ajax({#}
-{#                cache: false,#}
-{#                type: "POST",#}
-{#                url:"",#}
-{##}
-{#                data:{#}
-{#                    queryid:queryid#}
-{#                },#}
-{#                async: true,#}
-{#                beforeSend:function(xhr, settings){#}
-{#                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");#}
-{#                },#}
-{#                success: function(data) {#}
-{#                    if(data.status == 'success'){#}
-{#                        alert('开始下载!');#}
-{#                        window.location.href='downloadzip/' + data.data#}
-{#                    }else if(data.status == 'fail'){#}
-{#                        alert('fail!');#}
-{#                    }#}
-{##}
-{#                },#}
-{#            });#}
-{#        })#}
-{#    })#}
-{##}
-{#</script>#}
+</body>
 </html>
