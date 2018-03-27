@@ -12,6 +12,11 @@ class SearchFilter(models.Model):
     time = models.CharField(verbose_name='时间戳', default='', max_length=20)
     filterPara = models.TextField(verbose_name='搜索条件', default='')
 
+    def __str__(self):
+        return self.username
+
+
+
     class Meta:
         verbose_name = '搜索条件'
         verbose_name_plural = verbose_name
