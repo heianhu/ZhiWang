@@ -34,13 +34,11 @@ class RegisterView(View):
             pass_word = request.POST.get('password', '')
             retype_password = request.POST.get('retype_password', '')
             if UserProfile.objects.filter(email=email):  # 检查是否已经注册过该用户
-                register_form.add_error(None, error='邮箱已存在!')
-                return render(request, 'register.html', {'register_form': register_form})
+                return render(request, 'register.html', {'register_form': register_form, 'msg': '邮箱已存在!'})
             elif UserProfile.objects.filter(nick_name=nick_name):  # 检查是否已经注册过该用户
-                register_form.add_error(None, error='用户名已存在!')
-                return render(request, 'register.html', {'register_form': register_form})
+                return render(request, 'register.html', {'register_form': register_form, 'msg': '昵称已存在!'})
             elif pass_word != retype_password:
-                return render(request, 'register.html', {'register_form': register_form})
+                return render(request, 'register.html', {'register_form': register_form, 'msg': '两次密码不一样'})
             else:
                 user_profile = UserProfile()
                 user_profile.nick_name = nick_name
@@ -58,6 +56,7 @@ class RegisterView(View):
                 # user_message.save()
                 return render(request, 'login.html')
         else:
+            print('adsf')
             return render(request, 'register.html', {'register_form': register_form})
 
 

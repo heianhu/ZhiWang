@@ -13,6 +13,8 @@ class LoginForm(forms.Form):
 
 class RegisterForm(forms.Form):
     email = forms.EmailField(required=True)
-    username = forms.CharField(required=True)
+    nick_name = forms.CharField(required=True)
     password = forms.CharField(required=True, min_length=5, widget=forms.PasswordInput)
+    retype_password = forms.CharField(required=True, min_length=5, widget=forms.PasswordInput)
+
     captcha = CaptchaField(error_messages={'invalid': '验证码错误'})
