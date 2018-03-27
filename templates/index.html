@@ -466,7 +466,7 @@
 
                 {% if request.path|slice:'2' == '/r' and request.user.is_authenticated%}
                     <div class="box box-widget">
-                <div class="box-header with-border">
+                <div class="box-header with-border resultItem">
 
                     <div class="box-body clearfix">
                         <div class="col-lg-4">
@@ -497,7 +497,7 @@
                     {# 搜索结果#}
                     {% for article in all_articles.object_list %}
 
-                <div class="box box-widget">
+                <div class="box box-widget ">
                 <div class="box-header with-border">
                 <!--<div class="user-block">-->
                 <span class="username"><a href="{{ article.url }}">{{ article.title }}</a></span>
@@ -517,12 +517,11 @@
                     特色现代考试招生制度。 </p>
 
 
+                    <div class="downloadOperation">
 
-
-                <!-- Social sharing buttons -->
-                <a href="{% url 'retrieve:getdetailinfo' article.id  %}"><i class="fa fa-share"></i>下载链接 </a>
-                  <label> <input type="checkbox" >选择</label>
-{#                    <button type="button" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-up"></i> Like</button>#}
+                        <a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id  %}"><i class="fa fa-share"></i>下载链接 </a>
+                        <label> <input  class="downloadCheckbox" type="checkbox" >选择</label>
+                    </div>
                 </div>
                 <!-- /.box-body -->
 
@@ -633,11 +632,12 @@
 
             var result=new Array(), ids='';
 
-            $(".resultItem").each(function(){
-                if ($(this).children('.needDownload').attr("checked")){
-                    var link = $(this).children().children('.downloadLink').attr("href")
+            $(".downloadOperation").each(function(){
+
+                if ($(this).find('.downloadCheckbox').is(':checked')){
+
+                    var link = $(this).find('.downloadLink').attr("href")
                     link = link.split('/').slice(3)
-                    {#alert('1');#}
                     result.push(link );
                 }
 
