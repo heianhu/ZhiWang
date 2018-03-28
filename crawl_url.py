@@ -13,6 +13,6 @@ if __name__ == '__main__':
         use_Chrome=True,
         # executable_path='/Users/heianhu/phantomjs-2.1.1-macosx/bin/phantomjs'
     )
-    # crawl_cnki_summary.crawl_periodicals_summary(mark=True)
-    crawl_cnki_summary.test()
+    crawl_cnki_summary.crawl_periodicals_summary(issn_number='1004-6577')
+    # crawl_cnki_summary.test()
     sys.exit(0)

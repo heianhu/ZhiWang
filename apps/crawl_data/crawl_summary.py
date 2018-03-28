@@ -56,11 +56,11 @@ class CrawlCnkiSummary(object):
         if self.use_Chrome:
             # 使用Chrome
             # 设置Chrome无界面化
-            chrome_options = Options()
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--disable-gpu')
-            driver = webdriver.Chrome(chrome_options=chrome_options)  # 指定使用的浏览器，初始化webdriver
-            # driver = webdriver.Chrome()  # 指定使用的浏览器，初始化webdriver
+            # chrome_options = Options()
+            # chrome_options.add_argument('--headless')
+            # chrome_options.add_argument('--disable-gpu')
+            # driver = webdriver.Chrome(chrome_options=chrome_options)  # 指定使用的浏览器，初始化webdriver
+            driver = webdriver.Chrome()  # 指定使用的浏览器，初始化webdriver
         else:
             desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
             desired_capabilities["phantomjs.page.settings.userAgent"] = \
@@ -76,19 +76,15 @@ class CrawlCnkiSummary(object):
         elem.send_keys(Keys.RETURN)  # 相当于回车键，提交
         time.sleep(2)
         driver.get(
-            url=self._root_url + '/kns/brief/brief.aspx?curpage=1&RecordsPerPage=20&QueryID=20&ID=&turnpage=1&dbPrefix=CJFQ&PageName=ASP.brief_result_aspx#J_ORDER&')
+            url=self._root_url + '/kns/brief/brief.aspx?curpage=1&RecordsPerPage=20&QueryID=20&ID=&turnpage=1&dbPrefix=CJFQ&PageName=ASP.brief_result_aspx#J_ORDER&'
+        )
         # 根据时间排序
         if first:
             # 第一次来先将时间由新到旧排序
-            driver.find_elements_by_class_name("Btn5")[1].click()
+            every_page_url = "/kns/brief/brief.aspx?curpage={0}&RecordsPerPage=20&QueryID=20&ID=&turnpage={0}&dbPrefix=CJFQ&DisplayMode=listmode&tpagemode=L&sorttype=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)+desc&PageName=ASP.brief_result_aspx#J_ORDER&"
         else:
             # 第二次来将时间由旧到新排序
-            driver.find_elements_by_class_name("Btn5")[1].click()
-            time.sleep(1)
-            driver.find_elements_by_class_name("Btn5")[1].click()
-
-        time.sleep(2)
-
+            every_page_url = "/kns/brief/brief.aspx?curpage={0}&RecordsPerPage=20&QueryID=20&ID=&turnpage={0}&dbPrefix=CJFQ&DisplayMode=listmode&tpagemode=L&sorttype=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)&PageName=ASP.brief_result_aspx#J_ORDER&"
         t_selector = Selector(text=driver.page_source)
         pagenums = t_selector.css('.countPageMark::text').extract()
         try:
@@ -99,11 +95,10 @@ class CrawlCnkiSummary(object):
 
         have_done = 0  # 监测是否已经提取过该概览
         for num in range(1, pagenums + 1):
-
             print(keyword.issn_number + ":page-" + str(num))
             # 遍历每一页
             driver.get(
-                self._root_url + "/kns/brief/brief.aspx?curpage={0}&RecordsPerPage=20&QueryID=20&ID=&turnpage={0}&dbPrefix=CJFQ&DisplayMode=listmode&tpagemode=L&PageName=ASP.brief_result_aspx#J_ORDER&"
+                self._root_url + every_page_url
                 .format(num)
             )
             t_selector = Selector(text=driver.page_source)
