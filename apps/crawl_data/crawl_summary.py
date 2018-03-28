@@ -81,10 +81,10 @@ class CrawlCnkiSummary(object):
         # 根据时间排序
         if first:
             # 第一次来先将时间由新到旧排序
-            every_page_url = "/kns/brief/brief.aspx?curpage={0}&RecordsPerPage=20&QueryID=20&ID=&turnpage={0}&dbPrefix=CJFQ&DisplayMode=listmode&tpagemode=L&sorttype=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)+desc&PageName=ASP.brief_result_aspx#J_ORDER&"
+            every_page_url = "/kns/brief/brief.aspx?{0}RecordsPerPage=20&QueryID=1&ID=&pagemode=L&dbPrefix=CJFQ&Fields=&DisplayMode=listmode&SortType=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)+desc&PageName=ASP.brief_result_aspx#J_ORDER&"
         else:
             # 第二次来将时间由旧到新排序
-            every_page_url = "/kns/brief/brief.aspx?curpage={0}&RecordsPerPage=20&QueryID=20&ID=&turnpage={0}&dbPrefix=CJFQ&DisplayMode=listmode&tpagemode=L&sorttype=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)&PageName=ASP.brief_result_aspx#J_ORDER&"
+            every_page_url = "/kns/brief/brief.aspx?{0}RecordsPerPage=20&QueryID=1&ID=&pagemode=L&dbPrefix=CJFQ&Fields=&DisplayMode=listmode&SortType=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)&PageName=ASP.brief_result_aspx#J_ORDER&"
         t_selector = Selector(text=driver.page_source)
         pagenums = t_selector.css('.countPageMark::text').extract()
         try:
@@ -96,19 +96,23 @@ class CrawlCnkiSummary(object):
         have_done = 0  # 监测是否已经提取过该概览
         for num in range(1, pagenums + 1):
             print(keyword.issn_number + ":page-" + str(num))
+            curr_page = "curpage={0}&turnpage={0}&".format(num)
+            if num == 1:
+                page_url = every_page_url.format('')
+            else:
+                page_url = every_page_url.format(curr_page)
             # 遍历每一页
             driver.get(
-                self._root_url + every_page_url
-                .format(num)
+                self._root_url + page_url
             )
             t_selector = Selector(text=driver.page_source)
             summarys = t_selector.css('.GridTableContent tr')[1:]
             # 获取每一个细节
             for i in summarys:
-                if have_done >= 5:
-                    # 如果有5个连续的url已重复表示之后的也都有收录过了
-                    driver.quit()
-                    return
+                # if have_done >= 5:
+                #     # 如果有5个连续的url已重复表示之后的也都有收录过了
+                #     driver.quit()
+                #     return
                 url = i.css('.fz14::attr(href)').extract()[0]
 
                 # 改成正常的url
