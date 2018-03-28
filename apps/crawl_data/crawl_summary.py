@@ -100,7 +100,7 @@ class CrawlCnkiSummary(object):
         have_done = 0  # 监测是否已经提取过该概览
         for num in range(1, pagenums + 1):
 
-            print(keyword.issn_number + ":" + str(num))
+            print(keyword.issn_number + ":page-" + str(num))
             # 遍历每一页
             driver.get(
                 self._root_url + "/kns/brief/brief.aspx?curpage={0}&RecordsPerPage=20&QueryID=20&ID=&turnpage={0}&dbPrefix=CJFQ&DisplayMode=listmode&tpagemode=L&PageName=ASP.brief_result_aspx#J_ORDER&"
@@ -184,6 +184,7 @@ class CrawlCnkiSummary(object):
         count = start_num
         for i in keywords:
             count += 1
-            print(count, i.issn_number)
+            print(count, i.issn_number, 'new->old')
             self.get_periodicals_summary(i)
+            print(count, i.issn_number, 'old->new')
             self.get_periodicals_summary(i, first=False)
