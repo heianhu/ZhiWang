@@ -18,4 +18,3 @@ def start_scrapy():
 
 if __name__ == '__main__':
     start_scrapy()
-    sys.exit(1)

@@ -15,4 +15,4 @@ if __name__ == '__main__':
     )
     # crawl_cnki_summary.crawl_periodicals_summary(mark=True)
     crawl_cnki_summary.test()
-    sys.exit(1)
+    sys.exit(0)
