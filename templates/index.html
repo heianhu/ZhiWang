@@ -646,12 +646,13 @@
 {#下载全部按钮确认框#}
 <script>
     $(function(){
-
         $('#downloadAll').on('click', function() {
             var res = confirm('确定下载全部{{ result_count }}项结果？');
+            {% if request.path|slice:'2' == '/r' and request.user.is_authenticated%}
             if (res==true){
                 window.location.href="{% url 'retrieve:downloadall' request.GET.queryId %}"
             }
+            {% endif %}
         })
 
     })
