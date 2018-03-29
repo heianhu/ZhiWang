@@ -4,7 +4,8 @@ from django.db.models import Q  # 数据库中用多操作
 import re
 
 from crawl_data.models import Summary, Periodicals, Detail
-from crawl_data.crawl_ZhiWang_Periodicals.crawl_ZhiWang_Periodicals.items import DetailItem, ReferencesCJFQItem, ReferencesCMFDItem, ReferencesCDFDItem, ReferencesCBBDItem, \
+from crawl_data.crawl_ZhiWang_Periodicals.crawl_ZhiWang_Periodicals.items import DetailItem, ReferencesCJFQItem, \
+    ReferencesCMFDItem, ReferencesCDFDItem, ReferencesCBBDItem, \
     ReferencesSSJDItem, ReferencesCRLDENGItem, ReferencesItem, ReferencesCCNDItem, ReferencesCPFDItem
 from crawl_data.models import ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD, ReferencesCBBD, ReferencesSSJD, \
     ReferencesCRLDENG, References, ReferencesCCND, ReferencesCPFD
@@ -28,10 +29,10 @@ class CrawlDetailSpider(scrapy.Spider):
         summarys = Summary.objects.filter(Q(have_detail=False) & Q(source__in=periodicals))  # 标记且没有爬去过的
         # periodicals = Periodicals.objects.filter(issn_number='1004-6577')  # 找到指定的期刊
         summarys = Summary.objects.filter(Q(have_detail=False) & Q(source__in=periodicals))  # 标记且没有爬去过的
-        print(summarys.count())
+        all_count = summarys.count()
         count = 0
         for summary in summarys:
-            print(count)
+            print(count, '/', all_count)
             count += 1
             # 去重
             # 有些文章在不同的期刊中投放了两次，导致之前爬去过，现在又来了一遍，只要将这次的summary指向之前的detail即可
@@ -45,7 +46,6 @@ class CrawlDetailSpider(scrapy.Spider):
             else:
                 yield scrapy.Request(url=summary.url, headers=self.header, callback=self.parse,
                                      meta={'summary': summary})
-
 
     def parse(self, response):
         """
@@ -478,7 +478,8 @@ class CrawlDetailSpider(scrapy.Spider):
             # print('CCND_list:', CCND_list)
             # print('CPFD_list:', CPFD_list)
 
-            if len(CJFQ_list + CDFD_list + CMFD_list + CBBD_list + SSJD_list + CRLDENG_list + CCND_list + CPFD_list) == 0:
+            if len(
+                    CJFQ_list + CDFD_list + CMFD_list + CBBD_list + SSJD_list + CRLDENG_list + CCND_list + CPFD_list) == 0:
                 references = References.objects.filter(id=76438)[0]
             else:
                 references = References()
