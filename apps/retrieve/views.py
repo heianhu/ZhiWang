@@ -206,6 +206,26 @@ class GetDetailInfo(View):
 
         return response
 
+    def post(self, requset, getdetailinfo_id):
+        """
+        根据id返回单个文章的详情内容
+        :param getdetailinfo_id: summary文章的id
+        :return: 文章详情json
+        """
+        article = Summary.objects.get(id=int(getdetailinfo_id))
+        data = dict(
+            title=article.title,
+            authors=article.authors,
+            keywords=article.detail.detail_keywords,
+            abstract = article.detail.detail_abstract,
+            issuing_time = article.issuing_time,
+        )
+
+
+        return JsonResponse({'status': 'success',
+                             'data': data,
+                             }, content_type='application/json')
+
 
 class DownloadSel(View):
 
