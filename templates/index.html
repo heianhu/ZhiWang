@@ -28,6 +28,7 @@
          folder instead of downloading all of them to reduce the load. -->
     <link rel="stylesheet" href="{% static 'css/_all-skins.min.css' %}">
 
+
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -58,82 +59,41 @@
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
                     <!-- Messages: style can be found in dropdown.less-->
-{#                    <li class="dropdown messages-menu">#}
-{#                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">#}
-{#                            <i class="fa fa-envelope-o"></i>#}
-{#                            <span class="label label-success">4</span>#}
-{#                        </a>#}
-{#                        <ul class="dropdown-menu">#}
-{#                            <li class="header">You have 4 messages</li>#}
-{#                            <li>#}
-{#                                <!-- inner menu: contains the actual data -->#}
-{#                                <ul class="menu">#}
-{#                                    <li><!-- start message -->#}
-{#                                        <a href="#">#}
-{#                                            <div class="pull-left">#}
-{#                                                <img src="../dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">#}
-{#                                            </div>#}
-{#                                            <h4>#}
-{#                                                Support Team#}
-{#                                                <small><i class="fa fa-clock-o"></i> 5 mins</small>#}
-{#                                            </h4>#}
-{#                                            <p>Why not buy a new awesome theme?</p>#}
-{#                                        </a>#}
-{#                                    </li>#}
-{#                                    <!-- end message -->#}
-{#                                    <li>#}
-{#                                        <a href="#">#}
-{#                                            <div class="pull-left">#}
-{#                                                <img src="../dist/img/user3-128x128.jpg" class="img-circle" alt="User Image">#}
-{#                                            </div>#}
-{#                                            <h4>#}
-{#                                                AdminLTE Design Team#}
-{#                                                <small><i class="fa fa-clock-o"></i> 2 hours</small>#}
-{#                                            </h4>#}
-{#                                            <p>Why not buy a new awesome theme?</p>#}
-{#                                        </a>#}
-{#                                    </li>#}
-{#                                    <li>#}
-{#                                        <a href="#">#}
-{#                                            <div class="pull-left">#}
-{#                                                <img src="../dist/img/user4-128x128.jpg" class="img-circle" alt="User Image">#}
-{#                                            </div>#}
-{#                                            <h4>#}
-{#                                                Developers#}
-{#                                                <small><i class="fa fa-clock-o"></i> Today</small>#}
-{#                                            </h4>#}
-{#                                            <p>Why not buy a new awesome theme?</p>#}
-{#                                        </a>#}
-{#                                    </li>#}
-{#                                    <li>#}
-{#                                        <a href="#">#}
-{#                                            <div class="pull-left">#}
-{#                                                <img src="../dist/img/user3-128x128.jpg" class="img-circle" alt="User Image">#}
-{#                                            </div>#}
-{#                                            <h4>#}
-{#                                                Sales Department#}
-{#                                                <small><i class="fa fa-clock-o"></i> Yesterday</small>#}
-{#                                            </h4>#}
-{#                                            <p>Why not buy a new awesome theme?</p>#}
-{#                                        </a>#}
-{#                                    </li>#}
-{#                                    <li>#}
-{#                                        <a href="#">#}
-{#                                            <div class="pull-left">#}
-{#                                                <img src="../dist/img/user4-128x128.jpg" class="img-circle" alt="User Image">#}
-{#                                            </div>#}
-{#                                            <h4>#}
-{#                                                Reviewers#}
-{#                                                <small><i class="fa fa-clock-o"></i> 2 days</small>#}
-{#                                            </h4>#}
-{#                                            <p>Why not buy a new awesome theme?</p>#}
-{#                                        </a>#}
-{#                                    </li>#}
-{#                                </ul>#}
-{#                            </li>#}
-{#                            <li class="footer"><a href="#">See All Messages</a></li>#}
-{#                        </ul>#}
-{#                    </li>#}
+                    <li class="dropdown messages-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-rmb "></i>
+                            捐赠
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="header">捐赠</li>
+                            <li>
+                                <!-- inner menu: contains the actual data -->
+                                <ul class="menu">
+                                    <li><!-- start message -->
+                                        <a href="#" data-toggle="modal" data-target="#show_qrcode">
+                                            <div class="pull-left">
+                                                <img src="{% static 'images/juanzeng_zfb.JPG' %}" height="40" width="40"  alt="User Image">
+                                            </div>
+                                            <h4>
+                                                支付宝 / 微信
+                                                <small><i class="fa fa-clock-o"></i> Online</small>
+                                            </h4>
+                                            <p>点击显示二维码</p>
+                                        </a>
+
+                                    </li>
+
+                                    <!-- end message -->
+
+
+                                </ul>
+                            </li>
+                            <li class="footer"><a href="#">即将支持其他支付方式...</a></li>
+                        </ul>
+                    </li>
+
+
+
 {#                    <!-- Notifications: style can be found in dropdown.less -->#}
 {#                    <li class="dropdown notifications-menu">#}
 {#                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">#}
@@ -550,22 +510,56 @@
     </div>
     <!-- /.content-wrapper -->
 
-    <footer class="main-footer">
-{#        <div class="pull-right hidden-xs">#}
-{#            <b>Version</b> 2.4.0#}
-{#        </div>#}
-{#        <strong>Copyright &copy; 2014-2016 <a href="https://adminlte.io">Almsaeed Studio</a>.</strong> All rights#}
-{#        reserved.#}
-    <div>
-        <span>捐赠</span>
-        <br>
-        <a>支付宝</a>
-        <img src="{% static 'images/juanzeng_zfb.JPG' %}"  alt="User Image" height="100" width="100">
-        <a>微信</a>
-        <img src="{% static 'images/juanzeng_wx.JPG' %}"  alt="User Image" height="100" width="100">
-        <a>请在备注中注明您的注册邮箱或昵称，方便日后回馈您的捐赠。</a>
 
-    </div>
+{#捐赠悬浮窗#}
+<div class="modal fade" id="show_qrcode" style="display: none;">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">×</span></button>
+                                <h4 class="modal-title">捐赠</h4>
+                            </div>
+                            <div class="box-footer no-border">
+              <div class="row">
+                <div class="col-xs-6 text-center" style="border-right: 1px solid #f4f4f4">
+                  <div style="display:inline;width:200px;height:200px;"><img src="{% static 'images/juanzeng_zfb.JPG' %}" height="200px" width="200px"  alt="User Image"></div>
+                  <div class="knob-label">支付宝</div>
+                </div>
+                <!-- ./col -->
+                <div class="col-xs-6 text-center" >
+                <div style="display:inline;width:200px;height:200px;"><img src="{% static 'images/juanzeng_wx.JPG' %}" height="200px" width="200px"  alt="User Image"></div>
+                <div class="knob-label">微信</div>
+                </div>
+                <!-- ./col -->
+
+              </div>
+              <!-- /.row -->
+            </div>
+                            <div >
+
+                            </div>
+
+                            <div class="modal-body">
+                                <p>请在备注中注明您的注册邮箱或昵称，方便日后回馈您的捐赠。</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" data-dismiss="modal" class="btn btn-primary">关闭</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+{#捐赠悬浮窗 end#}
+
+    <footer class="main-footer">
+        <div class="pull-right hidden-xs">
+            <b>Version</b> 2.4.0
+        </div>
+        <div> <strong>Copyright &copy; 2014-2016 <a href="https://adminlte.io">Almsaeed Studio</a>.</strong> All rights
+        reserved.
+        </div>
     </footer>
 
 </div>
