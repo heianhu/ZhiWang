@@ -313,15 +313,15 @@ class CrawlCnkiSummary(object):
                     summary.cited = cited
                     summary.have_detail = False
                     summary.save()
-
-                summary = Summary()
-                summary.url = url
-                summary.title = title
-                summary.authors = authors
-                summary.source = periodical
-                summary.issuing_time = datetime.strptime(issuing_time, '%Y-%m-%d').date()
-                summary.cited = cited
-                summary.have_detail = False
-                summary.detail = None
-                summary.save()
+                else:
+                    summary = Summary()
+                    summary.url = url
+                    summary.title = title
+                    summary.authors = authors
+                    summary.source = periodical
+                    summary.issuing_time = datetime.strptime(issuing_time, '%Y-%m-%d').date()
+                    summary.cited = cited
+                    summary.have_detail = False
+                    summary.detail = None
+                    summary.save()
         driver.quit()
