@@ -26,7 +26,6 @@ class CrawlDetailSpider(scrapy.Spider):
         从数据库中找出所要爬取的url
         """
         periodicals = Periodicals.objects.filter(mark=True)  # 找到标记的期刊
-        summarys = Summary.objects.filter(Q(have_detail=False) & Q(source__in=periodicals))  # 标记且没有爬去过的
         # periodicals = Periodicals.objects.filter(issn_number='1004-6577')  # 找到指定的期刊
         summarys = Summary.objects.filter(Q(have_detail=False) & Q(source__in=periodicals))  # 标记且没有爬去过的
         all_count = summarys.count()
