@@ -507,7 +507,9 @@
                 <p>{{ article.detail.detail_abstract }} </p>
                     <div class="downloadOperation">
                         <a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id  %}"><i class="fa fa-share"></i>下载链接 </a>
+                        {% if request.user.is_authenticated%}
                         <label> <input  class="downloadCheckbox" type="checkbox" >选择</label>
+                        {% endif %}
                     </div>
                 </div>
                 <!-- /.box-body -->
@@ -657,7 +659,7 @@
 <script>
     $(function(){
         $('#downloadAll').on('click', function() {
-            var res = confirm('确定下载全部{{ result_count }}项结果？');
+            var res = confirm('确定下载全部{{ result_count }}项结果？可能会等待一段时间请不要刷新或者关闭该页面');
             {% if request.path|slice:'2' == '/r' and request.user.is_authenticated%}
             if (res==true){
                 window.location.href="{% url 'retrieve:downloadall' request.GET.queryId %}"
