@@ -34,27 +34,17 @@ class IncrementalCrawlDetailSpider(scrapy.Spider):
     def parse(self, response):
         summary = response.meta.get('summary')
         paper_id, keywords, abstract, date, authors_dic, orgs_dic = select_detail(response=response)
+        detail_item = DetailItem()
+        detail_item['detail_id'] = paper_id
+        detail_item['detail_keywords'] = keywords
+        detail_item['detail_abstract'] = abstract
+        detail_item['detail_date'] = date
+        detail_item['authors_dic'] = authors_dic
+        detail_item['organizations_dic'] = orgs_dic
+        detail_item['summary'] = summary
+        yield detail_item
         detail = Detail.objects.filter(detail_id=self._re_filename.search(summary.url).group(1))
-        if detail:
-            detail_item = detail[0]
-            detail_item['detail_id'] = paper_id
-            detail_item['detail_keywords'] = keywords
-            detail_item['detail_abstract'] = abstract
-            detail_item['detail_date'] = date
-            detail_item['authors_dic'] = authors_dic
-            detail_item['organizations_dic'] = orgs_dic
-            detail_item['summary'] = summary
-            yield detail_item
-        else:
-            detail_item = DetailItem()
-            detail_item['detail_id'] = paper_id
-            detail_item['detail_keywords'] = keywords
-            detail_item['detail_abstract'] = abstract
-            detail_item['detail_date'] = date
-            detail_item['authors_dic'] = authors_dic
-            detail_item['organizations_dic'] = orgs_dic
-            detail_item['summary'] = summary
-            yield detail_item
+        if not detail:
             detail = Detail.objects.get(Q(detail_id=paper_id) & Q(summary=summary))
             references_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1' \
                 .format(detail.detail_id)

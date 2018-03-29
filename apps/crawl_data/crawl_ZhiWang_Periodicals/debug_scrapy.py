@@ -12,8 +12,9 @@ def start_scrapy():
         os.path.dirname(  # 父目录文件地址
             os.path.abspath(__file__)  # 当前文件地址
         ))
-    execute(['scrapy', 'crawl', 'crawl_detail'])
-    # execute(['scrapy', 'crawl', 'repair_references'])
+    # execute(['scrapy', 'crawl', 'crawl_detail'])
+    execute(['scrapy', 'crawl', 'repair_references'])
+    # execute(['scrapy', 'crawl', 'incremental_crawl_detail'])
 
 
 if __name__ == '__main__':

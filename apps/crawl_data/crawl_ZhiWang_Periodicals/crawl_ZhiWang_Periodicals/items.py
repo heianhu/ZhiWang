@@ -85,7 +85,12 @@ class DetailItem(scrapy.Item):
         authors_database_id = self.processing_authors()
         organization_database_id = self.processing_organizations()
 
-        detail = Detail()
+        detail = Detail.objects.filter(detail_id=self['detail_id'])  # 检查是否是增量来的数据
+        if detail:
+            detail = detail[0]
+        else:
+            detail = Detail()
+            detail.references = None
         detail.detail_id = self['detail_id']
         detail.detail_keywords = self['detail_keywords']
         if not self['detail_abstract']:
@@ -96,7 +101,6 @@ class DetailItem(scrapy.Item):
         detail.detail_date = self['detail_date']
         detail.authors = ' '.join(authors_database_id)
         detail.organizations = ' '.join(organization_database_id)
-        detail.references = None
         detail.save()
         self['summary'].detail = detail
         self['summary'].have_detail = True

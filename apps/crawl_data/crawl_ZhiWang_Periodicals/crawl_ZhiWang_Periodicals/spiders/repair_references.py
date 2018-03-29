@@ -28,7 +28,7 @@ class RepairReferencesSpider(scrapy.Spider):
         references = References.objects.filter(CJFQ='', CDFD='', CMFD='', CBBD='', SSJD='', CRLDENG='', CCND='',
                                                CPFD='')  # 找到全是空白的数据
         details = Detail.objects.filter(references__in=references)
-        # details = Detail.objects.filter(id=306539)
+        # details = Detail.objects.filter(references=None)
         print(details.count())
         count = 1
         for detail in details:

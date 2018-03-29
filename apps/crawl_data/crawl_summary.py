@@ -205,14 +205,19 @@ class CrawlCnkiSummary(object):
             print(count, i.issn_number, 'old->new')
             self.get_periodicals_summary(i, first=False)
 
-    def incremental_crawl(self):
+    def incremental_crawl(self, *args, start_num=0, mark=False, issn_number=0):
         """
         用于每日增量处理
         不用去重，而是修改内容
         :return:
         """
-        periodicals = Periodicals.objects.filter(mark=True)
-        count = 0
+        if mark:
+            periodicals = Periodicals.objects.filter(mark=True)[start_num:]
+        elif issn_number:
+            periodicals = Periodicals.objects.filter(issn_number=issn_number)
+        else:
+            periodicals = Periodicals.objects.all()[start_num:]
+        count = start_num
         for periodical in periodicals:
             count += 1
             print(count, periodical.issn_number)
