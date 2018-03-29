@@ -56,7 +56,6 @@ class RegisterView(View):
                 # user_message.save()
                 return render(request, 'login.html')
         else:
-            print('adsf')
             return render(request, 'register.html', {'register_form': register_form})
 
 
@@ -82,9 +81,17 @@ class LoginView(View):
                     login_form.add_error(None, error='用户未激活!')
                     return render(request, 'login.html', {'form': login_form})
             else:
-                login_form.add_error(None, error='用户名或密码错误!')
                 return render(request, 'login.html', {'form': login_form, 'msg': '用户名或密码错误!'})
 
         else:
-            print('asdfasd')
             return render(request, 'login.html', {'form': login_form})
+
+
+class LogoutView(View):
+    """
+    用户登出
+    """
+
+    def get(self, request):
+        logout(request)
+        return redirect('index')
