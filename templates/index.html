@@ -476,11 +476,7 @@
                             <button type="button" id="downloadSel" class="btn btn-block btn-default">下载已选</button>
                         </div>
                         <div class="col-lg-4">
-                            <form method="get" action="{% url 'retrieve:downloadall' request.GET.queryId %}">
-                                {% csrf_token %}
-                                <input class="btn btn-block btn-default" id="downloadAll" type="submit" value="下载全部">
-                            </form>
-{#                            <button type="button" class="btn btn-block btn-default">下载全部</button>#}
+                            <button type="button" id="downloadAll" class="btn btn-block btn-default">下载全部</button>
                         </div>
 
                      </div>
@@ -542,26 +538,7 @@
                 </div>
                 </div>
                 <!-- /.col -->
-                <div class="modal fade" id="modal-default" style="display: none;">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">×</span></button>
-                                <h4 class="modal-title">Default Modal</h4>
-                            </div>
-                            <div class="modal-body">
-                                <p>结果较多，确定下载全部？</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Save changes</button>
-                            </div>
-                        </div>
-                        <!-- /.modal-content -->
-                    </div>
-                    <!-- /.modal-dialog -->
-                </div>
+
 
             </div>
             <!-- /.row -->
@@ -659,8 +636,12 @@
                 },
                 success: function(data) {
                     if(data.status == 'success'){
-                        alert('开始下载!');
-                        window.location.href='downloadzip/' + data.data
+                        checked_num =  result.length
+
+                        var res = confirm('确认下载勾选的'+checked_num+'项结果？');
+                        if (res==true){
+                            window.location.href='downloadzip/' + data.data
+                        }
                     }else if(data.status == 'fail'){
                         alert('fail!');
                     }
@@ -670,6 +651,21 @@
         })
     })
 
+</script>
+
+{#下载全部按钮确认框#}
+<script>
+    $(function(){
+        $('#downloadAll').on('click', function() {
+            var res = confirm('确定下载全部{{ result_count }}项结果？');
+            {% if request.path|slice:'2' == '/r' and request.user.is_authenticated%}
+            if (res==true){
+                window.location.href="{% url 'retrieve:downloadall' request.GET.queryId %}"
+            }
+            {% endif %}
+        })
+
+    })
 </script>
 </body>
 </html>
