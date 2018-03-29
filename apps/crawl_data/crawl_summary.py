@@ -34,7 +34,7 @@ class CrawlCnkiSummary(object):
         :param executable_path: PhantomJS路径
         """
         self.split_word = re.compile(
-            r'(QueryID=0&|CurRec=\d+&|DbCode=[a-zA-Z]+&|urlid=[a-zA-Z0-9.]*&|yx=[a-zA-Z]*)',
+            r'(QueryID=[a-zA-Z0-9.]&|CurRec=\d*&|DbCode=[a-zA-Z]*&|urlid=[a-zA-Z0-9.]*&|yx=[a-zA-Z]*)',
             flags=re.I
         )
         self.re_issuing_time = re.compile(
@@ -43,20 +43,20 @@ class CrawlCnkiSummary(object):
         self.executable_path = executable_path
 
     def test(self):
-        # summary = Summary()
-        # summary.abstract = 'ok'
-        # print(summary.abstract)
-        summarys = Summary.objects.filter(Q(url__icontains='yx=') | Q(url__icontains='urlid='))
-        all_count = summarys.count()
-        count = 1
-        for summary in summarys:
-            print(str(count) + '/' + str(all_count))
-            count += 1
-            summary.url = self.split_word.sub('', summary.url)
-            try:
-                summary.save()
-            except IntegrityError:
-                summary.delete()
+        summary = Summary()
+        summary.abstract = 'ok'
+        print(summary.abstract)
+        # summarys = Summary.objects.filter(Q(url__icontains='yx=') | Q(url__icontains='urlid='))
+        # all_count = summarys.count()
+        # count = 1
+        # for summary in summarys:
+        #     print(str(count) + '/' + str(all_count))
+        #     count += 1
+        #     summary.url = self.split_word.sub('', summary.url)
+        #     try:
+        #         summary.save()
+        #     except IntegrityError:
+        #         summary.delete()
 
     def get_periodicals_summary(self, keyword, *args, first=True):
         """
@@ -70,11 +70,11 @@ class CrawlCnkiSummary(object):
         if self.use_Chrome:
             # 使用Chrome
             # 设置Chrome无界面化
-            # chrome_options = Options()
-            # chrome_options.add_argument('--headless')
-            # chrome_options.add_argument('--disable-gpu')
-            # driver = webdriver.Chrome(chrome_options=chrome_options)  # 指定使用的浏览器，初始化webdriver
-            driver = webdriver.Chrome()  # 指定使用的浏览器，初始化webdriver
+            chrome_options = Options()
+            chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--disable-gpu')
+            driver = webdriver.Chrome(chrome_options=chrome_options)  # 指定使用的浏览器，初始化webdriver
+            # driver = webdriver.Chrome()  # 指定使用的浏览器，初始化webdriver
         else:
             desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
             desired_capabilities["phantomjs.page.settings.userAgent"] = \
