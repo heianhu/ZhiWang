@@ -294,7 +294,7 @@
 
 
             <div class="row">
-
+                {#左侧内容#}
                 <div class="col-md-6">
 
                     <!-- Input addon -->
@@ -444,20 +444,22 @@
                     {# 搜索结果#}
                     {% for article in all_articles.object_list %}
 
-                        <div class="box box-widget ">
+                        <div class="box box-widget  collapsed-box ">
                             <div class="box-header with-border">
-                                <!--<div class="user-block">-->
-                                <span class="username"><a href="{{ article.url }}">{{ article.title }}</a></span>
+                                <span data-widget="collapse" data-toggle="tooltip" title="" data-original-title="Collapse" class="username"><a href="">{{ article.title }}</a></span>
                                 <span class="description"> {{ article.authors }}</span>
-                                <span class="description pull-right"> {{ article.issuing_time }}</span>
-                                <!--</div>-->
+                                <span class="pull-right"> {{ article.issuing_time }}</span>
+
                             </div>
                             <!-- /.box-header -->
                             <div class="box-body">
                                 <!-- post text -->
                                 <p>{{ article.detail.detail_abstract }} </p>
                                 <div class="downloadOperation">
-                                    <a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id %}"><i class="fa fa-share"></i>下载链接 </a>
+                                    <a class="downloadLink" target="_blank" href="{{ article.url }}"><i class="fa fa-book"></i>查看原文 </a>
+
+                                    <a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id %}"><i class="fa fa-download"></i>下载此文 </a>
+                                    <a class="downloadLink" onclick="showArticleDetail({{ article.id }})" href="#"><i class="fa fa-download"></i>查看细节 </a>
                                     {% if request.user.is_authenticated %}
                                         <label> <input class="downloadCheckbox" type="checkbox">选择</label>
                                     {% endif %}
@@ -492,7 +494,57 @@
                 </div>
                 <!-- /.col -->
 
+                {#右侧内容#}
+                <div class="col-md-6">
+          <div class="box box-primary" style="display: none;">
+            <div class="box-header with-border">
+              <h3 class="box-title">文章详情</h3>
 
+              <div class="box-tools pull-right">
+                <a href="#" class="btn btn-box-tool" data-toggle="tooltip" title="" data-original-title="Previous"><i class="fa fa-chevron-left"></i></a>
+                <a href="#" class="btn btn-box-tool" data-toggle="tooltip" title="" data-original-title="Next"><i class="fa fa-chevron-right"></i></a>
+              </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body no-padding">
+              <div class="mailbox-read-info">
+                <h3><div class="box-body with-border articleTitle">
+
+            </div></h3>
+
+              </div>
+              <!-- /.mailbox-read-info -->
+              <div class="box-body with-border articleAuthors">
+
+                <!-- /.btn-group -->
+                <button type="button" class="btn btn-default btn-sm" data-toggle="tooltip" title="" data-original-title="Print">
+                  <i class="fa fa-print"></i></button>
+              </div>
+              <!-- /.mailbox-controls -->
+
+              <!-- /.mailbox-read-message -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-body with-border articleAbstract">
+
+            </div>
+            <div class="box-body with-border issueTime">
+
+            </div>
+            <!-- /.box-footer -->
+            <div class="box-footer">
+              <div class="pull-right">
+                <button type="button" class="btn btn-default"><i class="fa fa-reply"></i> Reply</button>
+                <button type="button" class="btn btn-default"><i class="fa fa-share"></i> Forward</button>
+              </div>
+              <button type="button" class="btn btn-default"><i class="fa fa-trash-o"></i> Delete</button>
+              <button type="button" class="btn btn-default"><i class="fa fa-print"></i> Print</button>
+            </div>
+            <!-- /.box-footer -->
+          </div>
+          <!-- /. box -->
+        </div>
+                <!-- /.col -->
             </div>
             <!-- /.row -->
 
@@ -649,6 +701,38 @@
         })
 
     })
+</script>
+
+{#获取文章细节在右侧展示#}
+<script>
+    function showArticleDetail(article_id) {
+        $('.box-primary').css('display','block');
+        $.ajax({
+                cache: false,
+                type: "POST",
+                url: "/retrieve/download/"+article_id+"/",
+                data: {
+                    article_id: article_id
+                },
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (data) {
+                    if (data.status == 'success') {
+                        $('.articleTitle').html(data.data.title)
+                        $('.articleAbstract').html(data.data.abstract)
+                        $('.articleAuthors').html(data.data.authors)
+                        $('.issueTime').html(data.data.issuing_time)
+
+                    } else if (data.status == 'fail') {
+                        alert('fail!');
+                    }
+
+                },
+            });
+    }
+
 </script>
 </body>
 </html>
