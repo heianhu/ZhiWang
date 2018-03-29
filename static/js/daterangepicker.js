@@ -33,14 +33,15 @@
         //default settings for options
         this.parentEl = 'body';
         this.element = $(element);
-        this.startDate = moment().startOf('day');
+        this.startDate = moment("19900101", "YYYYMMDD")
+
         this.endDate = moment().endOf('day');
         this.minDate = false;
         this.maxDate = false;
         this.dateLimit = false;
         this.autoApply = false;
         this.singleDatePicker = false;
-        this.showDropdowns = false;
+        this.showDropdowns = true;
         this.showWeekNumbers = false;
         this.showISOWeekNumbers = false;
         this.showCustomRangeLabel = true;
