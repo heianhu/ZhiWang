@@ -62,7 +62,7 @@ class Search(View):
             magazine_special=request.POST.get('magazine_special', '')  # 文献模糊/精准
         )
         search_filter = SearchFilter()
-        search_filter.username = request.user.username
+        search_filter.username = request.user.nick_name
         search_filter.session_id = request.session.session_key
         queryId = str(time.time()).replace('.', '')
         search_filter.time = queryId
