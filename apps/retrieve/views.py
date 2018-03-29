@@ -165,14 +165,16 @@ class Search(View):
 
             if txt_2_relation == 'CNKI_AND':
                 all_articles = Summary.objects.filter(
-                    (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel, source__mark=True)
+                    (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel, source__mark=True
+                ).order_by('-issuing_time')
             elif txt_2_relation == 'CNKI_OR':
                 all_articles = Summary.objects.filter(
-                    (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel, source__mark=True)
+                    (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel, source__mark=True
+                ).order_by('-issuing_time')
             elif txt_2_relation == 'CNKI_NOT':
                 all_articles = Summary.objects.filter(
                     txt_2_sel_dic[txt_2_sel][0] & else_sel, source__mark=True
-                ).exclude(txt_2_sel_dic[txt_2_sel][1])
+                ).exclude(txt_2_sel_dic[txt_2_sel][1]).order_by('-issuing_time')
             else:
                 response = render_to_response('404.html', {})
                 response.status_code = 404
@@ -181,7 +183,6 @@ class Search(View):
             response = render_to_response('404.html', {})
             response.status_code = 404
             return response
-
         return all_articles
 
 
