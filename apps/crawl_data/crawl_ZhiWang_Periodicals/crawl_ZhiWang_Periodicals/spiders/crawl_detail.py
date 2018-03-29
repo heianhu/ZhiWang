@@ -46,21 +46,6 @@ class CrawlDetailSpider(scrapy.Spider):
                 yield scrapy.Request(url=summary.url, headers=self.header, callback=self.parse,
                                      meta={'summary': summary})
 
-        # # 在现有数据基础上新增引用内容
-        # details = Detail.objects.filter(references=None)  # 找到没有参考文献数据的期刊
-        # # details = Detail.objects.filter(detail_id='JYYJ200902021')  # 找到指定的期刊
-        # print(details.count())
-        # count = 0
-        # for detail in details:
-        #     print(count)
-        #     count += 1
-        #     if detail.references is None:
-        #         references_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1'.format(
-        #             detail.detail_id)
-        #         yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
-        #                              meta={'detail': detail, 'cur_page': 1, 'CJFQ_list': [], 'CDFD_list': [],
-        #                                    'CMFD_list': [], 'CBBD_list': [], 'SSJD_list': [], 'CRLDENG_list': [],
-        #                                    'CCND_list': [], 'CPFD_list': []})
 
     def parse(self, response):
         """

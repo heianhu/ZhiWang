@@ -33,16 +33,30 @@ class CrawlCnkiSummary(object):
         :param use_Chrome: True使用Chrome，False使用PhantomJS
         :param executable_path: PhantomJS路径
         """
-        self.split_word = re.compile(r'(QueryID=0&|CurRec=\d+&|DbCode=[a-zA-Z]+&)', flags=re.I)
+        self.split_word = re.compile(
+            r'(QueryID=0&|CurRec=\d+&|DbCode=[a-zA-Z]+&|urlid=[a-zA-Z0-9.]*&|yx=[a-zA-Z]*)',
+            flags=re.I
+        )
         self.re_issuing_time = re.compile(
             '((?!0000)[0-9]{4}[-/]((0[1-9]|1[0-2])[-/](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[-/](29|30)|(0[13578]|1[02])[-/]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[-/]02[-/]29)')
         self.use_Chrome = use_Chrome
         self.executable_path = executable_path
 
     def test(self):
-        summary = Summary()
-        summary.abstract = 'ok'
-        print(summary.abstract)
+        # summary = Summary()
+        # summary.abstract = 'ok'
+        # print(summary.abstract)
+        summarys = Summary.objects.filter(Q(url__icontains='yx=') | Q(url__icontains='urlid='))
+        all_count = summarys.count()
+        count = 1
+        for summary in summarys:
+            print(str(count) + '/' + str(all_count))
+            count += 1
+            summary.url = self.split_word.sub('', summary.url)
+            try:
+                summary.save()
+            except IntegrityError:
+                summary.delete()
 
     def get_periodicals_summary(self, keyword, *args, first=True):
         """
@@ -109,10 +123,10 @@ class CrawlCnkiSummary(object):
             summarys = t_selector.css('.GridTableContent tr')[1:]
             # 获取每一个细节
             for i in summarys:
-                # if have_done >= 5:
-                #     # 如果有5个连续的url已重复表示之后的也都有收录过了
-                #     driver.quit()
-                #     return
+                if have_done >= 100:
+                    # 如果有5个连续的url已重复表示之后的也都有收录过了
+                    driver.quit()
+                    return
                 url = i.css('.fz14::attr(href)').extract()[0]
 
                 # 改成正常的url
@@ -154,6 +168,7 @@ class CrawlCnkiSummary(object):
                 else:
                     cited = int(cited[0])
 
+                # print(url)
                 summary = Summary()
                 summary.url = url
                 summary.title = title
