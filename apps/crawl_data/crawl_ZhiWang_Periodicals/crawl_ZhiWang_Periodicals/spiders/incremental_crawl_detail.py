@@ -12,67 +12,56 @@ from crawl_data.models import ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD, Re
 from .SelectData import select_detail
 
 
-class CrawlDetailSpider(scrapy.Spider):
+class IncrementalCrawlDetailSpider(scrapy.Spider):
     _re_filename = re.compile('filename=((.*?))&')
-    name = 'crawl_detail'
+    name = 'incremental_crawl_detail'
+    start_urls = ['http://http://kns.cnki.net//']
     header = {
         'Host': 'kns.cnki.net',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
     }
-    start_urls = ['http://kns.cnki.net/']
 
     def start_requests(self):
-        """
-        控制开始
-        从数据库中找出所要爬取的url
-        """
-        periodicals = Periodicals.objects.filter(mark=True)  # 找到标记的期刊
-        # periodicals = Periodicals.objects.filter(issn_number='1004-6577')  # 找到指定的期刊
-        summarys = Summary.objects.filter(Q(have_detail=False) & Q(source__in=periodicals))  # 标记且没有爬去过的
+        summarys = Summary.objects.filter(have_detail=False, source__mark=True)  # 标记的期刊且在做增量summary时候处理过的
         all_count = summarys.count()
         count = 0
         for summary in summarys:
             print(count, '/', all_count)
             count += 1
-            # 去重
-            # 有些文章在不同的期刊中投放了两次，导致之前爬去过，现在又来了一遍，只要将这次的summary指向之前的detail即可
-            paper_id = self._re_filename.search(summary.url).group(1)  # 文章ID Detail.detail_id
-            detail = Detail.objects.filter(detail_id=paper_id)
-            if detail:
-                print('Duplicate')
-                summary.detail = detail[0]
-                summary.have_detail = True
-                summary.save()
-            else:
-                yield scrapy.Request(url=summary.url, headers=self.header, callback=self.parse,
-                                     meta={'summary': summary})
+            yield scrapy.Request(url=summary.url, headers=self.header, callback=self.parse,
+                                 meta={'summary': summary})
 
     def parse(self, response):
-        """
-        爬取文章的详情
-        :param response:
-        :return:
-        """
         summary = response.meta.get('summary')
-
-        detail_item = DetailItem()
         paper_id, keywords, abstract, date, authors_dic, orgs_dic = select_detail(response=response)
-        detail_item['detail_id'] = paper_id
-        detail_item['detail_keywords'] = keywords
-        detail_item['detail_abstract'] = abstract
-        detail_item['detail_date'] = date
-        detail_item['authors_dic'] = authors_dic
-        detail_item['organizations_dic'] = orgs_dic
-        detail_item['summary'] = summary
-
-        yield detail_item
-        detail = Detail.objects.get(Q(detail_id=paper_id) & Q(summary=summary))
-        references_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1'.format(
-            detail.detail_id)
-        yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
-                             meta={'detail': detail, 'cur_page': 1, 'CJFQ_list': [], 'CDFD_list': [],
-                                   'CMFD_list': [], 'CBBD_list': [], 'SSJD_list': [], 'CRLDENG_list': [],
-                                   'CCND_list': [], 'CPFD_list': []})
+        detail = Detail.objects.filter(detail_id=self._re_filename.search(summary.url).group(1))
+        if detail:
+            detail_item = detail[0]
+            detail_item['detail_id'] = paper_id
+            detail_item['detail_keywords'] = keywords
+            detail_item['detail_abstract'] = abstract
+            detail_item['detail_date'] = date
+            detail_item['authors_dic'] = authors_dic
+            detail_item['organizations_dic'] = orgs_dic
+            detail_item['summary'] = summary
+            yield detail_item
+        else:
+            detail_item = DetailItem()
+            detail_item['detail_id'] = paper_id
+            detail_item['detail_keywords'] = keywords
+            detail_item['detail_abstract'] = abstract
+            detail_item['detail_date'] = date
+            detail_item['authors_dic'] = authors_dic
+            detail_item['organizations_dic'] = orgs_dic
+            detail_item['summary'] = summary
+            yield detail_item
+            detail = Detail.objects.get(Q(detail_id=paper_id) & Q(summary=summary))
+            references_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1' \
+                .format(detail.detail_id)
+            yield scrapy.Request(url=references_url, headers=self.header, callback=self.parse_references,
+                                 meta={'detail': detail, 'cur_page': 1, 'CJFQ_list': [], 'CDFD_list': [],
+                                       'CMFD_list': [], 'CBBD_list': [], 'SSJD_list': [], 'CRLDENG_list': [],
+                                       'CCND_list': [], 'CPFD_list': []})
 
     def parse_references(self, response):
         """
