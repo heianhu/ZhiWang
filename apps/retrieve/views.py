@@ -62,7 +62,10 @@ class Search(View):
             magazine_special=request.POST.get('magazine_special', '')  # 文献模糊/精准
         )
         search_filter = SearchFilter()
-        search_filter.username = request.user.nick_name
+        try:
+            search_filter.username = request.user.nick_name
+        except AttributeError:
+            search_filter.username = ''
         search_filter.session_id = request.session.session_key
         queryId = str(time.time()).replace('.', '')
         search_filter.time = queryId
@@ -83,7 +86,7 @@ class Search(View):
         session_id = request.session.session_key
         try:
             search_filter = SearchFilter.objects.get(time=queryId, session_id=session_id)
-        except KeyError:
+        except SearchFilter.DoesNotExist:
             return render(request, 'index.html')
 
         search_filter = eval(search_filter.filterPara)

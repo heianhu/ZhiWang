@@ -70,9 +70,7 @@ class LoginView(View):
         if login_form.is_valid():  # 检查表单提交是否符合规定
             email = request.POST.get('email', '')
             pass_word = request.POST.get('password', '')
-            print(pass_word)
             user = authenticate(username=email, password=pass_word)  # 验证是否存在或者对应正确
-            print(user)
             if user is not None:
                 if user.is_active:
                     login(request, user)  # django的auth自带的登录login
