@@ -7,7 +7,7 @@
 3. 分析文章引用间关系(待完成)
 
 ### 使用方法
-1. 在ZhiWang中新建一个mysetting.py文件，填入对应信息
+1. 在ZhiWang中新建一个`mysetting.py`文件，填入对应信息
 ```python
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -25,5 +25,6 @@ DATABASES = {
     },
 }
 ```
-2. 修改rootcorn
+
+2. 修改 `rootcorn`文件，自动执行时间务必小于一周(每周执行最佳)，并将目录正确设置。
 
