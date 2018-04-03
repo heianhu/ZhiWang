@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'retrieve',
     'user',
     'captcha',  # django-simple-captcha  验证码插件
+    'crawl_cnki',
 
 ]
 
