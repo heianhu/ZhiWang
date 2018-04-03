@@ -710,7 +710,9 @@
         $.ajax({
                 cache: false,
                 type: "POST",
-                url: "/retrieve/download/"+article_id+"/",
+                {#url: "/retrieve/download/"+article_id+"/",#}
+                url: "{% url 'retrieve:getdetailinfo' 123 %}".replace(123,article_id),
+
                 data: {
                     article_id: article_id
                 },
