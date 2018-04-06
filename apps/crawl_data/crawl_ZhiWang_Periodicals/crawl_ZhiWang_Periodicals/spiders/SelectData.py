@@ -49,7 +49,7 @@ def select_detail(response):
     return paper_id, keywords, abstract, date, authors_dic, orgs_dic
 
 
-def select_references(response,
+def select_references(response, *args,
                       CJFQ_list, CDFD_list, CMFD_list, CBBD_list, SSJD_list, CRLDENG_list, CCND_list, CPFD_list):
     """
     处理参考文献，提取出各项
