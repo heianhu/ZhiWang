@@ -103,3 +103,6 @@ REFERENCES_DBNAME = ('CJFQ',  # 中国学术期刊网络出版总库 id = "pc_CJ
                      'CCND',  # 中国重要报纸全文数据库 id = "pc_CCND"
                      'CPFD',  # 中国重要会议论文全文数据库 id="pc_CPFD"
                      )
+
+# 是否为增量爬取数据
+INCREMENTAL_CRAWL_DETAIL = False

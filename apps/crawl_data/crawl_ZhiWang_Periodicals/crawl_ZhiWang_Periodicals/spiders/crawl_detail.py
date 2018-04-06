@@ -10,7 +10,7 @@ from crawl_data.crawl_ZhiWang_Periodicals.crawl_ZhiWang_Periodicals.items import
 from crawl_data.models import ReferencesCJFQ, ReferencesCMFD, ReferencesCDFD, ReferencesCBBD, ReferencesSSJD, \
     ReferencesCRLDENG, References, ReferencesCCND, ReferencesCPFD
 from .SelectData import select_detail, select_references
-from settings import REFERENCES_DBNAME
+from settings import REFERENCES_DBNAME, INCREMENTAL_CRAWL_DETAIL
 
 
 class CrawlDetailSpider(scrapy.Spider):
@@ -40,7 +40,7 @@ class CrawlDetailSpider(scrapy.Spider):
             paper_id = self._re_filename.search(summary.url).group(1)  # 文章ID Detail.detail_id
             detail = Detail.objects.filter(detail_id=paper_id)
             if detail:
-                print('Duplicate')
+                # print('Duplicate')
                 summary.detail = detail[0]
                 summary.have_detail = True
                 summary.save()
