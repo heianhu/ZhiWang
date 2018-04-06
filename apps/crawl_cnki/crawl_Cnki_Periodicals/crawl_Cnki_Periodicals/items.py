@@ -6,9 +6,22 @@
 # http://doc.scrapy.org/en/latest/topics/items.html
 
 import scrapy
+from scrapy.loader import ItemLoader
+from scrapy.loader.processors import MapCompose, TakeFirst, Join
 
 
-class CrawlCnkiPeriodicalsItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class ArticleItemLoader(ItemLoader):
+    default_output_processor = TakeFirst()
+
+
+class ArticleItem(scrapy.Item):
+    url = scrapy.Field()
+    filename = scrapy.Field()
+    title = scrapy.Field()
+    periodicals = scrapy.Field()
+    issuing_time = scrapy.Field()
+    cited = scrapy.Field()
+    keywords = scrapy.Field()
+    abstract = scrapy.Field()
+    DOI = scrapy.Field()
+    remark = scrapy.Field()

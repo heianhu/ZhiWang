@@ -1,5 +1,7 @@
 from django.db import models
 from datetime import datetime
+
+
 # Create your models here.
 
 class Periodical(models.Model):
@@ -13,7 +15,6 @@ class Periodical(models.Model):
     class Meta:
         verbose_name = '期刊列表'
         verbose_name_plural = verbose_name
-
 
 
 class Article(models.Model):
@@ -60,7 +61,6 @@ class Organization(models.Model):
         verbose_name_plural = verbose_name
 
 
-
 class References(models.Model):
     """
     参考文献
@@ -78,7 +78,6 @@ class References(models.Model):
         verbose_name_plural = verbose_name
 
 
-
 class Article_Author(models.Model):
     article = models.ForeignKey(Article, verbose_name='文献', blank=True)
     author = models.ForeignKey(Author, verbose_name='作者', blank=True)
@@ -87,5 +86,3 @@ class Article_Author(models.Model):
 class Article_Organization(models.Model):
     article = models.ForeignKey(Article, verbose_name='文献', blank=True)
     organization = models.ForeignKey(Organization, verbose_name='机构', blank=True)
-
-
