@@ -69,7 +69,8 @@ class IncrementalCrawlDetailSpider(scrapy.Spider):
         page = max(every_page)  # 找到最大的参考文献库个数，定制翻页次数
         page = (page / 10)  # 每页有10条数据
 
-        select_references(response, **references_list_dict)
+        for item in select_references(response, **references_list_dict):
+            yield item
 
         if page > cur_page:
             # 网页+1继续获取信息
