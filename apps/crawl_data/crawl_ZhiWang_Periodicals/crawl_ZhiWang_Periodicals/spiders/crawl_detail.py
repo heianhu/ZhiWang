@@ -67,7 +67,7 @@ class CrawlDetailSpider(scrapy.Spider):
         detail_item['summary'] = summary
 
         yield detail_item
-        detail = Detail.objects.get(Q(detail_id=paper_id) & Q(summary=summary))
+        detail = Detail.objects.get(id=detail_item['database_id'])
         references_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1'.format(
             detail.detail_id)
         references_list_dict = dict()
