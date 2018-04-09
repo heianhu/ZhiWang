@@ -65,13 +65,22 @@ class References(models.Model):
     """
     参考文献
     """
-    article = models.ForeignKey(Article, verbose_name='文章')
+    # article = models.ForeignKey(Article, verbose_name='文章')
     url = models.URLField(max_length=255, verbose_name='参考文献的url')
     title = models.CharField(max_length=255, verbose_name='参考文献的题名')
     authors = models.CharField(max_length=255, verbose_name='参考文献的作者')
     source = models.CharField(max_length=255, verbose_name='参考文献的来源')
     issuing_time = models.CharField(max_length=255, verbose_name='发表时间')
-    remark = models.CharField(max_length=255, verbose_name='备注')
+    remark = models.TextField(verbose_name='备注')
+
+    class Meta:
+        verbose_name = '参考文献'
+        verbose_name_plural = verbose_name
+
+
+class Article_References(models.Model):
+    article = models.ForeignKey(Article, verbose_name='文章')
+    references = models.ForeignKey(References, verbose_name='参考文献')
 
     class Meta:
         verbose_name = '参考文献'
