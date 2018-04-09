@@ -11,6 +11,7 @@ from crawl_data.models import Detail, Summary, Authors, Organization, References
 
 
 class DetailItem(scrapy.Item):
+    database_id = scrapy.Field()  # 该条记录在数据库中的id
     detail_id = scrapy.Field()  # 论文ID
     detail_keywords = scrapy.Field()  # 关键字
     detail_abstract = scrapy.Field()  # 摘要
@@ -102,12 +103,14 @@ class DetailItem(scrapy.Item):
         detail.authors = ' '.join(authors_database_id)
         detail.organizations = ' '.join(organization_database_id)
         detail.save()
+        self['database_id'] = detail.id
         self['summary'].detail = detail
         self['summary'].have_detail = True
         self['summary'].save()
 
 
 class ReferencesItem(scrapy.Item):
+    database_id = scrapy.Field()  # 该条记录在数据库中的id
     CJFQ = scrapy.Field()
     CDFD = scrapy.Field()
     CMFD = scrapy.Field()
@@ -124,9 +127,11 @@ class ReferencesItem(scrapy.Item):
         references.SSJD = ' '.join(self['SSJD'])
         references.CRLDENG = ' '.join(self['CRLDENG'])
         references.save()
+        self['database_id'] = references.id
 
 
 class ReferencesCJFQItem(scrapy.Item):
+    database_id = scrapy.Field()  # 该条记录在数据库中的id
     url = scrapy.Field()
     title = scrapy.Field()
     authors = scrapy.Field()
@@ -141,6 +146,7 @@ class ReferencesCJFQItem(scrapy.Item):
         CJFQ.source = self['source']
         CJFQ.issuing_time = self['issuing_time']
         CJFQ.save()
+        self['database_id'] = CJFQ.id
 
 
 class ReferencesCDFDItem(ReferencesCJFQItem):
@@ -152,6 +158,7 @@ class ReferencesCDFDItem(ReferencesCJFQItem):
         CDFD.source = self['source']
         CDFD.issuing_time = self['issuing_time']
         CDFD.save()
+        self['database_id'] = CDFD.id
 
 
 class ReferencesCMFDItem(ReferencesCJFQItem):
@@ -163,12 +170,14 @@ class ReferencesCMFDItem(ReferencesCJFQItem):
         CMFD.source = self['source']
         CMFD.issuing_time = self['issuing_time']
         CMFD.save()
+        self['database_id'] = CMFD.id
 
 
 class ReferencesCBBDItem(scrapy.Item):
     """
     中国图书全文数据库
     """
+    database_id = scrapy.Field()  # 该条记录在数据库中的id
     title = scrapy.Field()
     authors = scrapy.Field()
     source = scrapy.Field()
@@ -181,9 +190,11 @@ class ReferencesCBBDItem(scrapy.Item):
         CBBD.source = self['source']
         CBBD.issuing_time = self['issuing_time']
         CBBD.save()
+        self['database_id'] = CBBD.id
 
 
 class ReferencesSSJDItem(scrapy.Item):
+    database_id = scrapy.Field()  # 该条记录在数据库中的id
     url = scrapy.Field()
     title = scrapy.Field()
     info = scrapy.Field()
@@ -196,9 +207,11 @@ class ReferencesSSJDItem(scrapy.Item):
         SSJD.info = self['info']
         SSJD.issuing_time = self['issuing_time']
         SSJD.save()
+        self['database_id'] = SSJD.id
 
 
 class ReferencesCRLDENGItem(scrapy.Item):
+    database_id = scrapy.Field()  # 该条记录在数据库中的id
     title = scrapy.Field()
     info = scrapy.Field()
     issuing_time = scrapy.Field()
@@ -209,6 +222,7 @@ class ReferencesCRLDENGItem(scrapy.Item):
         CRLDENG.info = self['info']
         CRLDENG.issuing_time = self['issuing_time']
         CRLDENG.save()
+        self['database_id'] = CRLDENG.id
 
 
 class ReferencesCCNDItem(ReferencesCJFQItem):
@@ -220,6 +234,7 @@ class ReferencesCCNDItem(ReferencesCJFQItem):
         CCND.source = self['source']
         CCND.issuing_time = self['issuing_time']
         CCND.save()
+        self['database_id'] = CCND.id
 
 
 class ReferencesCPFDItem(ReferencesSSJDItem):
@@ -230,3 +245,4 @@ class ReferencesCPFDItem(ReferencesSSJDItem):
         CPFD.info = self['info']
         CPFD.issuing_time = self['issuing_time']
         CPFD.save()
+        self['database_id'] = CPFD.id
