@@ -205,7 +205,9 @@ def select_references(response, *args,
                         CJFQ_item['source'] = source
                         CJFQ_item['issuing_time'] = issuing_time
                         yield CJFQ_item
-                    CJFQ_list.append(str(ReferencesCJFQ.objects.filter(url=url)[0].id))
+                        CJFQ_list.append(CJFQ_item['database_id'])
+                    else:
+                        CJFQ_list.append(str(ReferencesCJFQ.objects.filter(url=url)[0].id))
                 except TypeError:
                     continue
                 except IndexError:
@@ -234,7 +236,9 @@ def select_references(response, *args,
                         CDFD_item['source'] = source
                         CDFD_item['issuing_time'] = issuing_time
                         yield CDFD_item
-                    CDFD_list.append(str(ReferencesCDFD.objects.filter(url=url)[0].id))
+                        CDFD_list.append(CDFD_item['database_id'])
+                    else:
+                        CDFD_list.append(str(ReferencesCDFD.objects.filter(url=url)[0].id))
             except IndexError:
                 # 数据没有url获取他内容，不完整，不具备参考价值
                 continue
@@ -261,7 +265,9 @@ def select_references(response, *args,
                         CMFD_item['source'] = source
                         CMFD_item['issuing_time'] = issuing_time
                         yield CMFD_item
-                    CMFD_list.append(str(ReferencesCMFD.objects.filter(url=url)[0].id))
+                        CMFD_list.append(CMFD_item['database_id'])
+                    else:
+                        CMFD_list.append(str(ReferencesCMFD.objects.filter(url=url)[0].id))
             except IndexError:
                 # 数据没有url获取他内容，不完整，不具备参考价值
                 continue
@@ -286,9 +292,15 @@ def select_references(response, *args,
                         CBBD_item['source'] = source
                         CBBD_item['issuing_time'] = issuing_time
                         yield CBBD_item
-                    CBBD_list.append(str(ReferencesCBBD.objects.filter(
-                        Q(title=title) & Q(authors=authors) & Q(source=source) & Q(issuing_time=issuing_time))[
-                                             0].id))
+                        CBBD_list.append(CBBD_item['database_id'])
+                    else:
+                        CBBD_list.append(
+                            str(
+                                ReferencesCBBD.objects.filter(
+                                    Q(title=title) & Q(authors=authors) & Q(source=source) & Q(issuing_time=issuing_time)
+                                )[0].id
+                            )
+                        )
             except IndexError:
                 # 数据没有url获取他内容，不完整，不具备参考价值
                 continue
@@ -311,7 +323,9 @@ def select_references(response, *args,
                     SSJD_item['info'] = info
                     SSJD_item['issuing_time'] = issuing_time
                     yield SSJD_item
-                SSJD_list.append(str(ReferencesSSJD.objects.filter(url=url)[0].id))
+                    SSJD_list.append(SSJD_item['database_id'])
+                else:
+                    SSJD_list.append(str(ReferencesSSJD.objects.filter(url=url)[0].id))
         elif dbId == 'pc_CRLDENG':
             # 提取外文题录数据库
             for li in li_s:
@@ -334,8 +348,15 @@ def select_references(response, *args,
                         CRLDENG_item['info'] = info
                         CRLDENG_item['issuing_time'] = issuing_time
                         yield CRLDENG_item
-                    CRLDENG_list.append(str(ReferencesCRLDENG.objects.filter(
-                        Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time))[0].id))
+                        CRLDENG_list.append(CRLDENG_item['database_id'])
+                    else:
+                        CRLDENG_list.append(
+                            str(
+                                ReferencesCRLDENG.objects.filter(
+                                    Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time)
+                                )[0].id
+                            )
+                        )
                 except TypeError:
                     continue
         elif dbId == 'pc_CCND':
@@ -360,7 +381,9 @@ def select_references(response, *args,
                     CCND_item['source'] = source
                     CCND_item['issuing_time'] = issuing_time
                     yield CCND_item
-                CCND_list.append(str(ReferencesCCND.objects.filter(url=url)[0].id))
+                    CCND_list.append(CCND_item['database_id'])
+                else:
+                    CCND_list.append(str(ReferencesCCND.objects.filter(url=url)[0].id))
         elif dbId == 'pc_CPFD':
             for li in li_s:
                 url = 'http://kns.cnki.net' + li.css('a::attr(href)').extract_first()
@@ -379,6 +402,8 @@ def select_references(response, *args,
                     CPFD_item['info'] = info
                     CPFD_item['issuing_time'] = issuing_time
                     yield CPFD_item
-                CPFD_list.append(str(ReferencesCPFD.objects.filter(url=url)[0].id))
+                    CPFD_list.append(CPFD_item['database_id'])
+                else:
+                    CPFD_list.append(str(ReferencesCPFD.objects.filter(url=url)[0].id))
         else:
             print('当前块所属库dbId错误!url=', response.url)
