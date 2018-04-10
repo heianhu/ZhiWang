@@ -8,52 +8,14 @@
 import scrapy
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, TakeFirst, Join
-from crawl_cnki.models import Article, Periodical, Author, Article_Author, Organization, Article_Organization, References, Article_References
+from crawl_cnki.models import Article, Periodical, Author, Article_Author, Organization, Article_Organization, \
+    References, Article_References
 from w3lib.html import remove_tags
 from django.db.utils import IntegrityError
-
 import re
 
+from .utils import *
 
-def get_filename_from_url(url):
-    """
-    从url中提取filename
-    :param url: 'http://...&filename=JAXK201803001&R...'
-    :return: 'JAXK201803001'
-    """
-    filename = re.search('filename=((.*?))&', url).group(1)
-    return filename
-
-def get_authors_str(value):
-    """
-    从html中提取作者字信息
-    :param value:
-    :return:  "('au','张三','10086'),('au','张四','10087')"
-    """
-    authors = re.findall('TurnPageToKnet\((.*?)\)', value)
-    return authors
-
-def get_authors_name(authors):
-    """
-    从str中提取作者姓名列表
-    :param authors: "('au','张三','10086'),('au','张四','10087')"
-    :return: ['张三','张四']
-    """
-    author_name = []
-    for author in authors:
-        author_name.append(author.split("\',\'")[1])
-    return author_name
-
-def get_authors_id(authors):
-    """
-    从str中提取作者id列表
-    :param authors:  "('au','张三','10086'),('au','张四','10087')"
-    :return: ['10086','10087']
-    """
-    author_id = []
-    for author in authors:
-        author_id.append(author.split("\',\'")[-1][:-1])
-    return author_id
 
 class ArticleItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
@@ -99,8 +61,6 @@ class ArticleItem(scrapy.Item):
 
         return article
 
-
-
     # 作者部分
     authors_id = scrapy.Field(
         input_processor=MapCompose(get_authors_str),
@@ -114,7 +74,7 @@ class ArticleItem(scrapy.Item):
 
     def save_to_mysql_author(self):
         authors = []
-        for author_id, name in zip(self.get('authors_id', ''), self.get('authors_name','')):
+        for author_id, name in zip(self.get('authors_id', ''), self.get('authors_name', '')):
             author = Author()
             author.authors_id = author_id
             author.authors_name = name
@@ -181,42 +141,6 @@ class ArticleItem(scrapy.Item):
             article_org.save()
 
 
-
-
-
-# TODO
-def clean_refers(value):
-    return value
-
-# TODO
-def get_url_from_refer(refer):
-    match = re.search(r'href=\"(.*?)\">', refer)
-    if match:
-        url = match.group(1).replace('&amp;', '&')
-        url = 'http://kns.cnki.net/' + url
-        return url
-    else:
-        return ''
-
-
-# TODO
-def get_title_from_refer(refer):
-    title = ''
-    # 带超链接
-    if '</a>' in refer:
-        match = re.search(r'<a(.*?)>(.*?)</a>', refer)
-        if match:
-            title = match.group(2)
-    # 不带超链接
-    else:
-        pass
-    return title
-
-
-# TODO
-def get_author_from_refer(refer):
-    return refer
-
 class ReferenceItemLoader(ItemLoader):
     pass
     # default_output_processor = TakeFirst()
@@ -259,13 +183,8 @@ class ReferenceItem(scrapy.Item):
             refer = References.objects.get(title=self.get('title', ''))
         return article, refer
 
-
     def save_to_mysql_article_refer(self, article, refer):
         article_refer = Article_References()
         article_refer.article = article
         article_refer.references = refer
         article_refer.save()
-
-
-
-
