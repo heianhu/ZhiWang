@@ -67,7 +67,8 @@ class CnkiSpiderSpider(scrapy.Spider):
         # 对每一个issn进行爬取
         for periodical in periodicals:
             summary_url, pagenums, cookies = self.do_search(self.search_url, periodical.issn_number)
-
+            # TODO 手动翻页
+            # TODO 添加年份条件
             # for page in range(1, pagenums + 1):
             for page in range(1):  # 暂时只搜一页
             # curr_page = "curpage={0}&turnpage={0}&".format(page)
@@ -106,7 +107,6 @@ class CnkiSpiderSpider(scrapy.Spider):
             pagenums = 1
 
         driver.close()
-
         return summary_url, pagenums, cookies
 
 
@@ -118,7 +118,8 @@ class CnkiSpiderSpider(scrapy.Spider):
         :return:
         """
         summarys = response.css('.GridTableContent tr')[1:]
-        for summary in summarys[:1]:  # 暂时只取第一条文章
+        for summary in summarys:
+        # for summary in summarys[:1]:  # 暂时只取第一条文章
             url = summary.css('.fz14::attr(href)').extract()[0]
             # 改成正常的url
             url = url.split('/kns')[-1]
@@ -144,20 +145,15 @@ class CnkiSpiderSpider(scrapy.Spider):
         periodicals = response.meta.get('periodical')
 
         item_loader = ArticleItemLoader(item=ArticleItem(), response=response)
-        # 文章主体部分
+        # 文章部分
         item_loader.add_value('url', response.url)
         item_loader.add_value('filename', response.url)
         item_loader.add_value('title', summary.css('.fz14::text').extract())
         item_loader.add_value('issuing_time', summary.css('.cjfdyxyz + td::text').extract())
         item_loader.add_value('periodicals', periodicals)
-        # TODO 文章剩余细节
-        # item_loader.add_css('cited', periodical)
-        # item_loader.add_css('keywords', periodical)
-        # item_loader.add_css('abstract', periodical)
-        # item_loader.add_css('DOI', periodical)
-        # item_loader.add_css('DOI', periodical)
-        # item_loader.add_css('remark', periodical)
 
+        # 文章剩余细节
+        item_loader.add_css('remark', '.wxBaseinfo p')
 
         # 文章作者和机构部分
         item_loader.add_css('authors_id', '.author')
@@ -171,7 +167,7 @@ class CnkiSpiderSpider(scrapy.Spider):
 
         # 参考文献部分
 
-        # 记住此文章
+        # 记住此文章名
         filename = article_item['filename']
 
         # 各个数据库的代码号
@@ -182,7 +178,6 @@ class CnkiSpiderSpider(scrapy.Spider):
         for source in sources:
             pc = int(response.xpath('//span[@id="pc_{0}"]/text()'.format(source)).extract_first(default=1))
             pages.append(pc)
-
 
         # 每个数据库的每一页为一个url
         for i, source in enumerate(sources):
@@ -219,12 +214,9 @@ class CnkiSpiderSpider(scrapy.Spider):
         for refer in refers:
             item_loader = ReferenceItemLoader(item=ReferenceItem(), response=response)
             item_loader.add_value('article', filename)
-            item_loader.add_value('source', source)
-            item_loader.add_value('url', refer)
-            item_loader.add_value('title', refer)
-            item_loader.add_value('authors', refer)
-            item_loader.add_value('issuing_time', refer)
-            item_loader.add_value('remark', refer)
+
+            # 将source和参考文献一起传入，供后续按数据库分类清洗
+            item_loader.add_value('remark', [source, refer])
 
             reference_item = item_loader.load_item()
             yield reference_item

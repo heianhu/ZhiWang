@@ -24,6 +24,7 @@ class CrawlCnkiPeriodicalsPipeline(object):
 
         elif isinstance(item, ReferenceItem):
             try:
+                pass
                 # 写入基础表
                 article, refer = item.save_to_mysql_refer()
 
