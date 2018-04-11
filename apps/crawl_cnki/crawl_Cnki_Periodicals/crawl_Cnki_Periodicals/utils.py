@@ -4,9 +4,12 @@ __author__ = 'heianhu'
 import re
 
 RE_FILENAME = re.compile(r'filename=((.*?))&')
-RE_AUTHORS = re.compile('TurnPageToKnet\((.*?)\)')
+RE_AUTHORS = re.compile('TurnPageToKnet\((.*?)\)">')
 RE_REFER_URL = re.compile(r'href=\"(.*?)\">')
 RE_REFER_TITLE = re.compile(r'<a(.*?)>(.*?)</a>')
+
+def get_value(value):
+    return value
 
 def get_issuing_time(value):
     """
@@ -37,6 +40,7 @@ def parse_article(value):
 
     def clean_keyword(p):
         keywords = re.findall(r'TurnPageToKnet\(\'kw\',\'(.*?)\',\'[\d]*\'\)', p)
+        keywords = ';'.join(keywords)
         info['keywords'] = keywords
 
     def clean_fund(p):
@@ -106,6 +110,8 @@ def get_authors_id(authors):
         author_id.append(author.split("\',\'")[-1][:-1])
     return author_id
 
+def remove_space(value):
+    return re.sub('\n|\r|  |&amp|;nbsp', '', value)
 
 
 class CleanRefers(object):
@@ -132,14 +138,21 @@ class CleanRefers(object):
         return self.info
 
     def clean_CJFQ(self, refer):
-        match = re.search(r'href="(.*?)">(.*?)</a>(.*?)<a(.*?)>(.*?)</a>(.*?)<a(.*?)>(.*?)</a>', refer)
+        if '</a>' in refer:
+            match = re.search(r'href="(.*?)">(.*?)</a>(.*?)<a(.*?)>(.*?)</a>(.*?)<a(.*?)>(.*?)</a>', refer)
 
-        self.info['url'] = match.group(1)
-        self.info['title'] = match.group(2)
-        self.info['author'] = match.group(3)
-        self.info['source'] = match.group(5)
-        self.info['issuing_time'] = match.group(8)
-
+            self.info['url'] = match.group(1)
+            self.info['title'] = match.group(2)
+            self.info['author'] = match.group(3)
+            self.info['source'] = match.group(5)
+            self.info['issuing_time'] = match.group(8)
+        else:
+            # '白血病微环境对正常造血的影响[J]. 宫跃敏,程涛.&amp;nbsp&amp;nbsp中华血液学杂志.2015(01)'
+            match = re.search(r'(.*?)\.(.*?)\.(.*?)\.(.*?)', refer)
+            self.info['title'] = match.group(1)
+            self.info['author'] = match.group(2)
+            self.info['source'] = match.group(3)
+            self.info['issuing_time'] = match.group(4)
         return self.info
 
     def clean_CDFD(self, refer):
@@ -185,10 +198,17 @@ class CleanRefers(object):
         return self.info
 
     def clean_CRLDENG(self, refer):
-        match = re.search(r'<a([\s\S]*?)>(.*?)</a>([\s\S]*?)([\d]{4})', refer)
-        self.info['title'] = match.group(2)
-        self.info['author'] = match.group(3)
-        self.info['issuing_time'] = match.group(4)
+        if '</a>' in refer:
+            """<a onclick="OpenCRLDENG('Association of3its');">ality traits</a>. Yang H,Xu Z Y,Lei M G,et al. Journal of Applied Genetics. """
+            match = re.search(r'<a([\s\S]*?)>(.*?)</a>([\s\S]*)', refer)
+            self.info['title'] = match.group(2)
+            self.info['author'] = match.group(3)
+        else:
+            # ['CRLDENG', ' Arciero. International Journal of Biological Markers\r\n        . 2003']
+            match = re.search(r'([\s\S]*)\.[\s]?([\d]*)', refer)
+            self.info['title'] = match.group(1)
+            self.info['issuing_time'] = match.group(2)
+
         return self.info
 
     def clean_CCND(self, refer):
@@ -206,3 +226,36 @@ class CleanRefers(object):
         pass
 
         return self.info
+
+# from selenium.webdriver.support.ui import Select  # 导入Select
+# from scrapy.selector import Selector
+#
+# import time
+# from selenium.webdriver.common.keys import Keys  # 导入Keys
+#
+# from selenium import webdriver
+# driver = webdriver.Chrome()
+# driver.get('http://nvsm.cnki.net/kns/brief/result.aspx?dbprefix=CJFQ')
+# elem = driver.find_element_by_id("magazine_value1")  # 找到name为q的元素，这里是个搜索框
+# elem.send_keys('1006-9305')
+# select = Select(driver.find_element_by_id('magazine_special1'))  # 通过Select来定义该元素是下拉框
+# select.select_by_index(1)  # 通过下拉元素的位置来选择
+# elem.send_keys(Keys.RETURN)  # 相当于回车键，提交
+# time.sleep(2)
+# # 搜索结果列表页的url
+# _root_url = 'http://nvsm.cnki.net'
+# summary_url = _root_url + '/kns/brief/brief.aspx?curpage=1&RecordsPerPage=20&QueryID=20&ID=&turnpage=1&dbPrefix=CJFQ&PageName=ASP.brief_result_aspx#J_ORDER&'
+# driver.get(url=summary_url)
+# # 拿到cookies
+# cookies = driver.get_cookies()
+# # 拿到最大页数
+# pagenums = Selector(text=driver.page_source).css('.countPageMark::text').extract()
+# try:
+#     pagenums = int(pagenums[0].split('/')[1])
+# except:
+#     pagenums = 1
+#
+
+
+
+

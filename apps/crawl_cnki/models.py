@@ -66,7 +66,7 @@ class References(models.Model):
     参考文献
     """
     url = models.URLField(max_length=255, verbose_name='参考文献的url')
-    title = models.CharField(max_length=255, verbose_name='参考文献的题名')
+    title = models.TextField(verbose_name='参考文献的题名')
     authors = models.TextField(max_length=255, verbose_name='参考文献的作者')
     source = models.CharField(max_length=255, verbose_name='参考文献的来源')
     issuing_time = models.CharField(max_length=255, verbose_name='发表时间')

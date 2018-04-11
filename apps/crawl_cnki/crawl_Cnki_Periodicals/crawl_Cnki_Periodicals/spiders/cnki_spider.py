@@ -34,12 +34,14 @@ class CnkiSpiderSpider(scrapy.Spider):
 
     # crawlcnkisummary_gen = CrawlCnkiSummary()
 
-    def __init__(self):
+    def __init__(self, issn=None, *args, **kwargs):
         """
         初始化，建立与Django的models连接，设置初始值
         :param use_Chrome: True使用Chrome，False使用PhantomJS
         :param executable_path: PhantomJS路径
         """
+        self.issn = issn
+
         self.split_word = re.compile(
             r'(QueryID=[a-zA-Z0-9.]&|CurRec=\d*&|DbCode=[a-zA-Z]*&|urlid=[a-zA-Z0-9.]*&|yx=[a-zA-Z]*)',
             flags=re.I
@@ -61,22 +63,33 @@ class CnkiSpiderSpider(scrapy.Spider):
         控制开始
         从数据库中找出所要爬取的url
         """
-        # periodicals = Periodicals.objects.all()  # 期刊
-        periodicals = Periodicals.objects.filter(issn_number='1674-7216')  # 暂时只用一个issn
+        # periodicals = Periodicals.objects.all()[:1]  # 期刊
+        periodicals = Periodicals.objects.filter(issn_number=self.issn)  # 暂时只用一个issn
 
         # 对每一个issn进行爬取
-        for periodical in periodicals:
-            summary_url, pagenums, cookies = self.do_search(self.search_url, periodical.issn_number)
-            # TODO 手动翻页
+        for i, periodical in enumerate(periodicals):
+            pagenums, cookies = self.do_search(self.search_url, periodical.issn_number)
             # TODO 添加年份条件
             # for page in range(1, pagenums + 1):
             for page in range(1):  # 暂时只搜一页
-            # curr_page = "curpage={0}&turnpage={0}&".format(page)
-                # page_url = summary_url.format(curr_page)
+                every_page_url = self._root_url + "/kns/brief/brief.aspx?{0}RecordsPerPage=20&QueryID=1&ID=&pagemode=L&dbPrefix=CJFQ&Fields=&DisplayMode=listmode&SortType=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)&PageName=ASP.brief_result_aspx#J_ORDER&"
+                curr_page = "curpage={0}&turnpage={0}&".format(page)
+                if page == 1:
+                    page_url = every_page_url.format('')
+                else:
+                    page_url = every_page_url.format(curr_page)
+
+
                 # 遍历每一页
-                yield scrapy.Request(url=summary_url, headers=self.header,
-                                callback=self.parse_summary, cookies=cookies,
+
+                yield scrapy.Request(url=page_url, headers=self.header,
+                                callback=self.parse_summary,
+                                     cookies=cookies,
                                 meta={'periodical': periodical.id})
+                pass
+                print('当前页码：', page)
+
+
 
 
     def do_search(self, search_url, issn_number):
@@ -86,7 +99,7 @@ class CnkiSpiderSpider(scrapy.Spider):
         :param issn_number:搜索条件
         :return: 搜到的可翻页的summary_url, 总页数, cookies
         """
-        driver = webdriver.Chrome() #初始化webdriver
+        driver = webdriver.Chrome()  # 初始化webdriver
         driver.get(search_url)
         elem = driver.find_element_by_id("magazine_value1")  # 找到name为q的元素，这里是个搜索框
         elem.send_keys(issn_number)
@@ -94,6 +107,12 @@ class CnkiSpiderSpider(scrapy.Spider):
         select.select_by_index(1)  # 通过下拉元素的位置来选择
         elem.send_keys(Keys.RETURN)  # 相当于回车键，提交
         time.sleep(2)
+
+        # url = driver.find_element_by_class_name("groupsorttitle").get_attribute('href')
+
+
+        # queryid = re.search(r'queryid=([\d]+)\">相关度', driver.page_source)
+
         # 搜索结果列表页的url
         summary_url = self._root_url + '/kns/brief/brief.aspx?curpage=1&RecordsPerPage=20&QueryID=20&ID=&turnpage=1&dbPrefix=CJFQ&PageName=ASP.brief_result_aspx#J_ORDER&'
         driver.get(url=summary_url)
@@ -106,8 +125,10 @@ class CnkiSpiderSpider(scrapy.Spider):
         except:
             pagenums = 1
 
+
         driver.close()
-        return summary_url, pagenums, cookies
+
+        return pagenums, cookies
 
 
 
@@ -118,8 +139,8 @@ class CnkiSpiderSpider(scrapy.Spider):
         :return:
         """
         summarys = response.css('.GridTableContent tr')[1:]
-        for summary in summarys:
-        # for summary in summarys[:1]:  # 暂时只取第一条文章
+        # for summary in summarys:
+        for summary in summarys[:1]:  # 暂时只取第一条文章
             url = summary.css('.fz14::attr(href)').extract()[0]
             # 改成正常的url
             url = url.split('/kns')[-1]
@@ -216,7 +237,10 @@ class CnkiSpiderSpider(scrapy.Spider):
             item_loader.add_value('article', filename)
 
             # 将source和参考文献一起传入，供后续按数据库分类清洗
+            item_loader.add_value('info', [source, refer])
+            # remark保存为原始信息
             item_loader.add_value('remark', [source, refer])
+
 
             reference_item = item_loader.load_item()
             yield reference_item

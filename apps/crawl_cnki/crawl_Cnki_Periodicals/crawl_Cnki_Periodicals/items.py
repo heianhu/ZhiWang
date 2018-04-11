@@ -38,21 +38,21 @@ class ArticleItem(scrapy.Item):
 
     # 作者部分
     authors_id = scrapy.Field(
-        input_processor=MapCompose(get_authors_str),
+        input_processor=MapCompose(remove_space, get_authors_str),
         output_processor=get_authors_id
     )
     authors_name = scrapy.Field(
-        input_processor=MapCompose(get_authors_str),
+        input_processor=MapCompose(remove_space, get_authors_str),
         output_processor=(get_authors_name)
     )
 
     # 机构部分
     org_id = scrapy.Field(
-        input_processor=MapCompose(get_authors_str),
+        input_processor=MapCompose(remove_space, get_authors_str),
         output_processor=get_authors_id
     )
     org_name = scrapy.Field(
-        input_processor=MapCompose(get_authors_str),
+        input_processor=MapCompose(remove_space, get_authors_str),
         output_processor=(get_authors_name)
     )
 
@@ -146,6 +146,9 @@ class ReferenceItemLoader(ItemLoader):
 class ReferenceItem(scrapy.Item):
     article = scrapy.Field()
     remark = scrapy.Field(
+        output_processor=get_value
+    )
+    info = scrapy.Field(
         output_processor=CleanRefers()
     )
 
@@ -153,11 +156,11 @@ class ReferenceItem(scrapy.Item):
         article = Article.objects.get(filename=self.get('article', ''))
         refer = References()
 
-        refer.url = self['remark'].get('url', '')
-        refer.title = self['remark'].get('title', '')
-        refer.authors = self['remark'].get('author', '')
-        refer.source = self['remark'].get('source', '')
-        refer.issuing_time = self['remark'].get('issuing_time', '')
+        refer.url = self['info'].get('url', '')
+        refer.title = self['info'].get('title', '')
+        refer.authors = self['info'].get('author', '')
+        refer.source = self['info'].get('source', '')
+        refer.issuing_time = self['info'].get('issuing_time', '')
         refer.remark = self.get('remark', '')
         try:
             refer.save()
