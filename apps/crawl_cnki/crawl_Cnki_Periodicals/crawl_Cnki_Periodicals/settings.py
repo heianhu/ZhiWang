@@ -19,10 +19,10 @@ NEWSPIDER_MODULE = 'crawl_Cnki_Periodicals.spiders'
 #USER_AGENT = 'crawl_Cnki_Periodicals (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-#CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 200
 
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
@@ -46,15 +46,17 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'crawl_Cnki_Periodicals.middlewares.CrawlCnkiPeriodicalsSpiderMiddleware': 543,
-#}
+SPIDER_MIDDLEWARES = {
+   'crawl_Cnki_Periodicals.middlewares.CrawlCnkiPeriodicalsSpiderMiddleware': 543,
+}
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'crawl_Cnki_Periodicals.middlewares.MyCustomDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+   # 'crawl_Cnki_Periodicals.middlewares.MyCustomDownloaderMiddleware': 543,
+   # 'crawl_Cnki_Periodicals.middlewares.Use_seleniumMiddleware': 1
+
+}
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
@@ -64,9 +66,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'crawl_Cnki_Periodicals.pipelines.CrawlCnkiPeriodicalsPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'crawl_Cnki_Periodicals.pipelines.CrawlCnkiPeriodicalsPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -88,3 +90,6 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+LOG_LEVEL = 'INFO'
+DOWNLOAD_TIMEOUT = 15
