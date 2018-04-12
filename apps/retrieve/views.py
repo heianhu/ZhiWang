@@ -31,7 +31,7 @@ class Search(View):
         """
             'txt_2_sel': $('#txt_2_sel').val(),{# 主题选择 #}
             'txt_2_value1': $('#txt_2_value1').val(),{# 主题输入框1 #}
-            'txt_2_relation':  $('#txt_2_relation').val(),{# 并行条件选择 #}
+            'txt_2_relation1':  $('#txt_2_relation1').val(),{# 并行条件选择 #}
             'txt_2_value2': $('#txt_2_value2').val(),{# 主题输入框2 #}
             'au_1_sel': $('#au_1_sel').val(), {# 作者选择 #}
             'au_1_value1': $('#au_1_value1').val(),   {# 作者输入框 #}
@@ -43,7 +43,7 @@ class Search(View):
         para = dict(
             txt_2_sel=request.POST.get('txt_2_sel', ''),  # 主题选择
             txt_2_value1=request.POST.get('txt_2_value1', ''),  # 主题输入框1
-            txt_2_relation=request.POST.get('txt_2_relation', ''),  # 并行条件选择
+            txt_2_relation1=request.POST.get('txt_2_relation1', ''),  # 并行条件选择
             txt_2_value2=request.POST.get('txt_2_value2', ''),  # 主题输入框2
             # au_1_sel = request.POST.get('au_1_sel', '') # 作者选择  暂时没用
             au_1_value1=request.POST.get('au_1_value1', ''),  # 作者输入框
@@ -119,7 +119,7 @@ class Search(View):
         try:
             txt_2_sel = search_filter.get('txt_2_sel', '')
             txt_2_value1 = search_filter.get('txt_2_value1', '')
-            txt_2_relation = search_filter.get('txt_2_relation', '')
+            txt_2_relation1 = search_filter.get('txt_2_relation1', '')
             txt_2_value2 = search_filter.get('txt_2_value2', '')
             au_1_value1 = search_filter.get('au_1_value1', '')
             org_1_value = search_filter.get('org_1_value', '')
@@ -166,15 +166,15 @@ class Search(View):
                        & (Q(detail__organizations__icontains=org_1_value) | Q(detail__organizations__icontains=org_id)) \
                        & date_filter
 
-            if txt_2_relation == 'CNKI_AND':
+            if txt_2_relation1 == 'CNKI_AND':
                 all_articles = Summary.objects.filter(
                     (txt_2_sel_dic[txt_2_sel][0] & txt_2_sel_dic[txt_2_sel][1]) & else_sel, source__mark=True
                 ).order_by('-issuing_time')
-            elif txt_2_relation == 'CNKI_OR':
+            elif txt_2_relation1 == 'CNKI_OR':
                 all_articles = Summary.objects.filter(
                     (txt_2_sel_dic[txt_2_sel][0] | txt_2_sel_dic[txt_2_sel][1]) & else_sel, source__mark=True
                 ).order_by('-issuing_time')
-            elif txt_2_relation == 'CNKI_NOT':
+            elif txt_2_relation1 == 'CNKI_NOT':
                 all_articles = Summary.objects.filter(
                     txt_2_sel_dic[txt_2_sel][0] & else_sel, source__mark=True
                 ).exclude(txt_2_sel_dic[txt_2_sel][1]).order_by('-issuing_time')

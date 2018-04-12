@@ -1,5 +1,7 @@
 from django.db import models
 from datetime import datetime
+
+
 # Create your models here.
 
 class Periodical(models.Model):
@@ -13,7 +15,6 @@ class Periodical(models.Model):
     class Meta:
         verbose_name = '期刊列表'
         verbose_name_plural = verbose_name
-
 
 
 class Article(models.Model):
@@ -60,23 +61,29 @@ class Organization(models.Model):
         verbose_name_plural = verbose_name
 
 
-
 class References(models.Model):
     """
     参考文献
     """
-    article = models.ForeignKey(Article, verbose_name='文章')
     url = models.URLField(max_length=255, verbose_name='参考文献的url')
-    title = models.CharField(max_length=255, verbose_name='参考文献的题名')
-    authors = models.CharField(max_length=255, verbose_name='参考文献的作者')
+    title = models.TextField(verbose_name='参考文献的题名')
+    authors = models.TextField(max_length=255, verbose_name='参考文献的作者')
     source = models.CharField(max_length=255, verbose_name='参考文献的来源')
     issuing_time = models.CharField(max_length=255, verbose_name='发表时间')
-    remark = models.CharField(max_length=255, verbose_name='备注')
+    remark = models.TextField(verbose_name='备注')
 
     class Meta:
         verbose_name = '参考文献'
         verbose_name_plural = verbose_name
 
+
+class Article_References(models.Model):
+    article = models.ForeignKey(Article, verbose_name='文章')
+    references = models.ForeignKey(References, verbose_name='参考文献')
+
+    class Meta:
+        verbose_name = '参考文献'
+        verbose_name_plural = verbose_name
 
 
 class Article_Author(models.Model):
@@ -87,5 +94,3 @@ class Article_Author(models.Model):
 class Article_Organization(models.Model):
     article = models.ForeignKey(Article, verbose_name='文献', blank=True)
     organization = models.ForeignKey(Organization, verbose_name='机构', blank=True)
-
-
