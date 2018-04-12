@@ -20,7 +20,6 @@ class CrawlCnkiPeriodicalsPipeline(object):
             item.save_to_mysql_article_author(article, authors)
             item.save_to_mysql_article_org(article, orgs)
 
-
         elif isinstance(item, ReferenceItem):
 
             # 写入基础表
@@ -29,6 +28,4 @@ class CrawlCnkiPeriodicalsPipeline(object):
             # 写入 m2m 的表
             item.save_to_mysql_article_refer(article, refer)
 
-
         return item
-

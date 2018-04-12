@@ -16,6 +16,7 @@ import re
 
 from .utils import *
 
+
 class ArticleItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
 
@@ -55,7 +56,6 @@ class ArticleItem(scrapy.Item):
         input_processor=MapCompose(remove_space, get_authors_str),
         output_processor=(get_authors_name)
     )
-
 
     def save_to_mysql_article(self):
 
@@ -139,9 +139,9 @@ class ArticleItem(scrapy.Item):
             article_org.save()
 
 
-
 class ReferenceItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
+
 
 class ReferenceItem(scrapy.Item):
     article = scrapy.Field()

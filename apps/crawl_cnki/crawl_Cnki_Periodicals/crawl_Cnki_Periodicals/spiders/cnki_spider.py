@@ -7,16 +7,17 @@ from selenium.webdriver.common.keys import Keys  # 导入Keys
 from selenium.webdriver.chrome.options import Options  # Chrome设置内容
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from crawl_data.models import Periodicals
-from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.items import ArticleItemLoader, ArticleItem, ReferenceItem, ReferenceItemLoader
+from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.items import ArticleItemLoader, ArticleItem, \
+    ReferenceItem, ReferenceItemLoader
 import time
 from scrapy.selector import Selector
 
+
 # from .BrowserSelect import CrawlCnkiSummary
+from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.RegularExpressions import *
 
 
 class CnkiSpiderSpider(scrapy.Spider):
-
-
     name = 'cnki_spider'
     # allowed_domains = ['cnki.net']
     start_urls = ['http://kns.cnki.net/']
@@ -24,13 +25,6 @@ class CnkiSpiderSpider(scrapy.Spider):
         'Host': 'kns.cnki.net',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
     }
-    split_word = re.compile(
-        r'(QueryID=[a-zA-Z0-9.]&|CurRec=\d*&|DbCode=[a-zA-Z]*&|urlid=[a-zA-Z0-9.]*&|yx=[a-zA-Z]*)',
-        flags=re.I
-    )
-    re_issuing_time = re.compile(
-        '((?!0000)[0-9]{4}[-/]((0[1-9]|1[0-2])[-/](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[-/](29|30)|(0[13578]|1[02])[-/]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[-/]02[-/]29)'
-    )
 
     # crawlcnkisummary_gen = CrawlCnkiSummary()
 
@@ -42,12 +36,6 @@ class CnkiSpiderSpider(scrapy.Spider):
         """
         self.issn = issn
 
-        self.split_word = re.compile(
-            r'(QueryID=[a-zA-Z0-9.]&|CurRec=\d*&|DbCode=[a-zA-Z]*&|urlid=[a-zA-Z0-9.]*&|yx=[a-zA-Z]*)',
-            flags=re.I
-        )
-        self.re_issuing_time = re.compile(
-            '((?!0000)[0-9]{4}[-/]((0[1-9]|1[0-2])[-/](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[-/](29|30)|(0[13578]|1[02])[-/]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[-/]02[-/]29)')
         self._root_url = 'http://nvsm.cnki.net'
 
         self.search_url = self._root_url + '/kns/brief/result.aspx?dbprefix=CJFQ'
@@ -79,18 +67,14 @@ class CnkiSpiderSpider(scrapy.Spider):
                 else:
                     page_url = every_page_url.format(curr_page)
 
-
                 # 遍历每一页
 
                 yield scrapy.Request(url=page_url, headers=self.header,
-                                callback=self.parse_summary,
+                                     callback=self.parse_summary,
                                      cookies=cookies,
-                                meta={'periodical': periodical.id})
+                                     meta={'periodical': periodical.id})
                 pass
                 print('当前页码：', page)
-
-
-
 
     def do_search(self, search_url, issn_number):
         """
@@ -110,7 +94,6 @@ class CnkiSpiderSpider(scrapy.Spider):
 
         # url = driver.find_element_by_class_name("groupsorttitle").get_attribute('href')
 
-
         # queryid = re.search(r'queryid=([\d]+)\">相关度', driver.page_source)
 
         # 搜索结果列表页的url
@@ -125,12 +108,9 @@ class CnkiSpiderSpider(scrapy.Spider):
         except:
             pagenums = 1
 
-
         driver.close()
 
         return pagenums, cookies
-
-
 
     def parse_summary(self, response):
         """
@@ -146,15 +126,14 @@ class CnkiSpiderSpider(scrapy.Spider):
             url = url.split('/kns')[-1]
             url = 'http://kns.cnki.net/KCMS' + url
             url = ''.join(url.split())  # 有些url中含有空格
-            url = self.split_word.sub('', url)
+            url = RE_split_word.sub('', url)
 
             # 将summary中的网页元素传给后续的parse函数，以统一解析文章所有细节
             yield scrapy.Request(url=url, headers=self.header,
                                  callback=self.parse,
                                  meta={'summary': summary,
                                        'periodical': response.meta.get('periodical')
-                                     })
-
+                                       })
 
     def parse(self, response):
         """
@@ -185,7 +164,6 @@ class CnkiSpiderSpider(scrapy.Spider):
         article_item = item_loader.load_item()
         yield article_item
 
-
         # 参考文献部分
 
         # 记住此文章名
@@ -202,17 +180,16 @@ class CnkiSpiderSpider(scrapy.Spider):
 
         # 每个数据库的每一页为一个url
         for i, source in enumerate(sources):
-            for page in range(1, pages[i]+1):
+            for page in range(1, pages[i] + 1):
                 # 按数据库和页码格式化每一个url
                 url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?' \
-                                 'dbcode=CJFQ&filename={0}&RefType=1&CurDBCode={1}&page={2}' \
-                                    .format(filename, source, page)
+                      'dbcode=CJFQ&filename={0}&RefType=1&CurDBCode={1}&page={2}' \
+                    .format(filename, source, page)
 
                 # 每一个url只解析一种数据库的一页参考文献
                 yield scrapy.Request(url=url, headers=self.header, callback=self.parse_references,
                                      meta={'filename': filename,
                                            'source': source})
-
 
     def parse_references(self, response):
         """
@@ -229,7 +206,7 @@ class CnkiSpiderSpider(scrapy.Spider):
         # essayBoxs 是一个html页面中所有的数据库box，只有一个box是需要提取的(符合source)
         for box in essayBoxs:
             if source in box:
-                refers = re.findall(r'</em>([\s\S]*?)</li>', box)
+                refers = RE_refers.findall(box)
                 break
 
         for refer in refers:
@@ -240,7 +217,6 @@ class CnkiSpiderSpider(scrapy.Spider):
             item_loader.add_value('info', [source, refer])
             # remark保存为原始信息
             item_loader.add_value('remark', [source, refer])
-
 
             reference_item = item_loader.load_item()
             yield reference_item

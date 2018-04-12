@@ -6,6 +6,7 @@
 # http://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from selenium import webdriver
 
 
 class CrawlCnkiPeriodicalsSpiderMiddleware(object):
@@ -55,11 +56,9 @@ class CrawlCnkiPeriodicalsSpiderMiddleware(object):
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
 
-from selenium import webdriver
 
 class Use_seleniumMiddleware(object):
     def process_request(self, request, spider):
-
         driver = webdriver.Chrome()  # 初始化webdriver
         driver.get('http://localhost')
         for cookie in request.cookies:

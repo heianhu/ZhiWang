@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 __author__ = 'heianhu'
 import re
+from .RegularExpressions import *
 
-RE_FILENAME = re.compile(r'filename=((.*?))&')
-RE_AUTHORS = re.compile('TurnPageToKnet\((.*?)\)">')
-RE_REFER_URL = re.compile(r'href=\"(.*?)\">')
-RE_REFER_TITLE = re.compile(r'<a(.*?)>(.*?)</a>')
 
 def get_value(value):
     return value
+
 
 def get_issuing_time(value):
     """
@@ -17,7 +15,7 @@ def get_issuing_time(value):
     :param value:
     :return:
     """
-    match = re.search(r'([\d]+-[\d]+-[\d]+)', value)
+    match = RE_ISSUING_TIME.search(value)
     try:
         date = match.group(1)
     except Exception as e:
@@ -35,24 +33,24 @@ def parse_article(value):
     info = {'keywords': '', 'fund': '', 'catalog': '', 'abstract': '', 'DOI': ''}
 
     def clean_abstract(p):
-        match = re.search(r'ChDivSummary">(.*?)</span>', p)
+        match = RE_clean_abstract.search(p)
         info['abstract'] = match.group(1)
 
     def clean_keyword(p):
-        keywords = re.findall(r'TurnPageToKnet\(\'kw\',\'(.*?)\',\'[\d]*\'\)', p)
+        keywords = RE_clean_keyword.findall(p)
         keywords = ';'.join(keywords)
         info['keywords'] = keywords
 
     def clean_fund(p):
-        fund = re.findall(r'TurnPageToKnet\(\'fu\',\'(.*?)\',\'[\d]*\'\)', p)
+        fund = RE_clean_fund.findall(p)
         info['fund'] = fund
 
     def clean_DOI(p):
-        match = re.search(r'</label>(.*?)</p>', p)
+        match = RE_clean_DOI.search(p)
         info['DOI'] = match.group(1)
 
     for p in value:
-        p = re.sub('\n|\r|  ', '', p)
+        p = RE_remove_space_2.sub('', p)
         try:
             if 'catalog_ABSTRACT' in p:
                 clean_abstract(p)
@@ -110,14 +108,16 @@ def get_authors_id(authors):
         author_id.append(author.split("\',\'")[-1][:-1])
     return author_id
 
+
 def remove_space(value):
-    return re.sub('\n|\r|  |&amp|;nbsp', '', value)
+    return RE_remove_space.sub('', value)
 
 
 class CleanRefers(object):
     """
     清洗refer类，当作函数调用，作为Item中output_processor的参数
     """
+
     def __call__(self, refer):
         self.info = {'url': '', 'title': '', 'author': '', 'source': '', 'issuing_time': ''}
         """
@@ -127,7 +127,7 @@ class CleanRefers(object):
         source = refer[0]  # 数据库代码
         refer = refer[1]  # 参考文献内容
         # 先统一去除一些无用的字符
-        refer = re.sub('\n|\r|  ', '', refer)
+        refer = RE_remove_space_2.sub('', refer)
         # 根据数据库代码调用相应的清洗函数
         clean_func = getattr(self, 'clean_{}'.format(source))
         try:
@@ -139,7 +139,7 @@ class CleanRefers(object):
 
     def clean_CJFQ(self, refer):
         if '</a>' in refer:
-            match = re.search(r'href="(.*?)">(.*?)</a>(.*?)<a(.*?)>(.*?)</a>(.*?)<a(.*?)>(.*?)</a>', refer)
+            match = RE_clean_CJFQ.search(refer)
 
             self.info['url'] = match.group(1)
             self.info['title'] = match.group(2)
@@ -148,7 +148,7 @@ class CleanRefers(object):
             self.info['issuing_time'] = match.group(8)
         else:
             # '白血病微环境对正常造血的影响[J]. 宫跃敏,程涛.&amp;nbsp&amp;nbsp中华血液学杂志.2015(01)'
-            match = re.search(r'(.*?)\.(.*?)\.(.*?)\.(.*?)', refer)
+            match = RE_clean_CJFQ_else.search(refer)
             self.info['title'] = match.group(1)
             self.info['author'] = match.group(2)
             self.info['source'] = match.group(3)
@@ -156,7 +156,7 @@ class CleanRefers(object):
         return self.info
 
     def clean_CDFD(self, refer):
-        match = re.search(r'href="(.*?)">(.*?)</a>(.*?)<a(.*?)>(.*?)</a>(.*?)([\d]{4})', refer)
+        match = RE_clean_CDFD.search(refer)
 
         self.info['url'] = match.group(1)
         self.info['title'] = match.group(2)
@@ -167,7 +167,7 @@ class CleanRefers(object):
         return self.info
 
     def clean_CMFD(self, refer):
-        match = re.search(r'href="(.*?)">(.*?)</a>(.*?)<a(.*?)>(.*?)</a>(.*?)([\d]{4})', refer)
+        match = RE_clean_CMFD.search(refer)
 
         self.info['url'] = match.group(1)
         self.info['title'] = match.group(2)
@@ -178,7 +178,7 @@ class CleanRefers(object):
         return self.info
 
     def clean_CBBD(self, refer):
-        match = re.search(r'(.*?)\.(.*?),(.*?),.*?([\d]{4})', refer)
+        match = RE_clean_CBBD.search(refer)
 
         self.info['title'] = match.group(1)
         self.info['source'] = match.group(2)
@@ -188,7 +188,7 @@ class CleanRefers(object):
         return self.info
 
     def clean_SSJD(self, refer):
-        match = re.search(r'href="([\s\S]*?)">(.*?)</a>([\s\S]*?)([\d\(\)]+)', refer)
+        match = RE_clean_SSJD.search(refer)
 
         self.info['url'] = match.group(1)
         self.info['title'] = match.group(2)
@@ -200,19 +200,19 @@ class CleanRefers(object):
     def clean_CRLDENG(self, refer):
         if '</a>' in refer:
             """<a onclick="OpenCRLDENG('Association of3its');">ality traits</a>. Yang H,Xu Z Y,Lei M G,et al. Journal of Applied Genetics. """
-            match = re.search(r'<a([\s\S]*?)>(.*?)</a>([\s\S]*)', refer)
+            match = RE_clean_CRLDENG.search(refer)
             self.info['title'] = match.group(2)
             self.info['author'] = match.group(3)
         else:
             # ['CRLDENG', ' Arciero. International Journal of Biological Markers\r\n        . 2003']
-            match = re.search(r'([\s\S]*)\.[\s]?([\d]*)', refer)
+            match = RE_clean_CRLDENG_else.search(refer)
             self.info['title'] = match.group(1)
             self.info['issuing_time'] = match.group(2)
 
         return self.info
 
     def clean_CCND(self, refer):
-        match = re.search(r'<a([\s\S]*?)>(.*?)</a>([\s\S]*?)\.(.*?)\.([\d]{4}\([\d+]\))', refer)
+        match = RE_clean_CCND.search(refer)
 
         self.info['url'] = match.group(1)
         self.info['title'] = match.group(2)
@@ -255,7 +255,3 @@ class CleanRefers(object):
 # except:
 #     pagenums = 1
 #
-
-
-
-
