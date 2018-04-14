@@ -43,7 +43,7 @@ class ArticleItem(scrapy.Item):
     )
     authors_name = scrapy.Field(
         input_processor=MapCompose(remove_space, get_authors_str),
-        output_processor=(get_authors_name)
+        output_processor=get_authors_name
     )
 
     # 机构部分
@@ -53,7 +53,7 @@ class ArticleItem(scrapy.Item):
     )
     org_name = scrapy.Field(
         input_processor=MapCompose(remove_space, get_authors_str),
-        output_processor=(get_authors_name)
+        output_processor=get_authors_name
     )
 
 

@@ -6,6 +6,9 @@
 # http://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from selenium import webdriver
+from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.utils import USER_AGENT_LIST
+import random
 
 
 class CrawlCnkiPeriodicalsSpiderMiddleware(object):
@@ -55,7 +58,26 @@ class CrawlCnkiPeriodicalsSpiderMiddleware(object):
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
 
-from selenium import webdriver
+
+
+class RandomUserAgentMiddleware(object):
+    # 随机更换 user-agent
+    def __init__(self, crawler):
+        super(RandomUserAgentMiddleware, self).__init__()
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler)
+
+    def process_request(self, request, spider):
+
+        ua = random.choice(USER_AGENT_LIST)
+        if ua:
+            request.headers.setdefault(b'User-Agent', ua)
+
+        # request.meta["proxy"] = "http://122.245.58.221:8118"
+
+
 
 class Use_seleniumMiddleware(object):
     def process_request(self, request, spider):

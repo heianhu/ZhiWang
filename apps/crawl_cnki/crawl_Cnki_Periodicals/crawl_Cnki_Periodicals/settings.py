@@ -27,10 +27,10 @@ CONCURRENT_REQUESTS = 200
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+# DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
-#CONCURRENT_REQUESTS_PER_DOMAIN = 16
-#CONCURRENT_REQUESTS_PER_IP = 16
+CONCURRENT_REQUESTS_PER_DOMAIN = 200
+CONCURRENT_REQUESTS_PER_IP = 80
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
@@ -52,11 +52,13 @@ SPIDER_MIDDLEWARES = {
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-DOWNLOADER_MIDDLEWARES = {
-   # 'crawl_Cnki_Periodicals.middlewares.MyCustomDownloaderMiddleware': 543,
-   # 'crawl_Cnki_Periodicals.middlewares.Use_seleniumMiddleware': 1
-
-}
+# DOWNLOADER_MIDDLEWARES = {
+#    # 'crawl_Cnki_Periodicals.middlewares.MyCustomDownloaderMiddleware': 543,
+#    # 'crawl_Cnki_Periodicals.middlewares.Use_seleniumMiddleware': 1，
+#    # 'crawl_Cnki_Periodicals.middlewares.RandomUserAgentMiddleware': 1,
+#    # 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None
+#
+# }
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
@@ -92,4 +94,6 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 LOG_LEVEL = 'INFO'
-DOWNLOAD_TIMEOUT = 15
+DOWNLOAD_TIMEOUT = 20
+# 设置随机UA 自定义middleware
+RANDOM_UA_TYPE = 'random'

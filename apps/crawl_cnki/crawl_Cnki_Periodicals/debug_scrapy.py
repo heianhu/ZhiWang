@@ -31,7 +31,7 @@ def speak(a):
 
 
 if __name__=='__main__':
-
+    start_scrapy('1674-7216')
 
     # print('Parent process %s.' % os.getpid())
     # p = Pool(4)
@@ -42,7 +42,7 @@ if __name__=='__main__':
     # p.join()
     # print('All subprocesses done.')
 
-    from concurrent import futures
-    executor = futures.ProcessPoolExecutor(max_workers=10)
-    results = executor.map(start_scrapy, issns)
-    # results = executor.map(speak, issns)
+    # from concurrent import futures
+    # executor = futures.ProcessPoolExecutor(max_workers=10)
+    # results = executor.map(start_scrapy, issns)
+    # # results = executor.map(speak, issns)

@@ -10,6 +10,9 @@ from crawl_data.models import Periodicals
 from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.items import ArticleItemLoader, ArticleItem, ReferenceItem, ReferenceItemLoader
 import time
 from scrapy.selector import Selector
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 # from .BrowserSelect import CrawlCnkiSummary
 
@@ -41,6 +44,7 @@ class CnkiSpiderSpider(scrapy.Spider):
         :param executable_path: PhantomJS路径
         """
         self.issn = issn
+        self.article_count = 0
 
         self.split_word = re.compile(
             r'(QueryID=[a-zA-Z0-9.]&|CurRec=\d*&|DbCode=[a-zA-Z]*&|urlid=[a-zA-Z0-9.]*&|yx=[a-zA-Z]*)',
@@ -63,15 +67,26 @@ class CnkiSpiderSpider(scrapy.Spider):
         控制开始
         从数据库中找出所要爬取的url
         """
-        # periodicals = Periodicals.objects.all()[:1]  # 期刊
-        periodicals = Periodicals.objects.filter(issn_number=self.issn)  # 暂时只用一个issn
+
+        issns = ['1674-7216',
+                 '1674-7224',
+                 '1674-7232',
+                 '1674-7240',
+                 '1674-7259',
+                 '1674-7267']
+
+        # issns = ['1674-7216']
+
+        periodicals = Periodicals.objects.all()[:5]  # 期刊
+        # periodicals = Periodicals.objects.filter(issn_number=self.issn)  # 暂时只用一个issn
 
         # 对每一个issn进行爬取
-        for i, periodical in enumerate(periodicals):
-            pagenums, cookies = self.do_search(self.search_url, periodical.issn_number)
+        for i,issn in enumerate(issns,1):
+        # for i, periodical in enumerate(periodicals):
+            pagenums, cookies = self.do_search(self.search_url, issn)
             # TODO 添加年份条件
-            # for page in range(1, pagenums + 1):
-            for page in range(1):  # 暂时只搜一页
+            for page in range(1, pagenums + 1):
+            # for page in range(1):  # 暂时只搜一页
                 every_page_url = self._root_url + "/kns/brief/brief.aspx?{0}RecordsPerPage=20&QueryID=1&ID=&pagemode=L&dbPrefix=CJFQ&Fields=&DisplayMode=listmode&SortType=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)&PageName=ASP.brief_result_aspx#J_ORDER&"
                 curr_page = "curpage={0}&turnpage={0}&".format(page)
                 if page == 1:
@@ -80,14 +95,11 @@ class CnkiSpiderSpider(scrapy.Spider):
                     page_url = every_page_url.format(curr_page)
 
 
-                # 遍历每一页
-
                 yield scrapy.Request(url=page_url, headers=self.header,
                                 callback=self.parse_summary,
-                                     cookies=cookies,
-                                meta={'periodical': periodical.id})
-                pass
-                print('当前页码：', page)
+                                     cookies=cookies, dont_filter = True,
+                                meta={'periodical': i})
+                print('当前issn：', issn, '当前页码:', page)
 
 
 
@@ -106,27 +118,38 @@ class CnkiSpiderSpider(scrapy.Spider):
         select = Select(driver.find_element_by_id('magazine_special1'))  # 通过Select来定义该元素是下拉框
         select.select_by_index(1)  # 通过下拉元素的位置来选择
         elem.send_keys(Keys.RETURN)  # 相当于回车键，提交
-        time.sleep(2)
+        driver.switch_to.frame('iframeResult')
 
-        # url = driver.find_element_by_class_name("groupsorttitle").get_attribute('href')
+        # time.sleep(2)
 
-
-        # queryid = re.search(r'queryid=([\d]+)\">相关度', driver.page_source)
-
-        # 搜索结果列表页的url
-        summary_url = self._root_url + '/kns/brief/brief.aspx?curpage=1&RecordsPerPage=20&QueryID=20&ID=&turnpage=1&dbPrefix=CJFQ&PageName=ASP.brief_result_aspx#J_ORDER&'
-        driver.get(url=summary_url)
-        # 拿到cookies
-        cookies = driver.get_cookies()
-        # 拿到最大页数
-        pagenums = Selector(text=driver.page_source).css('.countPageMark::text').extract()
         try:
-            pagenums = int(pagenums[0].split('/')[1])
-        except:
-            pagenums = 1
+            element = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "GridTableContent"))
+            )
+
+            # print(driver.page_source)
+
+            # url = driver.find_element_by_class_name("groupsorttitle").get_attribute('href')
+
+            # match = re.search(r'queryid=([\d]+)\">相关度', driver.page_source)
+            # queryid = match.group(1)
+
+            # # 搜索结果列表页的url
+            # summary_url = self._root_url + '/kns/brief/brief.aspx?curpage=1&RecordsPerPage=20&QueryID=0&ID=&' \
+            #                 'turnpage=1&dbPrefix=CJFQ&PageName=ASP.brief_result_aspx#J_ORDER&'
+            # driver.get(url=summary_url)
+            # 拿到cookies
+            cookies = driver.get_cookies()
+            # 拿到最大页数
+            pagenums = Selector(text=driver.page_source).css('.countPageMark::text').extract()
+            try:
+                pagenums = int(pagenums[0].split('/')[1])
+            except:
+                pagenums = 1
 
 
-        driver.close()
+        finally:
+            driver.close()
 
         return pagenums, cookies
 
@@ -139,14 +162,20 @@ class CnkiSpiderSpider(scrapy.Spider):
         :return:
         """
         summarys = response.css('.GridTableContent tr')[1:]
-        # for summary in summarys:
-        for summary in summarys[:1]:  # 暂时只取第一条文章
+
+        for summary in summarys:
+        # for summary in summarys[:1]:  # 暂时只取第一条文章
             url = summary.css('.fz14::attr(href)').extract()[0]
             # 改成正常的url
             url = url.split('/kns')[-1]
             url = 'http://kns.cnki.net/KCMS' + url
             url = ''.join(url.split())  # 有些url中含有空格
             url = self.split_word.sub('', url)
+
+            print("{0:4}".format(self.article_count), end=';')
+            self.article_count += 1
+            if self.article_count % 100 == 0:
+                print('\n')
 
             # 将summary中的网页元素传给后续的parse函数，以统一解析文章所有细节
             yield scrapy.Request(url=url, headers=self.header,
@@ -191,28 +220,52 @@ class CnkiSpiderSpider(scrapy.Spider):
         # 记住此文章名
         filename = article_item['filename']
 
+        # 此url用于探测该文章有多少页参考文献
+        refers_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={}&' \
+                     'RefType=1&CurDBCode=CJFQ&page=1'.format(filename)
+
+        yield scrapy.Request(url=refers_url, headers=self.header, callback=self.parse_refer_pages,
+                             meta={'filename': filename})
+
+
+
+    def parse_refer_pages(self, response):
+        """
+        解析每篇文章的参考文献页面数
+        :param response:
+        :return:
+        """
+        filename = response.meta.get('filename', '')
         # 各个数据库的代码号
         sources = ['CJFQ', 'CDFD', 'CMFD', 'CBBD', 'SSJD', 'CRLDENG', 'CCND', 'CPFD']
 
         # 获取各个数据库的页数 如:pages: [1,1,1,1,3,3,1,1]
         pages = []
         for source in sources:
-            pc = int(response.xpath('//span[@id="pc_{0}"]/text()'.format(source)).extract_first(default=1))
+            css_partten = '#pc_{}::text'.format(source)
+            # 每个数据库中条数
+            nums = int(response.css(css_partten).extract_first(default=0))
+            # 由条数计算页数
+            pc = (nums - 1) // 10 + 1
             pages.append(pc)
+
+        # 如果所有数据库都是0页,即此文章没有参考文献
+        if not any(pages):
+            return
+
 
         # 每个数据库的每一页为一个url
         for i, source in enumerate(sources):
-            for page in range(1, pages[i]+1):
+            for page in range(1, pages[i] + 1):
                 # 按数据库和页码格式化每一个url
                 url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?' \
-                                 'dbcode=CJFQ&filename={0}&RefType=1&CurDBCode={1}&page={2}' \
-                                    .format(filename, source, page)
+                      'dbcode=CJFQ&filename={0}&RefType=1&CurDBCode={1}&page={2}' \
+                    .format(filename, source, page)
 
                 # 每一个url只解析一种数据库的一页参考文献
                 yield scrapy.Request(url=url, headers=self.header, callback=self.parse_references,
                                      meta={'filename': filename,
                                            'source': source})
-
 
     def parse_references(self, response):
         """
