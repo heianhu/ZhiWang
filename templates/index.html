@@ -456,10 +456,10 @@
                                 <!-- post text -->
                                 <p>{{ article.detail.detail_abstract }} </p>
                                 <div class="downloadOperation">
-                                    <a class="downloadLink" target="_blank" href="{{ article.url }}"><i class="fa fa-book"></i>查看原文 </a>
+                                    <a class="" target="_blank" href="{{ article.url }}"><i class="fa fa-book"></i>查看原文 </a>
 
                                     <a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id %}"><i class="fa fa-download"></i>下载此文 </a>
-                                    <a class="downloadLink" onclick="showArticleDetail({{ article.id }})" href="#"><i class="fa fa-download"></i>查看细节 </a>
+                                    <a class="" onclick="showArticleDetail({{ article.id }})" href="#"><i class="fa fa-download"></i>查看细节 </a>
                                     {% if request.user.is_authenticated %}
                                         <label> <input class="downloadCheckbox" type="checkbox">选择</label>
                                     {% endif %}
