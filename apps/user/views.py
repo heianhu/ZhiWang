@@ -42,7 +42,7 @@ class RegisterView(View):
             else:
                 user_profile = UserProfile()
                 user_profile.nick_name = nick_name
-                user_profile.username = nick_name
+                user_profile.username = email
                 user_profile.email = email
                 user_profile.password = make_password(pass_word)
                 user_profile.is_active = True
