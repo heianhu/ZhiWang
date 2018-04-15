@@ -157,7 +157,10 @@ class ReferenceItem(scrapy.Item):
         refer = References()
 
         refer.url = self['info'].get('url', '')
-        refer.title = self['info'].get('title', '')
+        if len(self['info'].get('title', '')) > 250:
+            refer.title = self['info'].get('title', '')[:250]
+        else:
+            refer.title = self['info'].get('title', '')
         refer.authors = self['info'].get('author', '')
         refer.source = self['info'].get('source', '')
         refer.issuing_time = self['info'].get('issuing_time', '')
