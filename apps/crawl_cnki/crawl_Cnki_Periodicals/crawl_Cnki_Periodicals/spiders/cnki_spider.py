@@ -37,13 +37,12 @@ class CnkiSpiderSpider(scrapy.Spider):
 
     # crawlcnkisummary_gen = CrawlCnkiSummary()
 
-    def __init__(self, issn=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         初始化，建立与Django的models连接，设置初始值
         :param use_Chrome: True使用Chrome，False使用PhantomJS
         :param executable_path: PhantomJS路径
         """
-        self.issn = issn
         self.article_count = 0
 
         self.split_word = re.compile(

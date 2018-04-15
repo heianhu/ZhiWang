@@ -22,15 +22,15 @@ NEWSPIDER_MODULE = 'crawl_Cnki_Periodicals.spiders'
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 200
+# CONCURRENT_REQUESTS = 200
 
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-# DOWNLOAD_DELAY = 3
+# DOWNLOAD_DELAY = 0.25
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 200
-CONCURRENT_REQUESTS_PER_IP = 80
+# CONCURRENT_REQUESTS_PER_DOMAIN = 200
+# CONCURRENT_REQUESTS_PER_IP = 80
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
@@ -94,6 +94,6 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 LOG_LEVEL = 'INFO'
-DOWNLOAD_TIMEOUT = 20
+# DOWNLOAD_TIMEOUT = 20
 # 设置随机UA 自定义middleware
 RANDOM_UA_TYPE = 'random'
