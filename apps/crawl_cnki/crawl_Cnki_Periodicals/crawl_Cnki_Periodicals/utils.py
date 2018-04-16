@@ -95,7 +95,7 @@ def get_authors_name(authors):
     """
     author_name = []
     for author in authors:
-        author_name.append(author.split("\',\'")[1])
+        author_name.append(author.split("\',\'")[1][:255])
     return author_name
 
 
@@ -135,6 +135,8 @@ class CleanRefers(object):
         clean_func = getattr(self, 'clean_{}'.format(source))
         try:
             self.info = clean_func(refer)
+            # 截取前255个字符以能够插入数据库
+            self.info['title'] = self.info['title'][:255]
         # 捕获函数中正则匹配的异常
         except Exception as e:
             print(e)

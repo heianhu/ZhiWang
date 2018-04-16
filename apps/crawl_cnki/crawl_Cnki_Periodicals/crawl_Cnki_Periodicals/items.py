@@ -61,7 +61,7 @@ class ArticleItem(scrapy.Item):
 
         article = Article()
         article.filename = self.get('filename', '')
-        article.title = self.get('title', '')
+        article.title = self.get('title', '')[:255]
         article.url = self.get('url', '')
         periodicals = self.get('periodicals', '')
         article.periodicals = Periodical.objects.get(id=periodicals)
@@ -157,10 +157,7 @@ class ReferenceItem(scrapy.Item):
         refer = References()
 
         refer.url = self['info'].get('url', '')
-        if len(self['info'].get('title', '')) > 250:
-            refer.title = self['info'].get('title', '')[:250]
-        else:
-            refer.title = self['info'].get('title', '')
+        refer.title = self['info'].get('title', '')
         refer.authors = self['info'].get('author', '')
         refer.source = self['info'].get('source', '')
         refer.issuing_time = self['info'].get('issuing_time', '')
