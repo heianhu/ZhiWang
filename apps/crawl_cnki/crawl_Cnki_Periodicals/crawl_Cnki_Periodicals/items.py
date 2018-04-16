@@ -11,7 +11,11 @@ from scrapy.loader.processors import MapCompose, TakeFirst, Join
 from crawl_cnki.models import Article, Periodical, Author, Article_Author, Organization, Article_Organization, \
     References, Article_References
 from w3lib.html import remove_tags
-from django.db.utils import IntegrityError
+# import django.db.utils.IntegrityError
+# import pymysql.err.IntegrityError
+from django.db.utils import IntegrityError as djIntegrityError
+from pymysql.err import IntegrityError as pyIntegrityError
+
 import re
 
 from .utils import *
@@ -75,7 +79,7 @@ class ArticleItem(scrapy.Item):
         try:
             article.save()
             # 文章已经存在
-        except IntegrityError as e:
+        except djIntegrityError or pyIntegrityError:
             article = Article.objects.get(filename=self.get('filename', ''))
 
         return article
@@ -89,7 +93,8 @@ class ArticleItem(scrapy.Item):
             try:
                 author.save()
                 # 已经存在
-            except IntegrityError as e:
+            except djIntegrityError or pyIntegrityError:
+
                 author = Author.objects.get(authors_id=author_id, authors_name=name)
             authors.append(author)
         return authors
@@ -103,7 +108,7 @@ class ArticleItem(scrapy.Item):
             try:
                 org.save()
                 # 已经存在
-            except IntegrityError as e:
+            except djIntegrityError or pyIntegrityError:
                 org = Organization.objects.get(organization_id=org_id, organization_name=name)
             orgs.append(org)
         return orgs
@@ -165,7 +170,7 @@ class ReferenceItem(scrapy.Item):
         try:
             refer.save()
             # 已经存在
-        except IntegrityError as e:
+        except djIntegrityError or pyIntegrityError:
             refer = References.objects.get(title=self['info'].get('title', ''))
         return article, refer
 
