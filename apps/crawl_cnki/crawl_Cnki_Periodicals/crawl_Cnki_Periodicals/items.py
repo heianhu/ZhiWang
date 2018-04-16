@@ -90,7 +90,7 @@ class ArticleItem(scrapy.Item):
                 author.save()
                 # 已经存在
             except IntegrityError as e:
-                author = Article.objects.get(authors_id=author_id)
+                author = Author.objects.get(authors_id=author_id, authors_name=name)
             authors.append(author)
         return authors
 
@@ -104,7 +104,7 @@ class ArticleItem(scrapy.Item):
                 org.save()
                 # 已经存在
             except IntegrityError as e:
-                org = Article.objects.get(organization_id=org_id)
+                org = Organization.objects.get(organization_id=org_id, organization_name=name)
             orgs.append(org)
         return orgs
 
@@ -166,7 +166,7 @@ class ReferenceItem(scrapy.Item):
             refer.save()
             # 已经存在
         except IntegrityError as e:
-            refer = References.objects.get(title=self.get('title', ''))
+            refer = References.objects.get(title=self['info'].get('title', ''))
         return article, refer
 
     def save_to_mysql_article_refer(self, article, refer):
