@@ -54,9 +54,6 @@ SPIDER_MIDDLEWARES = {
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 # DOWNLOADER_MIDDLEWARES = {
 #    # 'crawl_Cnki_Periodicals.middlewares.MyCustomDownloaderMiddleware': 543,
-#    # 'crawl_Cnki_Periodicals.middlewares.Use_seleniumMiddleware': 1，
-#    # 'crawl_Cnki_Periodicals.middlewares.RandomUserAgentMiddleware': 1,
-#    # 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None
 #
 # }
 
@@ -95,5 +92,4 @@ ITEM_PIPELINES = {
 
 LOG_LEVEL = 'INFO'
 # DOWNLOAD_TIMEOUT = 20
-# 设置随机UA 自定义middleware
-RANDOM_UA_TYPE = 'random'
+LOG_FILE="log.txt"

@@ -107,7 +107,9 @@ def get_authors_id(authors):
     """
     author_id = []
     for author in authors:
-        author_id.append(author.split("\',\'")[-1][:-1])
+        id = author.split("\',\'")[-1][:-1]
+        id = id.split(';')
+        author_id += id
     return author_id
 
 def remove_space(value):
@@ -128,7 +130,7 @@ class CleanRefers(object):
         source = refer[0]  # 数据库代码
         refer = refer[1]  # 参考文献内容
         # 先统一去除一些无用的字符
-        refer = re.sub('\n|\r|  ', '', refer)
+        refer = re.sub('\n|\r|  |&amp|;nbsp', '', refer)
         # 根据数据库代码调用相应的清洗函数
         clean_func = getattr(self, 'clean_{}'.format(source))
         try:
@@ -148,12 +150,23 @@ class CleanRefers(object):
             self.info['source'] = match.group(5)
             self.info['issuing_time'] = match.group(8)
         else:
-            # '白血病微环境对正常造血的影响[J]. 宫跃敏,程涛.&amp;nbsp&amp;nbsp中华血液学杂志.2015(01)'
-            match = re.search(r'(.*?)\.(.*?)\.(.*?)\.(.*?)', refer)
-            self.info['title'] = match.group(1)
-            self.info['author'] = match.group(2)
-            self.info['source'] = match.group(3)
-            self.info['issuing_time'] = match.group(4)
+            # '白血病微环境对正常造血的影响[J]. 宫跃敏,程涛.中华血液学杂志.2015(01)'
+            # '发刊辞[J]. 中国青年.1923(01)'
+
+            # match = re.search(r'(.*?)\.(.*?)\.(.*?)\.(.*?)', refer)
+            # self.info['title'] = match.group(1)
+            # self.info['author'] = match.group(2)
+            # self.info['source'] = match.group(3)
+            # self.info['issuing_time'] = match.group(4)
+            # 以上弃用
+
+            refer = refer.split('.')
+            self.info['title'] = refer[0]
+            self.info['author'] = refer[-3]
+            self.info['source'] = refer[-2]
+            self.info['issuing_time'] = refer[-1]
+
+
         return self.info
 
     def clean_CDFD(self, refer):
@@ -213,7 +226,11 @@ class CleanRefers(object):
         return self.info
 
     def clean_CCND(self, refer):
-        match = re.search(r'<a([\s\S]*?)>(.*?)</a>([\s\S]*?)\.(.*?)\.([\d]{4}\([\d+]\))', refer)
+        # '<a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=RMRB201405050012&amp;dbcode=CCND&amp;dbname=CCND2014&amp;v=">让青春之花绽放在祖国最需要的地方</a>[N].黄小希,陈国洲,王昆.&amp;nbsp&amp;nbsp人民日报.2014(001)'
+        # '<a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=GMRB20040826ZZ27;dbcode=CCND;dbname=ccnd2004;v=">高校德育工作者职业形象定位与结构</a>[N].赵可军.光明日报.2004'
+
+        # match = re.search(r'<a([\s\S]*?)>(.*?)</a>([\s\S]*?)\.(.*?)\.([\d]{4}\([\d]+\))', refer)
+        match = re.search(r'<a([\s\S]*?)>(.*?)</a>([\s\S]*)\.(.*?)\.([\d\(\)]+)', refer)
 
         self.info['url'] = match.group(1)
         self.info['title'] = match.group(2)
@@ -228,44 +245,4 @@ class CleanRefers(object):
 
         return self.info
 
-
-USER_AGENT_LIST = [
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
-    "Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11",
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6",
-    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6",
-    "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5",
-    "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5",
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-    "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; SE 2.X MetaSr 1.0; SE 2.X MetaSr 1.0; .NET CLR 2.0.50727; SE 2.X MetaSr 1.0)",
-    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
-    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; 360SE)",
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-    "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
-    "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1" \
-    "Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11", \
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6", \
-    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6", \
-    "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1", \
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5", \
-    "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5", \
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3", \
-    "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3", \
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3", \
-    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3", \
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3", \
-    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3", \
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3", \
-    "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3", \
-    "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3", \
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24", \
-    "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24"
-
-]
 

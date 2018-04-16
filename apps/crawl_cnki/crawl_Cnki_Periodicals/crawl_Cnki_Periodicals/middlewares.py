@@ -6,9 +6,6 @@
 # http://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-from selenium import webdriver
-from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.utils import USER_AGENT_LIST
-import random
 
 
 class CrawlCnkiPeriodicalsSpiderMiddleware(object):
@@ -59,70 +56,3 @@ class CrawlCnkiPeriodicalsSpiderMiddleware(object):
         spider.logger.info('Spider opened: %s' % spider.name)
 
 
-
-class RandomUserAgentMiddleware(object):
-    # 随机更换 user-agent
-    def __init__(self, crawler):
-        super(RandomUserAgentMiddleware, self).__init__()
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        return cls(crawler)
-
-    def process_request(self, request, spider):
-
-        ua = random.choice(USER_AGENT_LIST)
-        if ua:
-            request.headers.setdefault(b'User-Agent', ua)
-
-        # request.meta["proxy"] = "http://122.245.58.221:8118"
-
-
-
-class Use_seleniumMiddleware(object):
-    def process_request(self, request, spider):
-
-        driver = webdriver.Chrome()  # 初始化webdriver
-        driver.get('http://localhost')
-        for cookie in request.cookies:
-            driver.add_cookie(cookie)
-        driver.get(request.url)
-        # # 所有 url 都走 browser
-        # browser = webdriver.Chrome()
-        # # 先启动浏览器才能添加 cookie
-        # browser.get('http://localhost')
-        #
-        # # 从文件中读取 cookies
-        # with open('/Users/eeljiang/Desktop/zhihuCookies', 'rb') as f:
-        #     Cookies = pickle.load(f)
-        #
-        # for cookie in Cookies:
-        #     browser.add_cookie(cookie)
-
-        # print("开始访问：{0}".format(request.url))
-        # browser.get(request.url)
-        # time.sleep(5)
-
-        # pass
-        # if request.url in spider.start_urls:
-        #     # browser = webdriver.Chrome()
-        #     print("开始访问：{0}".format(request.url))
-        #     spider.browser.get(request.url)
-        #     time.sleep(3)
-        #
-        #     # 按一下 esc 关掉账号异常验证的框
-        #     actions = ActionChains(spider.browser)
-        #     actions.send_keys(Keys.ESCAPE)
-        #     actions.perform()
-        #
-        #     print("开始滚动")
-        #     for i in range(3):
-        #         spider.browser.execute_script(
-        #             "window.scrollTo(0, document.body.scrollHeight); var lenOfPage=document.body.scrollHeight; return lenOfPage;")
-        #         time.sleep(3)
-        #
-        #     url = spider.browser.current_url
-        #     body = spider.browser.page_source
-        #     # browser.quit()
-        #
-        #     return HtmlResponse(url=url, body=body, encoding="utf-8", request=request)
