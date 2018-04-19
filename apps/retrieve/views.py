@@ -13,7 +13,7 @@ from django.http import Http404
 import json
 import time, os
 import datetime
-from retrieve.utils import write_to_excel, compress_excel
+from retrieve.utils import write_to_txt, compress_txt
 
 
 # Create your views here.
@@ -194,9 +194,9 @@ class GetDetailInfo(View):
         """
         处理下载单个文章
         :param getdetailinfo_id: summary文章的id
-        :return: excel文件流
+        :return: txt文件流
         """
-        filename = write_to_excel(getdetailinfo_id)
+        filename = write_to_txt(getdetailinfo_id)
         if not filename:
             response = render_to_response('404.html', {})
             response.status_code = 404
@@ -235,14 +235,14 @@ class DownloadSel(View):
     def post(self, request):
         """
         处理下载选择的多篇文章，由前端ajax发起请求
-        生成多个excel文件并压缩zip
+        生成多个txt文件并压缩zip
         :return: 生成的zip文件前缀
         """
         ids = request.POST.get('ids', '')
         # 将id转为整形列表并去除空白项
         ids = [int(id) for id in ids.split(',') if id]
 
-        zip_name = compress_excel(ids)
+        zip_name = compress_txt(ids)
 
         return JsonResponse({'status': 'success',
                              # 返回的data值将成为前端js请求下载压缩文件的url的参数
@@ -301,7 +301,7 @@ class DownloadAll(View):
             ids = all_articles.values_list("id")
             # values_list返回的是单元素的元组构成的列表:[(123,),(456,)]，对其每个元素取第一项
             ids = map(lambda x: x[0], ids)
-            zip_name = compress_excel(ids)
+            zip_name = compress_txt(ids)
 
             # 将按时间戳生成的zip文件名改为按searchfilter哈希结果的文件名,并归档到all文件夹中
             os.rename('media/excel/{0}'.format(zip_name), 'media/excel/all/{0}'.format(hash_filename))
