@@ -22,7 +22,7 @@ def start_scrapy(issn):
             os.path.abspath(__file__)  # 当前文件地址
         ))
     # execute(['scrapy', 'crawl', 'crawl_detail'])
-    execute(['scrapy', 'crawl', 'cnki_spider', '-a', 'issn={}'.format(issn)])
+    execute(['scrapy', 'crawl', 'cnki_spider'])
     # execute(['scrapy', 'crawl', 'incremental_crawl_detail'])
     print('结束爬取issn：', issn)
 

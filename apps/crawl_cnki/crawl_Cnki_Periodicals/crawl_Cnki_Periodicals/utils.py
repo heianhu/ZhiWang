@@ -4,7 +4,6 @@ __author__ = 'heianhu'
 import re
 from .RegularExpressions import *
 
-
 def get_value(value):
     return value
 
@@ -93,7 +92,7 @@ def get_authors_name(authors):
     """
     author_name = []
     for author in authors:
-        author_name.append(author.split("\',\'")[1])
+        author_name.append(author.split("\',\'")[1][:255])
     return author_name
 
 
@@ -105,7 +104,9 @@ def get_authors_id(authors):
     """
     author_id = []
     for author in authors:
-        author_id.append(author.split("\',\'")[-1][:-1])
+        id = author.split("\',\'")[-1][:-1]
+        id = id.split(';')
+        author_id += id
     return author_id
 
 
@@ -132,6 +133,8 @@ class CleanRefers(object):
         clean_func = getattr(self, 'clean_{}'.format(source))
         try:
             self.info = clean_func(refer)
+            # 截取前255个字符以能够插入数据库
+            self.info['title'] = self.info['title'][:255]
         # 捕获函数中正则匹配的异常
         except Exception as e:
             print(e)
@@ -226,32 +229,3 @@ class CleanRefers(object):
         pass
 
         return self.info
-
-# from selenium.webdriver.support.ui import Select  # 导入Select
-# from scrapy.selector import Selector
-#
-# import time
-# from selenium.webdriver.common.keys import Keys  # 导入Keys
-#
-# from selenium import webdriver
-# driver = webdriver.Chrome()
-# driver.get('http://nvsm.cnki.net/kns/brief/result.aspx?dbprefix=CJFQ')
-# elem = driver.find_element_by_id("magazine_value1")  # 找到name为q的元素，这里是个搜索框
-# elem.send_keys('1006-9305')
-# select = Select(driver.find_element_by_id('magazine_special1'))  # 通过Select来定义该元素是下拉框
-# select.select_by_index(1)  # 通过下拉元素的位置来选择
-# elem.send_keys(Keys.RETURN)  # 相当于回车键，提交
-# time.sleep(2)
-# # 搜索结果列表页的url
-# _root_url = 'http://nvsm.cnki.net'
-# summary_url = _root_url + '/kns/brief/brief.aspx?curpage=1&RecordsPerPage=20&QueryID=20&ID=&turnpage=1&dbPrefix=CJFQ&PageName=ASP.brief_result_aspx#J_ORDER&'
-# driver.get(url=summary_url)
-# # 拿到cookies
-# cookies = driver.get_cookies()
-# # 拿到最大页数
-# pagenums = Selector(text=driver.page_source).css('.countPageMark::text').extract()
-# try:
-#     pagenums = int(pagenums[0].split('/')[1])
-# except:
-#     pagenums = 1
-#

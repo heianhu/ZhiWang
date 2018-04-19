@@ -47,6 +47,8 @@ class Author(models.Model):
     class Meta:
         verbose_name = '作者信息'
         verbose_name_plural = verbose_name
+        unique_together = (('authors_id', 'authors_name'),)
+
 
 
 class Organization(models.Model):
@@ -59,6 +61,8 @@ class Organization(models.Model):
     class Meta:
         verbose_name = '单位信息'
         verbose_name_plural = verbose_name
+        unique_together = (('organization_id', 'organization_name'),)
+
 
 
 class References(models.Model):
@@ -66,7 +70,7 @@ class References(models.Model):
     参考文献
     """
     url = models.URLField(max_length=255, verbose_name='参考文献的url')
-    title = models.TextField(verbose_name='参考文献的题名')
+    title = models.CharField(max_length=255, unique=True, verbose_name='参考文献的题名')
     authors = models.TextField(max_length=255, verbose_name='参考文献的作者')
     source = models.CharField(max_length=255, verbose_name='参考文献的来源')
     issuing_time = models.CharField(max_length=255, verbose_name='发表时间')

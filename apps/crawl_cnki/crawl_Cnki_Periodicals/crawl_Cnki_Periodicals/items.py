@@ -11,7 +11,11 @@ from scrapy.loader.processors import MapCompose, TakeFirst, Join
 from crawl_cnki.models import Article, Periodical, Author, Article_Author, Organization, Article_Organization, \
     References, Article_References
 from w3lib.html import remove_tags
-from django.db.utils import IntegrityError
+# import django.db.utils.IntegrityError
+# import pymysql.err.IntegrityError
+from django.db.utils import IntegrityError as djIntegrityError
+from pymysql.err import IntegrityError as pyIntegrityError
+
 import re
 
 from .utils import *
@@ -44,7 +48,7 @@ class ArticleItem(scrapy.Item):
     )
     authors_name = scrapy.Field(
         input_processor=MapCompose(remove_space, get_authors_str),
-        output_processor=(get_authors_name)
+        output_processor=get_authors_name
     )
 
     # 机构部分
@@ -54,14 +58,14 @@ class ArticleItem(scrapy.Item):
     )
     org_name = scrapy.Field(
         input_processor=MapCompose(remove_space, get_authors_str),
-        output_processor=(get_authors_name)
+        output_processor=get_authors_name
     )
 
     def save_to_mysql_article(self):
 
         article = Article()
         article.filename = self.get('filename', '')
-        article.title = self.get('title', '')
+        article.title = self.get('title', '')[:255]
         article.url = self.get('url', '')
         periodicals = self.get('periodicals', '')
         article.periodicals = Periodical.objects.get(id=periodicals)
@@ -75,7 +79,7 @@ class ArticleItem(scrapy.Item):
         try:
             article.save()
             # 文章已经存在
-        except IntegrityError as e:
+        except djIntegrityError or pyIntegrityError:
             article = Article.objects.get(filename=self.get('filename', ''))
 
         return article
@@ -89,8 +93,9 @@ class ArticleItem(scrapy.Item):
             try:
                 author.save()
                 # 已经存在
-            except IntegrityError as e:
-                author = Article.objects.get(authors_id=author_id)
+            except djIntegrityError or pyIntegrityError:
+
+                author = Author.objects.get(authors_id=author_id, authors_name=name)
             authors.append(author)
         return authors
 
@@ -103,8 +108,8 @@ class ArticleItem(scrapy.Item):
             try:
                 org.save()
                 # 已经存在
-            except IntegrityError as e:
-                org = Article.objects.get(organization_id=org_id)
+            except djIntegrityError or pyIntegrityError:
+                org = Organization.objects.get(organization_id=org_id, organization_name=name)
             orgs.append(org)
         return orgs
 
@@ -165,8 +170,8 @@ class ReferenceItem(scrapy.Item):
         try:
             refer.save()
             # 已经存在
-        except IntegrityError as e:
-            refer = References.objects.get(title=self.get('title', ''))
+        except djIntegrityError or pyIntegrityError:
+            refer = References.objects.get(title=self['info'].get('title', ''))
         return article, refer
 
     def save_to_mysql_article_refer(self, article, refer):
