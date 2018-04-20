@@ -22,7 +22,7 @@ RE_clean_CBBD = re.compile(r'(.*?)\.(.*?),(.*?),.*?([\d]{4})', )
 RE_clean_SSJD = re.compile(r'href="([\s\S]*?)">(.*?)</a>([\s\S]*?)([\d\(\)]+)', )
 RE_clean_CRLDENG = re.compile(r'<a([\s\S]*?)>(.*?)</a>([\s\S]*)', )
 RE_clean_CRLDENG_else = re.compile(r'([\s\S]*)\.[\s]?([\d]*)', )
-RE_clean_CCND = re.compile(r'<a([\s\S]*?)>(.*?)</a>([\s\S]*?)\.(.*?)\.([\d]{4}\([\d+]\))', )
+RE_clean_CCND = re.compile(r'<a([\s\S]*?)>(.*?)</a>([\s\S]*)\.(.*?)\.([\d]{4}\([\d]+\))', )  # 已修改1次
 RE_split_word = re.compile(
     r'(QueryID=[a-zA-Z0-9.]&|CurRec=\d*&|DbCode=[a-zA-Z]*&|urlid=[a-zA-Z0-9.]*&|yx=[a-zA-Z]*)',
     flags=re.I
