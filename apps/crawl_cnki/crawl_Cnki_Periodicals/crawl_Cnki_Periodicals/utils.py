@@ -18,7 +18,7 @@ def get_issuing_time(value):
     try:
         date = match.group(1)
     except Exception as e:
-        print(e)
+        print('时间解析错误', e)
         date = '1970-1-1'
     return date
 
@@ -60,7 +60,7 @@ def parse_article(value):
             elif 'catalog_ZCDOI' in p:
                 clean_DOI(p)
         except Exception as e:
-            print(e)
+            print('文章解析错误', e)
     return info
 
 
@@ -137,7 +137,7 @@ class CleanRefers(object):
             self.info['title'] = self.info['title'][:255]
         # 捕获函数中正则匹配的异常
         except Exception as e:
-            print(e)
+            print('refer解析错误', e)
         return self.info
 
     def clean_CJFQ(self, refer):
