@@ -26,9 +26,9 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'extra_apps'))
 SECRET_KEY = mysettings.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = mysettings.DEBUG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = mysettings.ALLOWED_HOSTS
 
 # Application definition
 AUTHENTICATION_BACKENDS = (
