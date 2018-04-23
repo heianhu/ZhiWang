@@ -41,7 +41,8 @@
         this.dateLimit = false;
         this.autoApply = false;
         this.singleDatePicker = false;
-        this.showDropdowns = true;
+        // this.showDropdowns = true;
+        this.showDropdowns = false;
         this.showWeekNumbers = false;
         this.showISOWeekNumbers = false;
         this.showCustomRangeLabel = true;
@@ -723,6 +724,8 @@
                 var currentYear = calendar[1][1].year();
                 var maxYear = (maxDate && maxDate.year()) || (currentYear + 5);
                 var minYear = (minDate && minDate.year()) || (currentYear - 50);
+                // var maxYear = Math.min((maxDate && maxDate.year()) || (currentYear + 200), (new Date()).getFullYear());
+                // var minYear = Math.max((minDate && minDate.year()) || (currentYear - 50), 1900);
                 var inMinYear = currentYear == minYear;
                 var inMaxYear = currentYear == maxYear;
 
