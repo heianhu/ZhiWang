@@ -65,8 +65,9 @@ class CnkiSpiderSpider(scrapy.Spider):
 
         # issns = ['1674-7216']
 
-        periodicals = Periodicals.objects.all()[:5]  # 期刊
+        periodicals = Periodicals.objects.filter(mark=1)  # 期刊
         # periodicals = Periodicals.objects.filter(issn_number=self.issn)  # 暂时只用一个issn
+        issns = [p.issn_number for p in periodicals]
 
         # 对每一个issn进行爬取
         for i, issn in enumerate(issns, 1):
