@@ -14,6 +14,7 @@ import json
 import time, os
 import datetime
 from retrieve.utils import write_to_txt, compress_txt
+from ZhiWang.settings import BASE_DIR
 
 
 # Create your views here.
@@ -201,7 +202,7 @@ class GetDetailInfo(View):
             response = render_to_response('404.html', {})
             response.status_code = 404
             return response
-        file = open('media/excel/single/{0}'.format(filename), 'rb')
+        file = open(BASE_DIR + '/media/txt/single/{0}'.format(filename), 'rb')
         response = FileResponse(file)
 
         response['Content-Type'] = 'application/octet-stream'
@@ -220,10 +221,9 @@ class GetDetailInfo(View):
             title=article.title,
             authors=article.authors,
             keywords=article.detail.detail_keywords,
-            abstract = article.detail.detail_abstract,
-            issuing_time = article.issuing_time,
+            abstract=article.detail.detail_abstract,
+            issuing_time=article.issuing_time,
         )
-
 
         return JsonResponse({'status': 'success',
                              'data': data,
@@ -260,8 +260,9 @@ class DownloadZip(View):
         """
 
         # 将勾选下载的压缩包归档到select文件夹
-        os.rename('media/excel/{0}.zip'.format(zip_name),'media/excel/select/{0}.zip'.format(zip_name))
-        file = open('media/excel/select/{0}.zip'.format(zip_name), 'rb')
+        os.rename(BASE_DIR + '/media/txt/{0}.zip'.format(zip_name),
+                  BASE_DIR + '/media/txt/select/{0}.zip'.format(zip_name))
+        file = open(BASE_DIR + '/media/txt/select/{0}.zip'.format(zip_name), 'rb')
         response = FileResponse(file)
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="{}"'.format(urlquote('downloadfile.zip'))
@@ -295,7 +296,7 @@ class DownloadAll(View):
         hash_filename = '{0}.zip'.format(hash_str)
 
         # zip文件未生成过,如果生成过了直接返回该文件
-        if not os.path.isfile('media/excel/all/{0}'.format(hash_filename)):
+        if not os.path.isfile(BASE_DIR + '/media/txt/all/{0}'.format(hash_filename)):
             all_articles = Search.get_query_set(search_filter)
 
             ids = all_articles.values_list("id")
@@ -304,9 +305,10 @@ class DownloadAll(View):
             zip_name = compress_txt(ids)
 
             # 将按时间戳生成的zip文件名改为按searchfilter哈希结果的文件名,并归档到all文件夹中
-            os.rename('media/excel/{0}'.format(zip_name), 'media/excel/all/{0}'.format(hash_filename))
+            os.rename(BASE_DIR + '/media/txt/{0}'.format(zip_name),
+                      BASE_DIR + '/media/txt/all/{0}'.format(hash_filename))
 
-        file = open('media/excel/all/{0}'.format(hash_filename), 'rb')
+        file = open(BASE_DIR + '/media/txt/all/{0}'.format(hash_filename), 'rb')
         response = FileResponse(file)
 
         response['Content-Type'] = 'application/octet-stream'
