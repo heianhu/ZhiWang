@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import Select  # 导入Select
 from selenium.webdriver.common.keys import Keys  # 导入Keys
 from selenium.webdriver.chrome.options import Options  # Chrome设置内容
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from crawl_data.models import Periodicals
+from crawl_cnki.models import Periodical
 from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.items import ArticleItemLoader, ArticleItem, \
     ReferenceItem, ReferenceItemLoader
 import time
@@ -65,7 +65,7 @@ class CnkiSpiderSpider(scrapy.Spider):
 
         # issns = ['1674-7216']
 
-        periodicals = Periodicals.objects.filter(mark=1)  # 期刊
+        periodicals = Periodical.objects.filter(mark=1)  # 期刊
         # periodicals = Periodicals.objects.filter(issn_number=self.issn)  # 暂时只用一个issn
         issns = [p.issn_number for p in periodicals]
 
