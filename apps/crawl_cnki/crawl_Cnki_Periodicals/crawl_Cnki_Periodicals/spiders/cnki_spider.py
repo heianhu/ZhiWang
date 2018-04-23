@@ -14,6 +14,8 @@ from scrapy.selector import Selector
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options  # Chrome设置内容
+
 
 # from .BrowserSelect import CrawlCnkiSummary
 from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.RegularExpressions import *
@@ -93,7 +95,14 @@ class CnkiSpiderSpider(scrapy.Spider):
         :param issn_number:搜索条件
         :return: 搜到的可翻页的summary_url, 总页数, cookies
         """
-        driver = webdriver.Chrome()  # 初始化webdriver
+
+        # 无界面运行
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-gpu')
+        driver = webdriver.Chrome(chrome_options=chrome_options)  # 指定使用的浏览器，初始化webdriver
+
+
         driver.get(search_url)
         elem = driver.find_element_by_id("magazine_value1")  # 找到name为q的元素，这里是个搜索框
         elem.send_keys(issn_number)
