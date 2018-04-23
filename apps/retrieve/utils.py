@@ -6,6 +6,7 @@ from crawl_data.models import Summary, Detail, Authors, Periodicals, References,
     ReferencesCDFD, ReferencesCJFQ, ReferencesCPFD, ReferencesCMFD, ReferencesCRLDENG, ReferencesSSJD, Organization
 from openpyxl import Workbook
 import time
+from ZhiWang.settings import BASE_DIR
 
 
 def write_to_txt(getdetailinfo_id):
@@ -89,7 +90,9 @@ def write_to_txt(getdetailinfo_id):
             values['CR'].append(temp_refers_info)
 
     filename = '{0}.txt'.format(article_detail.detail_id)
-    with open('media/txt/single/'+filename, 'w+', encoding='utf-8') as file:
+    from ZhiWang.settings import BASE_DIR
+    print(BASE_DIR)
+    with open(BASE_DIR + '/media/txt/single/' + filename, 'w+', encoding='utf-8') as file:
         for key, (i, *all_value) in values.items():
             file.write(str(key))
             for v in all_value:
@@ -107,12 +110,12 @@ def compress_txt(ids):
     """
     files = []
     for id in ids:
-        filename = write_to_excel(id)
-        files.append('media/txt/single/{0}'.format(filename))
+        filename = write_to_txt(id)
+        files.append(BASE_DIR + '/media/txt/single/{0}'.format(filename))
 
     timestamp = str(time.time()).replace('.', '')
     zip_name = '{0}.zip'.format(timestamp)
-    jungle_zip = zipfile.ZipFile('media/txt/{0}'.format(zip_name), 'w')
+    jungle_zip = zipfile.ZipFile(BASE_DIR + '/media/txt/{0}'.format(zip_name), 'w')
     for file in files:
         jungle_zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
     jungle_zip.close()
@@ -216,7 +219,7 @@ def write_to_excel(getdetailinfo_id):
     # filename = '{0}.xlsx'.format(article_detail.detail_id)
     filename = '{0}.xlsx'.format(article_detail.detail_id)
 
-    wb.save('media/excel/single/' + filename)
+    wb.save(BASE_DIR + '/media/excel/single/' + filename)
     return filename
 
 
@@ -229,11 +232,11 @@ def compress_excel(ids):
     files = []
     for id in ids:
         filename = write_to_excel(id)
-        files.append('media/excel/single/{0}'.format(filename))
+        files.append(BASE_DIR + '/media/excel/single/{0}'.format(filename))
 
     timestamp = str(time.time()).replace('.', '')
     zip_name = '{0}.zip'.format(timestamp)
-    jungle_zip = zipfile.ZipFile('media/excel/{0}'.format(zip_name), 'w')
+    jungle_zip = zipfile.ZipFile(BASE_DIR + '/media/excel/{0}'.format(zip_name), 'w')
     for file in files:
         jungle_zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
     jungle_zip.close()

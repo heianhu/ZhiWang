@@ -7,7 +7,7 @@
 3. 分析文章引用间关系(待完成)
 
 ### 使用方法
-1. 在ZhiWang中新建一个`mysetting.py`文件，填入对应信息
+1. 在ZhiWang中新建一个`mysettings.py`文件，填入对应信息
 ```python
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
