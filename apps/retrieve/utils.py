@@ -63,15 +63,16 @@ def write_to_txt(getdetailinfo_id):
         for refer in str_refer:
             refers.append(getattr(article_reference, refer).split())
 
-        all_refers = []  # 每一项是相应期刊的查询集
-        all_refers.append(ReferencesCBBD.objects.filter(id__in=refers[0]))
-        all_refers.append(ReferencesCDFD.objects.filter(id__in=refers[1]))
-        all_refers.append(ReferencesCJFQ.objects.filter(id__in=refers[2]))
-        all_refers.append(ReferencesCMFD.objects.filter(id__in=refers[3]))
-        all_refers.append(ReferencesCRLDENG.objects.filter(id__in=refers[4]))
-        all_refers.append(ReferencesSSJD.objects.filter(id__in=refers[5]))
-        all_refers.append(ReferencesCCND.objects.filter(id__in=refers[6]))
-        all_refers.append(ReferencesCPFD.objects.filter(id__in=refers[7]))
+        all_refers = [
+            ReferencesCBBD.objects.filter(id__in=refers[0]),
+            ReferencesCDFD.objects.filter(id__in=refers[1]),
+            ReferencesCJFQ.objects.filter(id__in=refers[2]),
+            ReferencesCMFD.objects.filter(id__in=refers[3]),
+            ReferencesCRLDENG.objects.filter(id__in=refers[4]),
+            ReferencesSSJD.objects.filter(id__in=refers[5]),
+            ReferencesCCND.objects.filter(id__in=refers[6]),
+            ReferencesCPFD.objects.filter(id__in=refers[7]),
+        ]            # 每一项是相应期刊的查询集
 
         # # 对每一条结果取title值
         # all_refers_title = (refer.title for queryset in all_refers for refer in queryset)
@@ -90,13 +91,13 @@ def write_to_txt(getdetailinfo_id):
             values['CR'].append(temp_refers_info)
 
     filename = '{0}.txt'.format(article_detail.detail_id)
-    from ZhiWang.settings import BASE_DIR
-    print(BASE_DIR)
     with open(BASE_DIR + '/media/txt/single/' + filename, 'w+', encoding='utf-8') as file:
         for key, (i, *all_value) in values.items():
             file.write(str(key))
-            for v in all_value:
+            for num, v in enumerate(all_value):
                 file.write('    ' + ''.join(v))
+                if num != len(all_value)-1:
+                    file.write('\n')
             file.write('\n')
 
     return filename
@@ -104,23 +105,51 @@ def write_to_txt(getdetailinfo_id):
 
 def compress_txt(ids):
     """
-    将批量id的文章写入txt，然后压缩成一个zip文件
+    将批量id的文章写入txt，然后写入一个txt文件
     :param ids: summary文章id列表
-    :return: 生成的zip文件名(不包含路径)
+    :return: 生成的总和txt文件名(不包含路径)
     """
     files = []
     for id in ids:
         filename = write_to_txt(id)
         files.append(BASE_DIR + '/media/txt/single/{0}'.format(filename))
+    zip_name = time.strftime("%Y%m%d%H%M%S", time.localtime()) + '.txt'
+    with open(
+            BASE_DIR + '/media/txt/select/' + zip_name, 'w+', encoding='utf-8'
+    ) as compress_file:
+        for file in files:
+            for line in open(file, encoding='utf-8'):
+                compress_file.writelines(line)
+            compress_file.write('\n')
 
-    timestamp = str(time.time()).replace('.', '')
-    zip_name = '{0}.zip'.format(timestamp)
-    jungle_zip = zipfile.ZipFile(BASE_DIR + '/media/txt/{0}'.format(zip_name), 'w')
-    for file in files:
-        jungle_zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
-    jungle_zip.close()
-
+    # timestamp = str(time.time()).replace('.', '')
+    # zip_name = '{0}.zip'.format(timestamp)
+    # jungle_zip = zipfile.ZipFile(BASE_DIR + '/media/txt/{0}'.format(zip_name), 'w')
+    # for file in files:
+    #     jungle_zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
+    # jungle_zip.close()
+    #
     return zip_name
+
+# def compress_txt(ids):
+#     """
+#     将批量id的文章写入txt，然后压缩成一个zip文件
+#     :param ids: summary文章id列表
+#     :return: 生成的zip文件名(不包含路径)
+#     """
+#     files = []
+#     for id in ids:
+#         filename = write_to_txt(id)
+#         files.append(BASE_DIR + '/media/txt/single/{0}'.format(filename))
+#
+#     timestamp = str(time.time()).replace('.', '')
+#     zip_name = '{0}.zip'.format(timestamp)
+#     jungle_zip = zipfile.ZipFile(BASE_DIR + '/media/txt/{0}'.format(zip_name), 'w')
+#     for file in files:
+#         jungle_zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
+#     jungle_zip.close()
+#
+#     return zip_name
 
 
 def write_to_excel(getdetailinfo_id):
