@@ -247,7 +247,7 @@ class DownloadSel(View):
         return JsonResponse({'status': 'success',
                              # 返回的data值将成为前端js请求下载压缩文件的url的参数
                              # 'data': zip_name,
-                             'data': zip_name.replace('.txt', ''),
+                             'data': zip_name.replace('.zip', ''),
                              }, content_type='application/json')
 
 
@@ -260,15 +260,16 @@ class DownloadZip(View):
         :return: 文件流
         """
 
-        # # 将勾选下载的压缩包归档到select文件夹
-        # os.rename(BASE_DIR + '/media/txt/{0}.zip'.format(zip_name),
-        #           BASE_DIR + '/media/txt/select/{0}.zip'.format(zip_name))
-        with open(BASE_DIR + '/media/txt/select/{0}.txt'.format(zip_name), 'rb') as file:
-            response = FileResponse(file)
-            response['Content-Type'] = 'application/octet-stream'
-            response['Content-Disposition'] = 'attachment;filename="{}.txt"'.format(urlquote(zip_name))
+        # 将勾选下载的压缩包归档到select文件夹
+        os.rename(BASE_DIR + '/media/txt/{0}.zip'.format(zip_name),
+                      BASE_DIR + '/media/txt/select/{0}.zip'.format(zip_name))
 
+        file = open(BASE_DIR + '/media/txt/select/{0}.zip'.format(zip_name), 'rb')
+        response = FileResponse(file)
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment;filename="{}.zip"'.format(urlquote(zip_name))
         return response
+
 
 
 class DownloadAll(View):
@@ -281,38 +282,28 @@ class DownloadAll(View):
         """
 
         session_id = request.session.session_key
-
         try:
             search_filter = SearchFilter.objects.get(time=query_id, session_id=session_id)
-            # 将搜索条件哈希，作为zip文件名
-            hash_str = hash(search_filter.filterPara)
-
         except KeyError:
             response = render_to_response('404.html', {})
             response.status_code = 404
             return response
 
         search_filter = eval(search_filter.filterPara)
+        all_articles = Search.get_query_set(search_filter)
 
-        hash_filename = '{0}.zip'.format(hash_str)
+        ids = all_articles.values_list("id")
+        # values_list返回的是单元素的元组构成的列表:[(123,),(456,)]，对其每个元素取第一项
+        ids = map(lambda x: x[0], ids)
+        zip_name = compress_txt(ids)
 
-        # zip文件未生成过,如果生成过了直接返回该文件
-        if not os.path.isfile(BASE_DIR + '/media/txt/all/{0}'.format(hash_filename)):
-            all_articles = Search.get_query_set(search_filter)
+        # 将按时间戳生成的zip文件名改为按searchfilter哈希结果的文件名,并归档到all文件夹中
+        os.rename(BASE_DIR + '/media/txt/{0}'.format(zip_name),
+                  BASE_DIR + '/media/txt/all/{0}'.format(zip_name))
 
-            ids = all_articles.values_list("id")
-            # values_list返回的是单元素的元组构成的列表:[(123,),(456,)]，对其每个元素取第一项
-            ids = map(lambda x: x[0], ids)
-            zip_name = compress_txt(ids)
-
-            # 将按时间戳生成的zip文件名改为按searchfilter哈希结果的文件名,并归档到all文件夹中
-            os.rename(BASE_DIR + '/media/txt/{0}'.format(zip_name),
-                      BASE_DIR + '/media/txt/all/{0}'.format(hash_filename))
-
-        file = open(BASE_DIR + '/media/txt/all/{0}'.format(hash_filename), 'rb')
+        file = open(BASE_DIR + '/media/txt/all/{0}'.format(zip_name), 'rb')
         response = FileResponse(file)
-
         response['Content-Type'] = 'application/octet-stream'
-        response['Content-Disposition'] = 'attachment;filename="{}"'.format(urlquote('downloadfile.zip'))
+        response['Content-Disposition'] = 'attachment;filename="{}"'.format(urlquote(zip_name))
 
         return response

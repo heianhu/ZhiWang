@@ -110,25 +110,29 @@ def compress_txt(ids):
     :return: 生成的总和txt文件名(不包含路径)
     """
     files = []
+    zip_name = time.strftime("%Y%m%d%H%M%S", time.localtime()) + '.zip'
+    jungle_zip = zipfile.ZipFile(BASE_DIR + '/media/txt/{0}'.format(zip_name), 'w')
+
     for id in ids:
         filename = write_to_txt(id)
-        files.append(BASE_DIR + '/media/txt/single/{0}'.format(filename))
-    zip_name = time.strftime("%Y%m%d%H%M%S", time.localtime()) + '.txt'
-    with open(
-            BASE_DIR + '/media/txt/select/' + zip_name, 'w+', encoding='utf-8'
-    ) as compress_file:
-        for file in files:
-            for line in open(file, encoding='utf-8'):
-                compress_file.writelines(line)
-            compress_file.write('\n')
+        file = BASE_DIR + '/media/txt/single/{0}'.format(filename)
+        jungle_zip.write(file, filename, compress_type=zipfile.ZIP_DEFLATED)
 
-    # timestamp = str(time.time()).replace('.', '')
-    # zip_name = '{0}.zip'.format(timestamp)
+    jungle_zip.close()
+
+    # with open(
+    #         BASE_DIR + '/media/txt/' + zip_name, 'w+', encoding='utf-8'
+    # ) as compress_file:
+    #     for file in files:
+    #         for line in open(file, encoding='utf-8'):
+    #             compress_file.writelines(line)
+    #         compress_file.write('\n')
+
     # jungle_zip = zipfile.ZipFile(BASE_DIR + '/media/txt/{0}'.format(zip_name), 'w')
     # for file in files:
     #     jungle_zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
     # jungle_zip.close()
-    #
+
     return zip_name
 
 # def compress_txt(ids):
