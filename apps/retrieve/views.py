@@ -4,6 +4,7 @@ from retrieve.models import SearchFilter
 from crawl_data.models import Summary, Detail, Authors, Periodicals, References, ReferencesCBBD, ReferencesCCND, \
     ReferencesCDFD, ReferencesCJFQ, ReferencesCPFD, ReferencesCMFD, ReferencesCRLDENG, ReferencesSSJD, Organization
 from django.db.models import Q
+from django.utils.datastructures import MultiValueDictKeyError
 import jieba
 import jieba.posseg
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
@@ -82,7 +83,12 @@ class Search(View):
         :return:
         """
         # 获取关键词和搜索类型
-        queryId = request.GET.get('queryId', '')
+        # queryId = request.GET.get('queryId', '')
+        try:
+            queryId = request.GET['queryId']
+        except MultiValueDictKeyError:
+            return render(request, 'index.html', {
+            })
         curr_page = request.GET.get('page', '1')
         session_id = request.session.session_key
         try:
@@ -202,7 +208,7 @@ class GetDetailInfo(View):
             response = render_to_response('404.html', {})
             response.status_code = 404
             return response
-        file = open(BASE_DIR+'/media/txt/single/{0}'.format(filename), 'rb')
+        file = open(BASE_DIR + '/media/txt/single/{0}'.format(filename), 'rb')
         response = FileResponse(file)
 
         response['Content-Type'] = 'application/octet-stream'
@@ -262,15 +268,13 @@ class DownloadZip(View):
 
         # 将勾选下载的压缩包归档到select文件夹
         os.rename(BASE_DIR + '/media/txt/{0}.zip'.format(zip_name),
-                      BASE_DIR + '/media/txt/select/{0}.zip'.format(zip_name))
-
+                  BASE_DIR + '/media/txt/select/{0}.zip'.format(zip_name))
 
         file = open(BASE_DIR + '/media/txt/select/{0}.zip'.format(zip_name), 'rb')
         response = FileResponse(file)
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="{}.zip"'.format(urlquote(zip_name))
         return response
-
 
 
 class DownloadAll(View):
@@ -309,3 +313,5 @@ class DownloadAll(View):
         response['Content-Disposition'] = 'attachment;filename="{}"'.format(urlquote(zip_name))
 
         return response
+
+
