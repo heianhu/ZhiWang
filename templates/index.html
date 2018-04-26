@@ -449,7 +449,7 @@
                                 </div>
                                 {% if request.path|slice:'2' == '/r' and request.user.is_authenticated %}
                                     <div class="col-lg-4">
-                                        <button type="button" id="downloadSel" class="btn btn-block btn-default">下载已选
+                                        <button type="button" id="downloadSel" class="btn btn-block btn-default">下载已选(共<span id="numOfSelected">0</span>项)
                                         </button>
                                     </div>
                                     <div class="col-lg-4">
@@ -775,5 +775,26 @@
     }
 
 </script>
+
+{#显示已勾选数量#}
+<script>
+$(function () {
+
+    $('.downloadCheckbox').on('click', function () {
+        var count = 0;
+        $(".downloadOperation").each(function () {
+
+            if ($(this).find('.downloadCheckbox').is(':checked')) {
+
+                count++;
+            }
+        })
+        $('#numOfSelected').html(count)
+    })
+})
+
+</script>
+
+
 </body>
 </html>
