@@ -22,7 +22,17 @@ def write_to_txt(getdetailinfo_id):
               'CT', 'CY', 'CL', 'SP', 'HO', 'DE', 'ID', 'AB', 'C1', 'RP', 'EM', 'FU', 'FX', 'CR', 'NR',
               'TC', 'Z9', 'PU', 'PI', 'PA', 'SN', 'BN', 'J9', 'JI', 'PD', 'PY', 'VL', 'IS', 'SI', 'PN',
               'SU', 'BP', 'EP', 'AR', 'DI', 'D2', 'PG', 'P2', 'WC', 'SC', 'GA', 'UT', 'ER', 'EF']
-    values = {field: [i, ] for i, field in enumerate(fields)}
+
+    import collections
+
+    values = collections.OrderedDict()
+    values = values.fromkeys(fields)
+
+    for k in values.keys():
+        values[k] = []
+
+    print(values)
+    # values = {field: [i, ] for i, field in enumerate(fields)}
     article_summary = Summary.objects.get(id=summary_id)
     try:
         article_detail = Detail.objects.get(id=article_summary.detail_id)
@@ -48,7 +58,31 @@ def write_to_txt(getdetailinfo_id):
     # 出版物名称
     values['SO'].append(Periodicals.objects.get(id=article_summary.source_id).name)
     # 摘要
-    values['AB'].append(article_detail.detail_abstract)
+    values['AB'].append('\n' + article_detail.detail_abstract)
+
+
+    # 关键词
+    kw = article_detail.detail_keywords
+    # '' kw.split()
+    # kw = [i.join('""') for i in kw.split()]
+    kw = ';'.join(kw.split())
+    values['DE'].append(kw)
+
+    # 组织
+    orgs = article_detail.organizations
+    orgs = orgs.split()
+    for org_id in orgs:
+        try:
+            org = int(org_id)
+            org = Organization.objects.get(id=org).organization_name
+        except ValueError as e:
+            # 可能是个字符串而不是数字id
+            org = org_id
+        finally:
+            values['C1'].append(org)
+
+
+
 
     try:
         # 参考文献
@@ -91,11 +125,17 @@ def write_to_txt(getdetailinfo_id):
             values['CR'].append(temp_refers_info)
 
     filename = '{0}.txt'.format(article_detail.detail_id)
+
+    print(values)
     with open(BASE_DIR + '/media/txt/single/' + filename, 'w+', encoding='utf-8') as file:
-        for key, (i, *all_value) in values.items():
+        for key, all_value in values.items():
             file.write(str(key))
             for num, v in enumerate(all_value):
-                file.write('    ' + ''.join(v))
+                if num != 0:
+                    file.write('    ' + ''.join(v))
+                else:
+                    file.write('  ' + ''.join(v))
+
                 if num != len(all_value)-1:
                     file.write('\n')
             file.write('\n')
