@@ -30,7 +30,7 @@ def write_to_txt(getdetailinfo_id):
 
     for k in values.keys():
         values[k] = []
-        
+
     print(values)
     # values = {field: [i, ] for i, field in enumerate(fields)}
     article_summary = Summary.objects.get(id=summary_id)
@@ -64,9 +64,25 @@ def write_to_txt(getdetailinfo_id):
     # 关键词
     kw = article_detail.detail_keywords
     # '' kw.split()
-    kw = [i.join('""') for i in kw.split()]
-    kw = ';'.join(kw)
+    # kw = [i.join('""') for i in kw.split()]
+    kw = ';'.join(kw.split())
     values['DE'].append(kw)
+
+    # 组织
+    orgs = article_detail.organizations
+    orgs = orgs.split()
+    for org_id in orgs:
+        try:
+            org = int(org_id)
+            org = Organization.objects.get(id=org).organization_name
+        except ValueError as e:
+            # 可能是个字符串而不是数字id
+            org = org_id
+        finally:
+            values['C1'].append(org)
+
+
+
 
     try:
         # 参考文献
