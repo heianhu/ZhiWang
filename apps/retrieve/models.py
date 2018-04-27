@@ -1,4 +1,5 @@
 from django.db import models
+import time
 
 
 # Create your models here.
@@ -15,7 +16,15 @@ class SearchFilter(models.Model):
     def __str__(self):
         return self.username
 
+    def search_time(self):
+        """
+        显示搜索时间
+        """
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(int(self.time[:10])))
 
+    # def search_filterPara(self):
+    #     search_filter = eval(self.filterPara)
+    #     text = '{}:{}{}{},{}:{},{}:{},{},{}'.format()
 
     class Meta:
         verbose_name = '搜索条件'
