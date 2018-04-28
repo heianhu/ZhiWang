@@ -36,7 +36,7 @@ class SearchFilter(models.Model):
             # 题目或其他搜索条件
             SEARCH_DIC.get(search_filter_keys[0], 'txt_2_sel').get(search_filter.get(search_filter_keys[0], ''), 'SU'),
             search_filter.get(search_filter_keys[1], ''),
-            SEARCH_DIC.get(search_filter_keys[2], '').get(search_filter.get(search_filter_keys[2], '')),
+            SEARCH_DIC.get(search_filter_keys[2], 'txt_2_relation1').get(search_filter.get(search_filter_keys[2], '')),
             search_filter.get(search_filter_keys[3], ''),
             # 作者
             SEARCH_DIC.get(search_filter_keys[4], 'au_1_sel').get(search_filter.get(search_filter_keys[4], 'AU'), ''),
