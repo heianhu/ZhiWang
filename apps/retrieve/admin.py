@@ -7,7 +7,7 @@ from .models import SearchFilter
 
 class SearchFilterAdmin(admin.ModelAdmin):
 
-    list_display = ['username', 'filterPara', 'search_time']
+    list_display = ['username', 'search_filterPara', 'search_time']
 
 
 admin.site.register(SearchFilter, SearchFilterAdmin)  # 将其注册

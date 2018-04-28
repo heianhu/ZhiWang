@@ -1,8 +1,5 @@
 from django.shortcuts import render, redirect, render_to_response
 from django.views.generic import View
-from retrieve.models import SearchFilter
-from crawl_data.models import Summary, Detail, Authors, Periodicals, References, ReferencesCBBD, ReferencesCCND, \
-    ReferencesCDFD, ReferencesCJFQ, ReferencesCPFD, ReferencesCMFD, ReferencesCRLDENG, ReferencesSSJD, Organization
 from django.db.models import Q
 from django.utils.datastructures import MultiValueDictKeyError
 import jieba
@@ -12,10 +9,16 @@ from django.http import HttpResponse, FileResponse, JsonResponse, HttpResponseRe
 from django.utils.http import urlquote
 from django.http import Http404
 import json
-import time, os
+import time
+import os
 import datetime
+
+
+from retrieve.models import SearchFilter
+from crawl_data.models import Summary, Detail, Authors, Periodicals, References, ReferencesCBBD, ReferencesCCND, \
+    ReferencesCDFD, ReferencesCJFQ, ReferencesCPFD, ReferencesCMFD, ReferencesCRLDENG, ReferencesSSJD, Organization
 from retrieve.utils import write_to_txt, compress_txt
-from ZhiWang.settings import BASE_DIR
+from ZhiWang.settings import BASE_DIR, SEARCH_DIC
 
 
 # Create your views here.
@@ -41,28 +44,29 @@ class Search(View):
         :param request:
         :return:
         """
-
-        para = dict(
-            txt_2_sel=request.POST.get('txt_2_sel', ''),  # 主题选择
-            txt_2_value1=request.POST.get('txt_2_value1', ''),  # 主题输入框1
-            txt_2_relation1=request.POST.get('txt_2_relation1', ''),  # 并行条件选择
-            txt_2_value2=request.POST.get('txt_2_value2', ''),  # 主题输入框2
-            # au_1_sel = request.POST.get('au_1_sel', '') # 作者选择  暂时没用
-            au_1_value1=request.POST.get('au_1_value1', ''),  # 作者输入框
-            au_special=request.POST.get('au_special', ''),  # 作者模糊/精准
-            org_1_value=request.POST.get('org_1_value', ''),  # 组织
-            org_1_special2=request.POST.get('org_1_special2', ''),  # 组织模糊/精准
-            # 出版日期合在一个input中传入了
-            publishdate=request.POST.get('publishdate', ''),
-
-            # publishdate_from = request.POST.get('publishdate', '').split(' - ')[0],
-            # publishdate_to = request.POST.get('publishdate', '').split(' - ')[1],
-
-            # publishdate_from=request.POST.get('publishdate_from', ''),  # 起始年
-            # publishdate_to=request.POST.get('publishdate_to', ''),  # 截止年
-            magazine_value1=request.POST.get('magazine_value1', ''),  # 文献来源输入框
-            magazine_special=request.POST.get('magazine_special', '')  # 文献模糊/精准
-        )
+        para = {key: request.POST.get(key, '') for key in SEARCH_DIC.keys()}
+        # para = dict(
+        #     key=request.POST.get(key, '') for key in SEARCH_DIC.keys()
+        #     # txt_2_sel=request.POST.get('txt_2_sel', ''),  # 主题选择
+        #     # txt_2_value1=request.POST.get('txt_2_value1', ''),  # 主题输入框1
+        #     # txt_2_relation1=request.POST.get('txt_2_relation1', ''),  # 并行条件选择
+        #     # txt_2_value2=request.POST.get('txt_2_value2', ''),  # 主题输入框2
+        #     # # au_1_sel = request.POST.get('au_1_sel', '') # 作者选择  暂时没用
+        #     # au_1_value1=request.POST.get('au_1_value1', ''),  # 作者输入框
+        #     # au_special=request.POST.get('au_special', ''),  # 作者模糊/精准
+        #     # org_1_value=request.POST.get('org_1_value', ''),  # 组织
+        #     # org_1_special2=request.POST.get('org_1_special2', ''),  # 组织模糊/精准
+        #     # # 出版日期合在一个input中传入了
+        #     # publishdate=request.POST.get('publishdate', ''),
+        #     #
+        #     # # publishdate_from = request.POST.get('publishdate', '').split(' - ')[0],
+        #     # # publishdate_to = request.POST.get('publishdate', '').split(' - ')[1],
+        #     #
+        #     # # publishdate_from=request.POST.get('publishdate_from', ''),  # 起始年
+        #     # # publishdate_to=request.POST.get('publishdate_to', ''),  # 截止年
+        #     # magazine_value1=request.POST.get('magazine_value1', ''),  # 文献来源输入框
+        #     # magazine_special=request.POST.get('magazine_special', '')  # 文献模糊/精准
+        # )
         search_filter = SearchFilter()
         try:
             search_filter.username = request.user.nick_name

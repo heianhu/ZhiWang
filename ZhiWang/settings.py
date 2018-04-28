@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 import sys
+import collections
+
 from ZhiWang import mysettings
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -140,3 +142,33 @@ PAGINATION_SETTINGS = {
 }
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+SEARCH_DIC = collections.OrderedDict(
+    {
+        'txt_2_sel': {
+            'SU': '标题',
+            'KY': '关键词',
+        },
+        'txt_2_value1': '',
+        'txt_2_relation1': {
+            'CNKI_AND': '并含',
+            'CNKI_OR': '或含',
+            'CNKI_NOT': '不含',
+        },
+        'txt_2_value2': '',
+        'au_1_sel': {
+            'AU': '作者',
+        },
+        'au_1_value1': '',
+        'org_1_sel': {
+            'ORG': '作者单位',
+        },
+        'org_1_value': '',
+        'magazine_1_sel': {
+            'issn_number': 'issn号',
+        },
+        'magazine_value1': '',
+        'publishdate': '发表日期',
+
+    }
+)

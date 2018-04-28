@@ -326,6 +326,9 @@
                                             </select>
                                         </div>
                                         <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <input name="txt_2_value1_special" type="checkbox">
+                                            </span>
                                             <input value="{{ txt_2_value1 }}" id="txt_2_value1" name="txt_2_value1"
                                                    type="text" class="form-control">
                                         </div>
@@ -347,6 +350,9 @@
                                             </select>
                                         </div>
                                         <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <input name="txt_2_value2_special" type="checkbox">
+                                            </span>
                                             <input value="{{ txt_2_value2 }}" id="txt_2_value2" name="txt_2_value2"
                                                    type="text" class="form-control">
                                         </div>
@@ -371,22 +377,22 @@
                                               <input name="au_special" type="checkbox">
                                             </span>
                                             <input value="{{ au_1_value1 }}" id="au_1_value1" name="au_1_value1"
-                                                   type="text" class="form-control" placeholder="作者">
+                                                   type="text" class="form-control" {#placeholder="作者"#}>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
 
                                         <div class="col-xs-4">
-                                            <select class="form-control">
-                                                <option>作者单位</option>
+                                            <select id="org_1_sel" name="org_1_sel" class="form-control">
+                                                <option value="ORG" selected="">作者单位</option>
                                             </select>
                                         </div>
                                         <div class="input-group ">
-                                        <span class="input-group-addon">
-                                          <input name="org_1_special2" type="checkbox">
-                                        </span>
+                                            <span class="input-group-addon">
+                                                <input name="org_1_special2" type="checkbox">
+                                            </span>
                                             <input name="org_1_value" id="org_1_value" value="{{ org_1_value }}"
-                                                   type="text" class="form-control" placeholder="作者单位">
+                                                   type="text" class="form-control" {#placeholder="作者单位"#}>
                                         </div>
                                     </div>
 
@@ -398,14 +404,18 @@
                             <div class="box-body">
                                 <div class="form-group">
                                     <div class="col-lg-6">
-
+                                        <div class="col-xs-4">
+                                            <select id="magazine_1_sel" name="magazine_1_sel" class="form-control">
+                                                <option value="issn_number" selected="">issn号</option>
+                                            </select>
+                                        </div>
                                         <div class="input-group ">
                                             <span class="input-group-addon">
                                                 <input name="magazine_special" type="checkbox">
                                             </span>
                                             <input name="magazine_value1" id="magazine_value1" type="text"
                                                    value="{{ magazine_value1 }}" class="form-control"
-                                                   placeholder="文献来源">
+{#                                                   placeholder="文献来源"#}>
                                         </div>
                                     </div>
 
@@ -414,6 +424,7 @@
                                         <div class="input-group ">
                                             <div class="input-group-addon">
                                                 <i class="fa fa-calendar"></i>
+                                                <input name="publishdate_special" type="checkbox">
                                             </div>
                                             <input type="text" placeholder="发表日期" name="publishdate"
                                                    value="{{ publishdate }}" class="form-control pull-right"
@@ -449,7 +460,8 @@
                                 </div>
                                 {% if request.path|slice:'2' == '/r' and request.user.is_authenticated %}
                                     <div class="col-lg-4">
-                                        <button type="button" id="downloadSel" class="btn btn-block btn-default">下载已选(共<span id="numOfSelected">0</span>项)
+                                        <button type="button" id="downloadSel" class="btn btn-block btn-default">
+                                            下载已选(共<span id="numOfSelected">0</span>项)
                                         </button>
                                     </div>
                                     <div class="col-lg-4">
@@ -778,20 +790,20 @@
 
 {#显示已勾选数量#}
 <script>
-$(function () {
+    $(function () {
 
-    $('.downloadCheckbox').on('click', function () {
-        var count = 0;
-        $(".downloadOperation").each(function () {
+        $('.downloadCheckbox').on('click', function () {
+            var count = 0;
+            $(".downloadOperation").each(function () {
 
-            if ($(this).find('.downloadCheckbox').is(':checked')) {
+                if ($(this).find('.downloadCheckbox').is(':checked')) {
 
-                count++;
-            }
+                    count++;
+                }
+            })
+            $('#numOfSelected').html(count)
         })
-        $('#numOfSelected').html(count)
     })
-})
 
 </script>
 
