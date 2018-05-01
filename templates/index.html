@@ -255,6 +255,12 @@
                                 </li>
                             </ul>
                         </li>
+                        {% if request.user.is_staff %}
+                        <li>
+                            <a href="{% url 'admin:index' %}" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                        </li>
+                        {% endif %}
+
                         <!-- Control Sidebar Toggle Button -->
                     {% else %}
                         <li>
@@ -264,9 +270,7 @@
                             <a href='{% url 'register' %}'>注册</a>
                         </li>
                     {% endif %}
-                    <li>
-                        <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
-                    </li>
+
                 </ul>
             </div>
         </nav>

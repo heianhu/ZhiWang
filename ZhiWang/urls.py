@@ -19,7 +19,7 @@ from retrieve.views import IndexView, Search
 from user.views import LoginView, RegisterView, LogoutView
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(r'^U2FsdGVkX18sI5oUus4o69GtiyYMZliP/', admin.site.urls),
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^login$', LoginView.as_view(), name='login'),
     url(r'^logout', LogoutView.as_view(), name='logout'),

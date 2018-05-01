@@ -172,3 +172,30 @@ SEARCH_DIC = collections.OrderedDict(
 
     ]
 )
+# # py3.6版本
+# SEARCH_DIC = {
+#     'txt_2_sel': {
+#         'SU': '标题',
+#         'KY': '关键词',
+#     },
+#     'txt_2_value1': '',
+#     'txt_2_relation1': {
+#         'CNKI_AND': '并含',
+#         'CNKI_OR': '或含',
+#         'CNKI_NOT': '不含',
+#     },
+#     'txt_2_value2': '',
+#     'au_1_sel': {
+#         'AU': '作者',
+#     },
+#     'au_1_value1': '',
+#     'org_1_sel': {
+#         'ORG': '作者单位',
+#     },
+#     'org_1_value': '',
+#     'magazine_1_sel': {
+#         'issn_number': 'issn号',
+#     },
+#     'magazine_value1': '',
+#     'publishdate': '发表日期',
+# }
