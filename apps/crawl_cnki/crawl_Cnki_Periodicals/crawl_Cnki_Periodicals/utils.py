@@ -19,6 +19,8 @@ def get_issuing_time(value):
         date = match.group(1)
     except Exception as e:
         print('时间解析错误', e)
+        print('value:', value)
+
         date = '1970-1-1'
     return date
 
@@ -61,6 +63,8 @@ def parse_article(value):
                 clean_DOI(p)
         except Exception as e:
             print('文章解析错误', e)
+            print('p:', p)
+
     return info
 
 
@@ -138,6 +142,7 @@ class CleanRefers(object):
         # 捕获函数中正则匹配的异常
         except Exception as e:
             print('refer解析错误', e)
+            print('refer:', refer)
         return self.info
 
     def clean_CJFQ(self, refer):
