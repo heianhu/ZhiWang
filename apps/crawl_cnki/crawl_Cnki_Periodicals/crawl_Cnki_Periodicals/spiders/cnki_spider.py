@@ -42,7 +42,7 @@ class CnkiSpiderSpider(scrapy.Spider):
         self.article_count = 0
 
 
-        self._root_url = 'http://nvsm.cnki.net'
+        self._root_url = 'http://kns.cnki.net'
 
         self.search_url = self._root_url + '/kns/brief/result.aspx?dbprefix=CJFQ'
         self.sort_page_url = (
