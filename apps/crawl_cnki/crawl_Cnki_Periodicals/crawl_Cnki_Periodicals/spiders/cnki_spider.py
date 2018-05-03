@@ -73,6 +73,8 @@ class CnkiSpiderSpider(scrapy.Spider):
         for i, issn in enumerate(issns, 1):
             # for i, periodical in enumerate(periodicals):
             pagenums, cookies = self.do_search(self.search_url, issn)
+            print('当前issn：', issn, '总页数:', pagenums)
+
             # TODO 添加年份条件
             for page in range(1, pagenums + 1):
                 # for page in range(1):  # 暂时只搜一页
@@ -87,7 +89,6 @@ class CnkiSpiderSpider(scrapy.Spider):
                                      callback=self.parse_summary,
                                      cookies=cookies, dont_filter=True,
                                      meta={'periodical': i})
-                print('当前issn：', issn, '当前页码:', page)
 
     def do_search(self, search_url, issn_number):
         """
@@ -161,10 +162,9 @@ class CnkiSpiderSpider(scrapy.Spider):
             url = ''.join(url.split())  # 有些url中含有空格
             url = RE_split_word.sub('', url)
 
-            print("{0:4}".format(self.article_count), end=';')
             self.article_count += 1
-            if self.article_count % 100 == 0:
-                print('\n')
+            if self.article_count % 500 == 0:
+                print("正在处理约第{0:6} 篇文献".format(self.article_count))
 
             # 将summary中的网页元素传给后续的parse函数，以统一解析文章所有细节
             yield scrapy.Request(url=url, headers=self.header,
