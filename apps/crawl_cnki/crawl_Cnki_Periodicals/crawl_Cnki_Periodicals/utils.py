@@ -54,7 +54,7 @@ def parse_article(value):
         info['DOI'] = match.group(1)
 
     for p in value:
-        p = RE_remove_space_2.sub('', p)
+        p = RE_remove_space.sub('', p)
         try:
             if 'catalog_ABSTRACT' in p:
                 clean_abstract(p)
@@ -136,7 +136,7 @@ class CleanRefers(object):
         source = refer[0]  # 数据库代码
         refer = refer[1]  # 参考文献内容
         # 先统一去除一些无用的字符
-        refer = RE_remove_space_2.sub('', refer)
+        refer = RE_remove_space.sub('', refer)
         # 根据数据库代码调用相应的清洗函数
         clean_func = getattr(self, 'clean_{}'.format(source))
         try:
