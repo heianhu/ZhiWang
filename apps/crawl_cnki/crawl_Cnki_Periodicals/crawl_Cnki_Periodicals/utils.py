@@ -192,6 +192,9 @@ class CleanRefers(object):
         return self.info
 
     def clean_CBBD(self, refer):
+
+        # '大学的理想[M].浙江教育出版社,(英)约翰·亨利·纽曼(JohnHenryNewman)著, 2001'
+        # '西洋教育通史[M].商务印书馆,雷通群 著, '
         match = RE_clean_CBBD.search(refer)
 
         self.info['title'] = match.group(1)
@@ -226,6 +229,8 @@ class CleanRefers(object):
         return self.info
 
     def clean_CCND(self, refer):
+
+        # '<a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=CJYB20031224ZZ18;dbcode=CCND;dbname=ccnd2003;v=">专科学校升格要不要降温</a>[N].唐景莉.中国教育报.2003'
         match = RE_clean_CCND.search(refer)
 
         self.info['url'] = match.group(1)
