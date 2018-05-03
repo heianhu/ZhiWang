@@ -15,6 +15,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options  # Chrome设置内容
+import logging
 
 
 # from .BrowserSelect import CrawlCnkiSummary
@@ -39,6 +40,7 @@ class CnkiSpiderSpider(scrapy.Spider):
         :param executable_path: PhantomJS路径
         """
         self.article_count = 0
+
 
         self._root_url = 'http://nvsm.cnki.net'
 
@@ -74,7 +76,8 @@ class CnkiSpiderSpider(scrapy.Spider):
             # for i, periodical in enumerate(periodicals):
             pagenums, cookies = self.do_search(self.search_url, issn)
             print('当前issn：', issn, '总页数:', pagenums)
-
+            logging.info('当前issn：{} , 总页数:{}'.format(issn, pagenums))
+            
             # TODO 添加年份条件
             for page in range(1, pagenums + 1):
                 # for page in range(1):  # 暂时只搜一页
@@ -165,6 +168,7 @@ class CnkiSpiderSpider(scrapy.Spider):
             self.article_count += 1
             if self.article_count % 500 == 0:
                 print("正在处理约第{0:6} 篇文献".format(self.article_count))
+                logging.info("正在处理约第{0:6} 篇文献".format(self.article_count))
 
             # 将summary中的网页元素传给后续的parse函数，以统一解析文章所有细节
             yield scrapy.Request(url=url, headers=self.header,

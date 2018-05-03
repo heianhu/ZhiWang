@@ -3,7 +3,7 @@
 __author__ = 'heianhu'
 import re
 from .RegularExpressions import *
-
+import logging
 def get_value(value):
     return value
 
@@ -20,6 +20,9 @@ def get_issuing_time(value):
     except Exception as e:
         print('时间解析错误', e)
         print('value:', value)
+
+        msg = '时间解析错误: {}\nvalue: {}'.format(e, value)
+        logging.warning(msg)
 
         date = '1970-1-1'
     return date
@@ -64,7 +67,8 @@ def parse_article(value):
         except Exception as e:
             print('文章解析错误', e)
             print('p:', p)
-
+            msg = '文章解析错误: {}\np: {}'.format(e, p)
+            logging.warning(msg)
     return info
 
 
@@ -143,6 +147,8 @@ class CleanRefers(object):
         except Exception as e:
             print('refer解析错误', e)
             print('refer:', refer)
+            msg = 'refer解析错误: {}\nrefer: {}'.format(e, refer)
+            logging.warning(msg)
         return self.info
 
     def clean_CJFQ(self, refer):
