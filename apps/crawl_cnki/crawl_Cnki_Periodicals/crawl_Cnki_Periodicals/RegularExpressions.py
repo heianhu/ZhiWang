@@ -17,6 +17,8 @@ RE_clean_CJFQ = re.compile(r'href="(.*?)">(.*?)</a>(.*?)<a(.*?)>(.*?)</a>(.*?)<a
 RE_clean_CJFQ_else = re.compile(r'(.*?)\.(.*?)\.(.*?)\.(.*?)')
 RE_clean_CDFD = re.compile(r'href="(.*?)">(.*?)</a>(.*?)<a(.*?)>(.*?)</a>(.*?)([\d]{4})',)
 RE_clean_CMFD = re.compile(r'href="(.*?)">(.*?)</a>(.*?)<a(.*?)>(.*?)</a>(.*?)([\d]{4})', )
+RE_clean_CMFD_else = re.compile(r'href="(.*?)">(.*?)</a>(.*)\.([\d\s]*)', )
+
 # RE_clean_CBBD = re.compile(r'(.*?)\.(.*?),(.*?),.*?([\d]{4})', )
 RE_clean_CBBD = re.compile(r'(.*?)\.(.*?),(.*?),([\d\s]*)', ) # 已修改一次
 

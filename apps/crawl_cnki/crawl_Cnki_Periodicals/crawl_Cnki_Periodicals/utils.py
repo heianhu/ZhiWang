@@ -181,13 +181,21 @@ class CleanRefers(object):
         return self.info
 
     def clean_CMFD(self, refer):
-        match = RE_clean_CMFD.search(refer)
-
-        self.info['url'] = match.group(1)
-        self.info['title'] = match.group(2)
-        self.info['author'] = match.group(3)
-        self.info['source'] = match.group(5)
-        self.info['issuing_time'] = match.group(7)
+        # 有2个</a>
+        if len(re.findall('</a>', refer)) == 1:
+            match = RE_clean_CMFD.search(refer)
+            self.info['url'] = match.group(1)
+            self.info['title'] = match.group(2)
+            self.info['author'] = match.group(3)
+            self.info['source'] = match.group(5)
+            self.info['issuing_time'] = match.group(7)
+        else:
+            # '<a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=1015027968.nh;dbcode=CMFD;dbname=CMFD2015;v=">基于LabVIEW的涡轮增压器测试台上位机开发</a>[D]. 张力. 2014'
+            match = RE_clean_CMFD_else.search(refer)
+            self.info['url'] = match.group(1)
+            self.info['title'] = match.group(2)
+            self.info['author'] = match.group(3)
+            self.info['issuing_time'] = match.group(4)
 
         return self.info
 
