@@ -257,6 +257,7 @@ class CnkiSpiderSpider(scrapy.Spider):
 
                 # 每一个url只解析一种数据库的一页参考文献
                 yield scrapy.Request(url=url, headers=self.header, callback=self.parse_references,
+                                     dont_filter=True,
                                      meta={'filename': filename,
                                            'source': source})
 
