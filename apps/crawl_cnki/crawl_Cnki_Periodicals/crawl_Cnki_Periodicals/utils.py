@@ -136,7 +136,7 @@ class CleanRefers(object):
         refer_source = refer[0]  # 数据库代码
         refer_content = refer[1]  # 参考文献内容
         # 先统一去除一些无用的字符
-        refer = RE_remove_space.sub('', refer_content)
+        refer_content = RE_remove_space.sub('', refer_content)
         # 根据数据库代码调用相应的清洗函数
         clean_func = getattr(self, 'clean_{}'.format(refer_source))
         try:
