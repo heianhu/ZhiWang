@@ -133,21 +133,20 @@ class CleanRefers(object):
         :param refer: ['refer_dbcode','refer_str']
         :return: refer_info
         """
-        source = refer[0]  # 数据库代码
-        refer = refer[1]  # 参考文献内容
+        refer_source = refer[0]  # 数据库代码
+        refer_content = refer[1]  # 参考文献内容
         # 先统一去除一些无用的字符
-        refer = RE_remove_space.sub('', refer)
+        refer = RE_remove_space.sub('', refer_content)
         # 根据数据库代码调用相应的清洗函数
-        clean_func = getattr(self, 'clean_{}'.format(source))
+        clean_func = getattr(self, 'clean_{}'.format(refer_source))
         try:
-            self.info = clean_func(refer)
+            self.info = clean_func(refer_content)
             # 截取前255个字符以能够插入数据库
             self.info['title'] = self.info['title'][:255]
         # 捕获函数中正则匹配的异常
         except Exception as e:
-            print('refer解析错误', e)
-            print('refer:', refer)
             msg = 'refer解析错误: {}\nrefer: {}'.format(e, refer)
+            print(msg)
             logging.warning(msg)
         return self.info
 
