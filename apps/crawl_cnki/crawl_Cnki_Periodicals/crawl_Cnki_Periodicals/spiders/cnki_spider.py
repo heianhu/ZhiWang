@@ -72,12 +72,17 @@ class CnkiSpiderSpider(scrapy.Spider):
         issns = [p.issn_number for p in periodicals]
 
         # 对每一个issn进行爬取
-        for i, issn in enumerate(issns, 1):
+        # for i, issn in enumerate(issns, 1):
+        for periodical in periodicals:
+            id = periodical.id
+            issn = periodical.issn_number
+
             # for i, periodical in enumerate(periodicals):
             pagenums, cookies = self.do_search(self.search_url, issn)
-            print('当前issn：', issn, '总页数:', pagenums)
-            logging.info('当前issn：{} , 总页数:{}'.format(issn, pagenums))
-            
+            msg = '当前issn号：id:{},issn:{} , 总页数:{}'.format(id, issn, pagenums)
+            print(msg)
+            logging.info(msg)
+
             # TODO 添加年份条件
             for page in range(1, pagenums + 1):
                 # for page in range(1):  # 暂时只搜一页
@@ -91,7 +96,7 @@ class CnkiSpiderSpider(scrapy.Spider):
                 yield scrapy.Request(url=page_url, headers=self.header,
                                      callback=self.parse_summary,
                                      cookies=cookies, dont_filter=True,
-                                     meta={'periodical': i})
+                                     meta={'periodical': id})
 
     def do_search(self, search_url, issn_number):
         """
