@@ -107,11 +107,11 @@ class CnkiSpiderSpider(scrapy.Spider):
         """
 
         # 无界面运行
-        chrome_options = Options()
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--disable-gpu')
-        driver = webdriver.Chrome(chrome_options=chrome_options)  # 指定使用的浏览器，初始化webdriver
-
+        # chrome_options = Options()
+        # chrome_options.add_argument('--headless')
+        # chrome_options.add_argument('--disable-gpu')
+        # driver = webdriver.Chrome(chrome_options=chrome_options)  # 指定使用的浏览器，初始化webdriver
+        driver = webdriver.Chrome()
 
         driver.get(search_url)
         elem = driver.find_element_by_id("magazine_value1")  # 找到name为q的元素，这里是个搜索框
