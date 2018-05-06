@@ -126,7 +126,11 @@ class ArticleItem(scrapy.Item):
             # article_author.author_id = Author.objects.get(id=author)
             article_author.article = article
             article_author.author = author
-            article_author.save()
+            try:
+                article_author.save()
+            # 如果已经存在
+            except djIntegrityError or pyIntegrityError:
+                pass
 
     def save_to_mysql_article_org(self, article, orgs):
         """
@@ -141,7 +145,11 @@ class ArticleItem(scrapy.Item):
             # article_author.author_id = Author.objects.get(id=author)
             article_org.article = article
             article_org.organization = org
-            article_org.save()
+            try:
+                article_org.save()
+            # 如果已经存在
+            except djIntegrityError or pyIntegrityError:
+                pass
 
 
 class ReferenceItemLoader(ItemLoader):
@@ -162,7 +170,9 @@ class ReferenceItem(scrapy.Item):
         refer = References()
 
         refer.url = self['info'].get('url', '')
-        refer.title = self['info'].get('title', '')
+
+        # 如果获取到的title为空字符串(从remark解析失败)，则填入remark的前255字符串。因为refer的title是要求unique的
+        refer.title = self['info'].get('title', '') or self.get('remark', '')[:255]
         refer.authors = self['info'].get('author', '')
         refer.source = self['info'].get('source', '')
         refer.issuing_time = self['info'].get('issuing_time', '')
@@ -178,4 +188,8 @@ class ReferenceItem(scrapy.Item):
         article_refer = Article_References()
         article_refer.article = article
         article_refer.references = refer
-        article_refer.save()
+        try:
+            article_refer.save()
+        # 如果已经存在
+        except djIntegrityError or pyIntegrityError:
+            pass

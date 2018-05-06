@@ -88,13 +88,20 @@ class Article_References(models.Model):
     class Meta:
         verbose_name = '参考文献'
         verbose_name_plural = verbose_name
+        unique_together = (('article', 'references'),)
 
 
 class Article_Author(models.Model):
     article = models.ForeignKey(Article, verbose_name='文献', blank=True)
     author = models.ForeignKey(Author, verbose_name='作者', blank=True)
 
+    class Meta:
+        unique_together = (('article', 'author'),)
+
 
 class Article_Organization(models.Model):
     article = models.ForeignKey(Article, verbose_name='文献', blank=True)
     organization = models.ForeignKey(Organization, verbose_name='机构', blank=True)
+
+    class Meta:
+        unique_together = (('article', 'organization'),)
