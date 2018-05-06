@@ -160,42 +160,58 @@ class CleanRefers(object):
             self.info['source'] = match.group(5)
             self.info['issuing_time'] = match.group(8)
         else:
+            content = refer.split('.')
+            # 有作者
             # '白血病微环境对正常造血的影响[J]. 宫跃敏,程涛.&amp;nbsp&amp;nbsp中华血液学杂志.2015(01)'
-            match = RE_clean_CJFQ_else.search(refer)
-            self.info['title'] = match.group(1)
-            self.info['author'] = match.group(2)
-            self.info['source'] = match.group(3)
-            self.info['issuing_time'] = match.group(4)
+            if len(content) == 4:
+                self.info['title'] = content[0]
+                self.info['author'] = content[1]
+                self.info['source'] = content[2]
+                self.info['issuing_time'] = content[3]
+            # 没有作者
+            # '补好真理标准讨论这一课教育问题要来一次大讨论[J].教育研究.1979(04)'
+            elif len(content) == 3:
+
+                self.info['title'] = content[0]
+                self.info['source'] = content[1]
+                self.info['issuing_time'] = content[2]
         return self.info
 
     def clean_CDFD(self, refer):
-        match = RE_clean_CDFD.search(refer)
-
-        self.info['url'] = match.group(1)
-        self.info['title'] = match.group(2)
-        self.info['author'] = match.group(3)
-        self.info['source'] = match.group(5)
-        self.info['issuing_time'] = match.group(7)
+        # 有2个</a>
+        if len(re.findall('</a>', refer)) == 2:
+            match = RE_clean_CDFD.search(refer)
+            self.info['url'] = match.group(1)
+            self.info['title'] = match.group(2)
+            self.info['author'] = match.group(3)
+            self.info['source'] = match.group(5)
+            self.info['issuing_time'] = match.group(7)
+        elif len(re.findall('</a>', refer)) == 1:
+            match = RE_clean_CDFD_else.search(refer)
+            # '<a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=2009141782.nh&amp;dbcode=CDFD&amp;dbname=CDFD2009&amp;v=">社会资本与大学发展研究</a>[D]. 侯志军. 2008'
+            self.info['url'] = match.group(1)
+            self.info['title'] = match.group(2)
+            self.info['author'] = match.group(3)
+            self.info['issuing_time'] = match.group(4)
 
         return self.info
 
     def clean_CMFD(self, refer):
         # 有2个</a>
-        if len(re.findall('</a>', refer)) == 1:
+        if len(re.findall('</a>', refer)) == 2:
             match = RE_clean_CMFD.search(refer)
             self.info['url'] = match.group(1)
             self.info['title'] = match.group(2)
             self.info['author'] = match.group(3)
             self.info['source'] = match.group(5)
             self.info['issuing_time'] = match.group(7)
-        else:
+        elif len(re.findall('</a>', refer)) == 1:
             # '<a target="kcmstarget" href="/kcms/detail/detail.aspx?filename=1015027968.nh;dbcode=CMFD;dbname=CMFD2015;v=">基于LabVIEW的涡轮增压器测试台上位机开发</a>[D]. 张力. 2014'
             match = RE_clean_CMFD_else.search(refer)
             self.info['url'] = match.group(1)
             self.info['title'] = match.group(2)
             self.info['author'] = match.group(3)
             self.info['issuing_time'] = match.group(4)
-
         return self.info
 
     def clean_CBBD(self, refer):
