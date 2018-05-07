@@ -119,9 +119,9 @@ def write_to_txt(getdetailinfo_id):
         # 将每个title分别填入
         for refers in all_refers:
             try:
-                temp_refers_info = (refers.title, refers.authors, refers.source, refers.issuing_time)
+                temp_refers_info = (refers.title, ' ', refers.authors, ' ', refers.source, ' ', refers.issuing_time)
             except AttributeError:
-                temp_refers_info = (refers.title, refers.info, refers.issuing_time)
+                temp_refers_info = (refers.title, ' ', refers.info, ' ', refers.issuing_time)
             values['CR'].append(temp_refers_info)
 
     filename = '{0}.txt'.format(article_detail.detail_id)
