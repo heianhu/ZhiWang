@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 {% load staticfiles %}
-
+{% load retrieve_tags %}
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -481,39 +481,78 @@
                         <!-- /.box -->
                     </div>
 
+        <div class="box">
 
-                    {# 搜索结果#}
+            <div class="box-body no-padding">
+              <table class="table table-striped">
+                <tbody><tr>
+                    {% if request.user.is_authenticated %}
+                  <th style="width: 10px">  <label> <input class="CheckAll" type="checkbox" ></label></th>
+                    {% endif %}
+                  <th style="width: 10px">#</th>
+                  <th>标题</th>
+                  <th>作者</th>
+                  <th style="">发表时间</th>
+                  <th style="">查看原文</th>
+                  <th style="">下载此文</th>
+
+                </tr>
+                 {# 搜索结果#}
                     {% for article in all_articles.object_list %}
+                <tr class="result_item">
+                    {% if request.user.is_authenticated %}
+                  <td><label> <input class="downloadCheckbox" type="checkbox"></label></td>
+                    {% endif %}
+{#                  <td>{% forloop.counter |add: widthratio  all_articles.number 1 12 %}</td>#}
+                <td>{{ all_articles.number|multiply:'12'|add:forloop.counter  }}</td>
+                  <td><a href="#" onclick="showArticleDetail({{ article.id }})" >{{ article.title }}</a></td>
+                  <td>
+                    {{ article.authors }}
+                  </td>
+                  <td>{{ article.issuing_time }}</td>
+                  <td> <a class="" target="_blank" href="{{ article.url }}"><i class="fa fa-book"></i></a></td>
+                  <td> <a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id %}"> <i class="fa fa-download"></i></a></td>
 
-                        <div class="box box-widget  collapsed-box ">
-                            <div class="box-header with-border">
-                                <span data-widget="collapse" data-toggle="tooltip" title=""
-                                      data-original-title="Collapse" class="username"><a href="">{{ article.title }}</a></span>
-                                <span class="description"> {{ article.authors }}</span>
-                                <span class="pull-right"> {{ article.issuing_time }}</span>
-
-                            </div>
-                            <!-- /.box-header -->
-                            <div class="box-body">
-                                <!-- post text -->
-                                <p>{{ article.detail.detail_abstract }} </p>
-                                <div class="downloadOperation">
-                                    <a class="" target="_blank" href="{{ article.url }}"><i class="fa fa-book"></i>查看原文
-                                    </a>
-
-                                    <a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id %}"><i
-                                            class="fa fa-download"></i>下载此文 </a>
-                                    <a class="" onclick="showArticleDetail({{ article.id }})" href="#"><i
-                                            class="fa fa-download"></i>查看细节 </a>
-                                    {% if request.user.is_authenticated %}
-                                        <label> <input class="downloadCheckbox" type="checkbox">选择</label>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <!-- /.box-body -->
-                        </div>
-                        <!-- /.box -->
+                </tr>
                     {% endfor %}
+
+              </tbody></table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+                    {# 搜索结果#}
+{#                    {% for article in all_articles.object_list %}#}
+{##}
+{#                        <div class="box box-widget  collapsed-box ">#}
+{#                            <div class="box-header with-border">#}
+{#                                {% if request.user.is_authenticated %}#}
+{#                                        <label> <input class="downloadCheckbox" type="checkbox"> {{ forloop.counter }}</label>#}
+{#                                    {% endif %}#}
+{#                                <span data-widget="collapse" data-toggle="tooltip" title=""#}
+{#                                      data-original-title="Collapse" class="username"><a href="">{{ article.title }}</a></span>#}
+{#                                <span class="description"> {{ article.authors }}</span>#}
+{#                                <span class="pull-right"> {{ article.issuing_time }}</span>#}
+{##}
+{#                            </div>#}
+{#                            <!-- /.box-header -->#}
+{#                            <div class="box-body">#}
+{#                                <!-- post text -->#}
+{#                                <p>{{ article.detail.detail_abstract }} </p>#}
+{#                                <div class="downloadOperation">#}
+{#                                    <a class="" target="_blank" href="{{ article.url }}"><i class="fa fa-book"></i>查看原文#}
+{#                                    </a>#}
+{##}
+{#                                    <a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id %}"><i#}
+{#                                            class="fa fa-download"></i>下载此文 </a>#}
+{#                                    <a class="" onclick="showArticleDetail({{ article.id }})" href="#"><i#}
+{#                                            class="fa fa-download"></i>查看细节 </a>#}
+{##}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <!-- /.box-body -->#}
+{#                        </div>#}
+{#                        <!-- /.box -->#}
+{#                    {% endfor %}#}
                     <!-- 分页 -->
                     <div class="resultTotal">
                         <ul class="pagination ue-clear">
@@ -524,7 +563,7 @@
                             {% for page in all_articles.pages %}
                                 {% if page %}
                                     {% ifequal page all_articles.number %}
-                                        <li class=""><a>{{ page }}</a></li>
+                                        <li class="paginate_button active"><a>{{ page }}</a></li>
                                     {% else %}
                                         <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
                                     {% endifequal %}
@@ -690,7 +729,7 @@
 
             var result = new Array(), ids = '';
 
-            $(".downloadOperation").each(function () {
+            $(".result_item").each(function () {
 
                 if ($(this).find('.downloadCheckbox').is(':checked')) {
 
@@ -798,7 +837,7 @@
 
         $('.downloadCheckbox').on('click', function () {
             var count = 0;
-            $(".downloadOperation").each(function () {
+            $(".result_item").each(function () {
 
                 if ($(this).find('.downloadCheckbox').is(':checked')) {
 
@@ -811,6 +850,26 @@
 
 </script>
 
+{#勾选当前页所有#}
+<script>
+    $(function () {
+
+        $(".CheckAll").click(function() {
+                {#$('input[class="downloadCheckbox"]').attr("checked",this.checked);#}
+                $(".downloadCheckbox").prop("checked", $(this).prop("checked"));
+
+
+                {#更新已勾选数量的显示#}
+                var count = 0;
+                $(".result_item").each(function () {
+                    if ($(this).find('.downloadCheckbox').is(':checked')) {
+                        count++;
+                    }
+                })
+                $('#numOfSelected').html(count)
+                });
+    })
+</script>
 
 </body>
 </html>
