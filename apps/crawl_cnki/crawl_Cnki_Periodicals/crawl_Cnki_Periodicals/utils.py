@@ -25,6 +25,8 @@ def get_issuing_time(value):
         logging.warning(msg)
 
         date = '1970-1-1'
+    if '/' in date:
+        date = date.replace('/', '-')
     return date
 
 

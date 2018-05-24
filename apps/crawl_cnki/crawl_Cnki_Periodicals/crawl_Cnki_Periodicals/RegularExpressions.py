@@ -7,7 +7,7 @@ RE_FILENAME = re.compile(r'filename=((.*?))&')
 RE_AUTHORS = re.compile('TurnPageToKnet\((.*?)\)[;]?">') #已修改1次(增加分号)
 RE_REFER_URL = re.compile(r'href=\"(.*?)\">')
 RE_REFER_TITLE = re.compile(r'<a(.*?)>(.*?)</a>')
-RE_ISSUING_TIME = re.compile(r'([\d]+-[\d]+-[\d]+)')
+RE_ISSUING_TIME = re.compile(r'([\d]+[-/][\d]+[-/][\d]+)')    # 在summary页中匹配issuing_time
 RE_remove_space = re.compile('\n|\r|  |&amp|;nbsp')
 RE_clean_abstract = re.compile(r'ChDivSummary">(.*?)</span>', )
 RE_clean_keyword = re.compile(r'TurnPageToKnet\(\'kw\',\'(.*?)\',\'[\d]*\'\)', )

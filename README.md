@@ -14,6 +14,7 @@
 __author__ = 'heianhu'
 
 SECRET_KEY = ''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -24,6 +25,11 @@ DATABASES = {
         'PORT': '',
     },
 }
+
+DEBUG = True
+
+ALLOWED_HOSTS = []
+
 ```
 
 2. 修改 `rootcorn`文件，自动执行时间务必小于一周(每周执行最佳)，并将目录正确设置。
