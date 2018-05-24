@@ -7,7 +7,7 @@ from crawl_data.models import Summary, Detail, Authors, Periodicals, References,
 from openpyxl import Workbook
 import time
 from ZhiWang.settings import BASE_DIR
-
+from django.db.models import ObjectDoesNotExist
 
 def write_to_txt(getdetailinfo_id):
     """
@@ -78,6 +78,8 @@ def write_to_txt(getdetailinfo_id):
         except ValueError as e:
             # 可能是个字符串而不是数字id
             org = org_id
+        except  ObjectDoesNotExist as e:
+            org = ''
         finally:
             values['C1'].append(org)
 
