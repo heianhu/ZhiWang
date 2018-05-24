@@ -108,6 +108,7 @@ class CrawlCnkiSummary(object):
 
         have_done = 0  # 监测是否已经提取过该概览
         for num in range(1, pagenums + 1):
+
             print(keyword.issn_number + ":page-" + str(num))
             curr_page = "curpage={0}&turnpage={0}&".format(num)
             if num == 1:
@@ -167,7 +168,7 @@ class CrawlCnkiSummary(object):
                     continue
         driver.quit()
 
-    def crawl_periodicals_summary(self, *args, start_num=0, mark=False, issn_number=0):
+    def crawl_periodicals_summary(self, *args, start_num=0, mark=False, issn_number=''):
         """
         爬取期刊概览内容
         (初始爬取功能)
@@ -179,7 +180,7 @@ class CrawlCnkiSummary(object):
         if mark:
             keywords = Periodical.objects.filter(mark=True)[start_num:]
         elif issn_number:
-            keywords = Periodical.objects.filter(issn_number=issn_number)[start_num:]
+            keywords = Periodical.objects.filter(issn_number=issn_number)
         else:
             keywords = Periodical.objects.all()[start_num:]
         count = start_num

@@ -14,7 +14,9 @@ def start_scrapy():
             os.path.abspath(__file__)  # 当前文件地址
         ))
     # execute(['scrapy', 'crawl', 'crawl_detail'])
-    execute(['scrapy', 'crawl', 'cnki_spider'])
+    # execute(['scrapy', 'crawl', 'cnki_spider'])
+    execute(['scrapy', 'crawl', 'cnki_spider_test'])
+
     # execute(['scrapy', 'crawl', 'incremental_crawl_detail'])
 
 

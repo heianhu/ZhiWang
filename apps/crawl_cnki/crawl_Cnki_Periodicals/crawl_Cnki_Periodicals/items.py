@@ -37,6 +37,7 @@ class ArticleItem(scrapy.Item):
     issuing_time = scrapy.Field(
         input_processor=MapCompose(get_issuing_time)
     )
+    article = scrapy.Field()
     remark = scrapy.Field(
         output_processor=parse_article
     )
@@ -63,14 +64,8 @@ class ArticleItem(scrapy.Item):
 
     def save_to_mysql_article(self):
 
-        article = Article()
-        article.filename = self.get('filename', '')
-        article.title = self.get('title', '')[:255]
-        article.url = self.get('url', '')
-        periodicals = self.get('periodicals', '')
-        article.periodicals = Periodical.objects.get(id=periodicals)
-        article.issuing_time = self.get('issuing_time', '')
-        article.cited = self.get('cited', 0)
+        # article = Article()
+        article = self['article']
         article.keywords = self['remark'].get('keywords', '')
         article.abstract = self['remark'].get('abstract', '')
         article.DOI = self['remark'].get('DOI', '')
@@ -166,7 +161,7 @@ class ReferenceItem(scrapy.Item):
     )
 
     def save_to_mysql_refer(self):
-        article = Article.objects.get(filename=self.get('article', ''))
+        article = self.get('article', '')
         refer = References()
 
         refer.url = self['info'].get('url', '')

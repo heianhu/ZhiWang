@@ -58,68 +58,11 @@ class CnkiSpiderSpider(scrapy.Spider):
         从数据库中找出所要爬取的url
         """
 
-        # issns = ['1674-7216',
-        #          '1674-7224',
-        #          '1674-7232',
-        #          '1674-7240',
-        #          '1674-7259',
-        #          '1674-7267']
-
-        # issns = ['1674-7216']
-
-        # ar = Article_References.objects.filter(article_id=16160)
-        # for i in ar:
-        #     print(
-        #         References.objects.get(id=int(i.references_id)).title
-        #     )
-        #
-        # # periodicals = Periodical.objects.filter(mark=1)  # 期刊
-        # periodicals = Periodical.objects.all()[:6] # 期刊
-        # # periodicals = Periodicals.objects.filter(issn_number=self.issn)  # 暂时只用一个issn
-        #
-        # # 对每一个issn进行爬取
-        # # for i, issn in enumerate(issns, 1):
-        # for periodical in periodicals:
-        #     id = periodical.id
-        #     issn = periodical.issn_number
-        #
-        #     # for i, periodical in enumerate(periodicals):
-        #     pagenums, cookies = self.do_search(self.search_url, issn)
-        #     msg = '当前issn号：id:{},issn:{} , 总页数:{}'.format(id, issn, pagenums)
-        #     print(msg)
-        #     logging.info(msg)
-        #
-        #     # TODO 添加年份条件
-        #     for page in range(1, pagenums + 1):
-        #         # for page in range(1):  # 暂时只搜一页
-        #         every_page_url = self._root_url + "/kns/brief/brief.aspx?{0}RecordsPerPage=20&QueryID=1&ID=&pagemode=L&dbPrefix=CJFQ&Fields=&DisplayMode=listmode&SortType=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)&PageName=ASP.brief_result_aspx#J_ORDER&"
-        #         curr_page = "curpage={0}&turnpage={0}&".format(page)
-        #         if page == 1:
-        #             page_url = every_page_url.format('')
-        #         else:
-        #             page_url = every_page_url.format(curr_page)
-        #
-        #         yield scrapy.Request(url=page_url, headers=self.header,
-        #                              callback=self.parse_summary,
-        #                              cookies=cookies, dont_filter=True,
-        #                              meta={'periodical': id})
-
-
-        urls= ['http://kns.cnki.net/KCMS/detail/detail.aspx?dbname=CJFD2003&filename=JYYJ200304013&']
-        # pagenums, cookies = self.do_search(self.search_url, '1674-7216')
-
-        articles = Article.objects.all()[:1]
-
+        articles = Article.objects.all()[:5]
         for article in articles:
-            # url = article.url
-            url = 'http://kns.cnki.net/KCMS/detail/detail.aspx?dbname=CJFD2003&filename=JYYJ200304013&'
-            url = 'https://www.baidu.com'
-            print(url)
-            yield scrapy.Request(url=url, headers=self.header,
-                                 callback=self.parse,
-                                 # cookies=cookies
-                                 )
-
+            yield scrapy.Request(
+                url=article.url, headers=self.header, callback=self.parse, meta={'article': article}
+            )
 
 
 
@@ -211,7 +154,7 @@ class CnkiSpiderSpider(scrapy.Spider):
         """
         # summary = response.meta.get('summary','')
         # periodicals = response.meta.get('periodical')
-
+        article = response.meta.get('article')
         item_loader = ArticleItemLoader(item=ArticleItem(), response=response)
         # 文章部分
         # item_loader.add_value('url', response.url)
@@ -228,21 +171,21 @@ class CnkiSpiderSpider(scrapy.Spider):
         item_loader.add_css('authors_name', '.author')
         item_loader.add_css('org_id', '.orgn')
         item_loader.add_css('org_name', '.orgn')
-
+        item_loader.add_value('article', article)
         article_item = item_loader.load_item()
         yield article_item
 
         # 参考文献部分
 
         # 记住此文章名
-        filename = article_item['filename']
+        filename = article.filename
 
         # 此url用于探测该文章有多少页参考文献
         refers_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={}&' \
                      'RefType=1&CurDBCode=CJFQ&page=1'.format(filename)
 
-        # yield scrapy.Request(url=refers_url, headers=self.header, callback=self.parse_refer_pages,
-        #                      meta={'filename': filename})
+        yield scrapy.Request(url=refers_url, headers=self.header, callback=self.parse_refer_pages,
+                             meta={'article': article})
 
     def parse_refer_pages(self, response):
         """
@@ -250,7 +193,7 @@ class CnkiSpiderSpider(scrapy.Spider):
         :param response:
         :return:
         """
-        filename = response.meta.get('filename', '')
+        article = response.meta.get('article', '')
         # 各个数据库的代码号
         sources = ['CJFQ', 'CDFD', 'CMFD', 'CBBD', 'SSJD', 'CRLDENG', 'CCND', 'CPFD']
 
@@ -274,12 +217,12 @@ class CnkiSpiderSpider(scrapy.Spider):
                 # 按数据库和页码格式化每一个url
                 url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?' \
                       'dbcode=CJFQ&filename={0}&RefType=1&CurDBCode={1}&page={2}' \
-                    .format(filename, source, page)
+                    .format(article.filename, source, page)
 
                 # 每一个url只解析一种数据库的一页参考文献
                 yield scrapy.Request(url=url, headers=self.header, callback=self.parse_references,
                                      dont_filter=True,
-                                     meta={'filename': filename,
+                                     meta={'article': article,
                                            'source': source})
 
     def parse_references(self, response):
@@ -289,7 +232,7 @@ class CnkiSpiderSpider(scrapy.Spider):
         :return:
         """
 
-        filename = response.meta.get('filename', '')
+        article = response.meta.get('article', '')
         source = response.meta.get('source', '')
         essayBoxs = response.css('.essayBox').extract()
         refers = []
@@ -302,7 +245,7 @@ class CnkiSpiderSpider(scrapy.Spider):
 
         for refer in refers:
             item_loader = ReferenceItemLoader(item=ReferenceItem(), response=response)
-            item_loader.add_value('article', filename)
+            item_loader.add_value('article', article)
 
             # 将source和参考文献一起传入，供后续按数据库分类清洗
             item_loader.add_value('info', [source, refer])
