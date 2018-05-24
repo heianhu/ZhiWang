@@ -11,4 +11,4 @@ if __name__ == '__main__':
         use_GPU=True,
         # executable_path='/Users/heianhu/phantomjs-2.1.1-macosx/bin/phantomjs'
     )
-    crawl_cnki_summary.crawl_periodicals_summary(mark=True)
+    crawl_cnki_summary.crawl_periodicals_summary(mark=True, start_num=60)

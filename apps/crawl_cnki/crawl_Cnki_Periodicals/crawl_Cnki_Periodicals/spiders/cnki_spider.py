@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import Select  # 导入Select
 from selenium.webdriver.common.keys import Keys  # 导入Keys
 from selenium.webdriver.chrome.options import Options  # Chrome设置内容
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from crawl_cnki.models import Periodical
+from crawl_cnki.models import Periodical, Article
 from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.items import ArticleItemLoader, ArticleItem, \
     ReferenceItem, ReferenceItemLoader
 import time
@@ -31,72 +31,16 @@ class CnkiSpiderSpider(scrapy.Spider):
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
     }
 
-    # crawlcnkisummary_gen = CrawlCnkiSummary()
-
-    def __init__(self, *args, **kwargs):
-        """
-        初始化，建立与Django的models连接，设置初始值
-        :param use_Chrome: True使用Chrome，False使用PhantomJS
-        :param executable_path: PhantomJS路径
-        """
-        self.article_count = 0
-
-
-        self._root_url = 'http://kns.cnki.net'
-
-        self.search_url = self._root_url + '/kns/brief/result.aspx?dbprefix=CJFQ'
-        self.sort_page_url = (
-            # 第一次来先将时间由新到旧排序
-            "/kns/brief/brief.aspx?{0}RecordsPerPage=20&QueryID=1&ID=&pagemode=L&dbPrefix=CJFQ&Fields=&DisplayMode=listmode&SortType=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)+desc&PageName=ASP.brief_result_aspx#J_ORDER&",
-            # 第二次来将时间由旧到新排序
-            "/kns/brief/brief.aspx?{0}RecordsPerPage=20&QueryID=1&ID=&pagemode=L&dbPrefix=CJFQ&Fields=&DisplayMode=listmode&SortType=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)&PageName=ASP.brief_result_aspx#J_ORDER&"
-        )
-
     def start_requests(self):
         """
         控制开始
-        从数据库中找出所要爬取的url
+        从数据库中找出所要爬取的Article，之后将其交由parse处理
         """
-
-        issns = ['1674-7216',
-                 '1674-7224',
-                 '1674-7232',
-                 '1674-7240',
-                 '1674-7259',
-                 '1674-7267']
-
-        # issns = ['1674-7216']
-
-        periodicals = Periodical.objects.filter(mark=1)  # 期刊
-        # periodicals = Periodicals.objects.filter(issn_number=self.issn)  # 暂时只用一个issn
-        issns = [p.issn_number for p in periodicals]
-
-        # 对每一个issn进行爬取
-        # for i, issn in enumerate(issns, 1):
-        for periodical in periodicals:
-            id = periodical.id
-            issn = periodical.issn_number
-
-            # for i, periodical in enumerate(periodicals):
-            pagenums, cookies = self.do_search(self.search_url, issn)
-            msg = '当前issn号：id:{},issn:{} , 总页数:{}'.format(id, issn, pagenums)
-            print(msg)
-            logging.info(msg)
-
-            # TODO 添加年份条件
-            for page in range(1, pagenums + 1):
-                # for page in range(1):  # 暂时只搜一页
-                every_page_url = self._root_url + "/kns/brief/brief.aspx?{0}RecordsPerPage=20&QueryID=1&ID=&pagemode=L&dbPrefix=CJFQ&Fields=&DisplayMode=listmode&SortType=(%E5%8F%91%E8%A1%A8%E6%97%B6%E9%97%B4%2c%27TIME%27)&PageName=ASP.brief_result_aspx#J_ORDER&"
-                curr_page = "curpage={0}&turnpage={0}&".format(page)
-                if page == 1:
-                    page_url = every_page_url.format('')
-                else:
-                    page_url = every_page_url.format(curr_page)
-
-                yield scrapy.Request(url=page_url, headers=self.header,
-                                     callback=self.parse_summary,
-                                     cookies=cookies, dont_filter=True,
-                                     meta={'periodical': id})
+        articles = Article.objects.filter(remark='')
+        for article in articles:
+            yield scrapy.Request(
+                url=article.url, headers=self.header, callback=self.parse, meta={'article': article}
+            )
 
     def do_search(self, search_url, issn_number):
         """
@@ -188,16 +132,10 @@ class CnkiSpiderSpider(scrapy.Spider):
         :param response:
         :return:
         """
-        summary = response.meta.get('summary')
-        periodicals = response.meta.get('periodical')
+        article = response.meta.get('article')
+        # periodicals = response.meta.get('periodical')
 
         item_loader = ArticleItemLoader(item=ArticleItem(), response=response)
-        # 文章部分
-        item_loader.add_value('url', response.url)
-        item_loader.add_value('filename', response.url)
-        item_loader.add_value('title', summary.css('.fz14::text').extract())
-        item_loader.add_value('issuing_time', summary.css('.cjfdyxyz + td::text').extract())
-        item_loader.add_value('periodicals', periodicals)
 
         # 文章剩余细节
         item_loader.add_css('remark', '.wxBaseinfo p')
@@ -214,14 +152,14 @@ class CnkiSpiderSpider(scrapy.Spider):
         # 参考文献部分
 
         # 记住此文章名
-        filename = article_item['filename']
+        filename = article.filename
 
         # 此url用于探测该文章有多少页参考文献
-        refers_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={}&' \
-                     'RefType=1&CurDBCode=CJFQ&page=1'.format(filename)
+        refers_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1'.format(filename)
 
-        yield scrapy.Request(url=refers_url, headers=self.header, callback=self.parse_refer_pages,
-                             meta={'filename': filename})
+        yield scrapy.Request(
+            url=refers_url, headers=self.header, callback=self.parse_refer_pages, meta={'filename': filename}
+        )
 
     def parse_refer_pages(self, response):
         """
