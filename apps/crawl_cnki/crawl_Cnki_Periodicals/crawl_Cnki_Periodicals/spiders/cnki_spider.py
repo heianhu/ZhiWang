@@ -23,7 +23,7 @@ from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.RegularExpressions
 
 
 class CnkiSpiderSpider(scrapy.Spider):
-    name = 'cnki_spider_test'
+    name = 'cnki_spider'
     # allowed_domains = ['cnki.net']
     start_urls = ['http://kns.cnki.net/']
     header = {
@@ -58,8 +58,8 @@ class CnkiSpiderSpider(scrapy.Spider):
         从数据库中找出所要爬取的url
         """
 
-        # articles = Article.objects.all()[:5]
-        articles = Article.objects.filter(filename='JYYJ201709016')
+        articles = Article.objects.filter(remark='')[:1000]
+        # articles = Article.objects.filter(filename='JYYJ201709016')
         for article in articles:
             yield scrapy.Request(
                 url=article.url, headers=self.header, callback=self.parse, meta={'article': article}
