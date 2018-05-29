@@ -70,15 +70,17 @@ class References(models.Model):
     参考文献
     """
     url = models.URLField(max_length=255, verbose_name='参考文献的url')
-    title = models.CharField(max_length=255, unique=True, verbose_name='参考文献的题名')
-    authors = models.TextField(max_length=255, verbose_name='参考文献的作者')
+    title = models.CharField(max_length=255, verbose_name='参考文献的题名')
+    authors = models.CharField(max_length=255, verbose_name='参考文献的作者')
     source = models.CharField(max_length=255, verbose_name='参考文献的来源')
-    issuing_time = models.CharField(max_length=255, verbose_name='发表时间')
+    issuing_time = models.CharField(max_length=20, verbose_name='发表时间')
+    dbID = models.CharField(max_length=10, verbose_name='参考文献的数据库', default='')
     remark = models.TextField(verbose_name='备注')
 
     class Meta:
         verbose_name = '参考文献'
         verbose_name_plural = verbose_name
+        unique_together = (('title', 'issuing_time', 'dbID',),)
 
 
 class Article_References(models.Model):

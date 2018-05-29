@@ -130,12 +130,13 @@ class CleanRefers(object):
     """
 
     def __call__(self, refer):
-        self.info = {'url': '', 'title': '', 'author': '', 'source': '', 'issuing_time': ''}
+        self.info = {'url': '', 'title': '', 'author': '', 'source': '', 'dbID': '', 'issuing_time': ''}
         """
         :param refer: ['refer_dbcode','refer_str']
         :return: refer_info
         """
         refer_source = refer[0]  # 数据库代码
+        self.info['dbID'] = refer_source
         refer_content = refer[1]  # 参考文献内容
         # 先统一去除一些无用的字符
         refer_content = RE_remove_space.sub('', refer_content)
@@ -145,6 +146,7 @@ class CleanRefers(object):
             self.info = clean_func(refer_content)
             # 截取前255个字符以能够插入数据库
             self.info['title'] = self.info['title'][:255]
+            self.info['author'] = self.info['author'][:255]
         # 捕获函数中正则匹配的异常
         except Exception as e:
             msg = 'refer解析错误: {}\nrefer: {}'.format(e, refer)

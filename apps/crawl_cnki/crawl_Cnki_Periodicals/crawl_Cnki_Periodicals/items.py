@@ -170,12 +170,14 @@ class ReferenceItem(scrapy.Item):
         refer.title = self['info'].get('title', '') or self.get('remark', '')[:255]
         refer.authors = self['info'].get('author', '')
         refer.source = self['info'].get('source', '')
+        refer.dbID = self['info'].get('dbID', '')
         refer.issuing_time = self['info'].get('issuing_time', '')
         refer.remark = self.get('remark', '')
         try:
             refer.save()
             # 已经存在
         except djIntegrityError or pyIntegrityError:
+            print(refer.title)
             refer = References.objects.get(title=self['info'].get('title', ''))
         return article, refer
 
