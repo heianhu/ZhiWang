@@ -90,7 +90,20 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+# 日志显示
 LOG_LEVEL = 'INFO'
+# LOG_FILE = "log.txt"
+
 # DOWNLOAD_TIMEOUT = 15
 # DOWNLOAD_TIMEOUT = 20
-# LOG_FILE = "log.txt"
+
+# 所要爬取的参考文献的dbname
+REFERENCES_DBNAME = ('CJFQ',  # 中国学术期刊网络出版总库 id = "pc_CJFQ"
+                     'CDFD',  # 中国博士学位论文全文数据库 id = "pc_CDFD"
+                     'CMFD',  # 中国优秀硕士学位论文全文数据库 id = "pc_CMFD"
+                     'CBBD',  # 中国图书全文数据库 id = "pc_CBBD"
+                     'SSJD',  # 国际期刊数据库 id = "pc_SSJD"
+                     'CRLDENG',  # 外文题录数据库 id = "pc_CRLDENG"
+                     'CCND',  # 中国重要报纸全文数据库 id = "pc_CCND"
+                     'CPFD',  # 中国重要会议论文全文数据库 id="pc_CPFD"
+                     )

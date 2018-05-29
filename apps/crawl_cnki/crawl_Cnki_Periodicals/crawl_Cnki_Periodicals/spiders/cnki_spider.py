@@ -20,6 +20,7 @@ import logging
 
 # from .BrowserSelect import CrawlCnkiSummary
 from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.RegularExpressions import *
+from crawl_cnki.crawl_Cnki_Periodicals.crawl_Cnki_Periodicals.settings import REFERENCES_DBNAME
 
 
 class CnkiSpiderSpider(scrapy.Spider):
@@ -57,6 +58,13 @@ class CnkiSpiderSpider(scrapy.Spider):
         控制开始
         从数据库中找出所要爬取的url
         """
+        # articles = Article.objects.filter(remark__icontains='{')
+        # for article in articles:
+        #     article.keywords = ''
+        #     article.abstract = ''
+        #     article.DOI = ''
+        #     article.remark = ''
+        #     article.save()
 
         articles = Article.objects.filter(remark='')[:1000]
         # articles = Article.objects.filter(filename='JYYJ201709016')
@@ -100,11 +108,291 @@ class CnkiSpiderSpider(scrapy.Spider):
         filename = article.filename
 
         # 此url用于探测该文章有多少页参考文献
-        refers_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={}&' \
-                     'RefType=1&CurDBCode=CJFQ&page=1'.format(filename)
+
+        # # eel的分段式url
+        # refers_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={}&' \
+        #              'RefType=1&CurDBCode=CJFQ&page=1'.format(filename)
+
+        # 整合式url
+        refers_url = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?dbcode=CJFQ&filename={0}&RefType=1&page=1'.format(
+            filename)
 
         yield scrapy.Request(url=refers_url, headers=self.header, callback=self.parse_refer_pages,
-                             meta={'article': article})
+                             meta={'article': article, 'cur_page': 1})
+
+    def parse_refer_pages(self, response):
+        """
+        解析每篇文章的参考文献页面数
+        :param response:
+        :return:
+        """
+        article = response.meta.get('article', '')
+        cur_page = response.meta.get('cur_page')
+        refers_url = response.url.split('page=')[0] + 'page=' + str(cur_page + 1)
+
+        # 找到每个期刊的数量
+        every_page = []  # 每种引用期刊的数量
+        for references_name in REFERENCES_DBNAME:
+            every_page.append(
+                int(response.xpath('//span[@id="pc_{}"]/text()'.format(references_name)).extract_first(default=0))
+            )
+
+        page = max(every_page)  # 找到最大的参考文献库个数，定制翻页次数
+        page = (page / 10)  # 每页有10条数据
+
+
+        # 爬取参考文献
+        div_s = response.css('.essayBox')  # 拿到所有含有文献列表的模块
+        for div in div_s:
+            # 分块提取信息
+            # 判断当前块所属库
+            dbId = div.css('.dbTitle span::attr(id)').extract_first()
+            li_s = div.css('li')
+            if dbId == 'pc_CJFQ':
+                # 提取中国学术期刊网络出版总库信息
+                for li in li_s:
+                    try:
+                        a_s = li.css('a')
+                        url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
+                        title = a_s[0].css('a::text').extract_first()
+                        if len(title) > 255:
+                            title = title[:255]
+                        authors = li.css('li::text').extract_first().split('[J].')[-1].split('.&nbsp&nbsp')[0]
+                        if len(authors) > 255:
+                            authors = authors[:255]
+                        source = a_s[1].css('a::text').extract_first()
+                        issuing_time = a_s[2].css('a::text').extract_first().rsplit()[0]
+                        if not ReferencesCJFQ.objects.filter(url=url):
+                            # 在数据库中没有这条数据信息
+                            CJFQ_item = ReferencesCJFQItem()
+                            CJFQ_item['url'] = url
+                            CJFQ_item['title'] = title
+                            CJFQ_item['authors'] = authors
+                            CJFQ_item['source'] = source
+                            CJFQ_item['issuing_time'] = issuing_time
+                            yield CJFQ_item
+                            CJFQ_list.append(CJFQ_item['database_id'])
+                        else:
+                            CJFQ_list.append(str(ReferencesCJFQ.objects.filter(url=url)[0].id))
+                    except TypeError:
+                        continue
+                    except IndexError:
+                        # 数据没有url获取他内容，不完整，不具备参考价值
+                        continue
+            elif dbId == 'pc_CDFD':
+                # 提取中国博士学位论文全文数据库
+                try:
+                    for li in li_s:
+                        a_s = li.css('a')
+                        url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
+                        title = a_s[0].css('a::text').extract_first()
+                        if len(title) > 255:
+                            title = title[:255]
+                        authors = li.css('li::text').extract_first().split('[D].')[-1]
+                        if len(authors) > 255:
+                            authors = authors[:255]
+                        source = a_s[1].css('a::text').extract_first()
+                        issuing_time = li.css('li').extract_first().split('</a>')[-1].split('</li>')[0].rsplit()[0]
+                        if not ReferencesCDFD.objects.filter(url=url):
+                            # 在数据库中没有这条数据信息
+                            CDFD_item = ReferencesCDFDItem()
+                            CDFD_item['url'] = url
+                            CDFD_item['title'] = title
+                            CDFD_item['authors'] = authors
+                            CDFD_item['source'] = source
+                            CDFD_item['issuing_time'] = issuing_time
+                            yield CDFD_item
+                            CDFD_list.append(CDFD_item['database_id'])
+                        else:
+                            CDFD_list.append(str(ReferencesCDFD.objects.filter(url=url)[0].id))
+                except IndexError:
+                    # 数据没有url获取他内容，不完整，不具备参考价值
+                    continue
+            elif dbId == 'pc_CMFD':
+                # 提取中国优秀硕士学位论文全文数据库
+                try:
+                    for li in li_s:
+                        a_s = li.css('a')
+                        url = 'http://kns.cnki.net' + a_s[0].css('a::attr(href)').extract_first()
+                        title = a_s[0].css('a::text').extract_first()
+                        if len(title) > 255:
+                            title = title[:255]
+                        authors = li.css('li::text').extract_first().split('[D].')[-1]
+                        if len(authors) > 255:
+                            authors = authors[:255]
+                        source = a_s[1].css('a::text').extract_first()
+                        issuing_time = li.css('li').extract_first().split('</a>')[-1].split('</li>')[0].rsplit()[0]
+                        if not ReferencesCMFD.objects.filter(url=url):
+                            # 在数据库中没有这条数据信息
+                            CMFD_item = ReferencesCMFDItem()
+                            CMFD_item['url'] = url
+                            CMFD_item['title'] = title
+                            CMFD_item['authors'] = authors
+                            CMFD_item['source'] = source
+                            CMFD_item['issuing_time'] = issuing_time
+                            yield CMFD_item
+                            CMFD_list.append(CMFD_item['database_id'])
+                        else:
+                            CMFD_list.append(str(ReferencesCMFD.objects.filter(url=url)[0].id))
+                except IndexError:
+                    # 数据没有url获取他内容，不完整，不具备参考价值
+                    continue
+            elif dbId == 'pc_CBBD':
+                # 提取中国图书全文数据库
+                try:
+                    for li in li_s:
+                        all_info = li.css('li::text').extract_first().rsplit()
+                        title = all_info[0]
+                        if len(title) > 255:
+                            title = title[:255]
+                        authors = all_info[3]
+                        if len(authors) > 255:
+                            authors = authors[:255]
+                        source = all_info[1]
+                        issuing_time = all_info[4]
+                        if not ReferencesCBBD.objects.filter(
+                                Q(title=title) & Q(authors=authors) & Q(source=source) & Q(issuing_time=issuing_time)):
+                            CBBD_item = ReferencesCBBDItem()
+                            CBBD_item['title'] = title
+                            CBBD_item['authors'] = authors
+                            CBBD_item['source'] = source
+                            CBBD_item['issuing_time'] = issuing_time
+                            yield CBBD_item
+                            CBBD_list.append(CBBD_item['database_id'])
+                        else:
+                            CBBD_list.append(
+                                str(
+                                    ReferencesCBBD.objects.filter(
+                                        Q(title=title) & Q(authors=authors) & Q(source=source) & Q(
+                                            issuing_time=issuing_time)
+                                    )[0].id
+                                )
+                            )
+                except IndexError:
+                    # 数据没有url获取他内容，不完整，不具备参考价值
+                    continue
+            elif dbId == 'pc_SSJD':
+                # 提取国际期刊数据库
+                for li in li_s:
+                    url = 'http://kns.cnki.net' + li.css('a::attr(href)').extract_first()
+                    title = li.css('a::text').extract_first()
+                    if len(title) > 255:
+                        title = title[:255]
+                    all_info = li.css('li::text').extract_first().split('\r\n')
+                    info = all_info[1]
+                    if len(info) > 255:
+                        info = info[:255]
+                    issuing_time = all_info[2]
+                    if not ReferencesSSJD.objects.filter(url=url):
+                        SSJD_item = ReferencesSSJDItem()
+                        SSJD_item['url'] = url
+                        SSJD_item['title'] = title
+                        SSJD_item['info'] = info
+                        SSJD_item['issuing_time'] = issuing_time
+                        yield SSJD_item
+                        SSJD_list.append(SSJD_item['database_id'])
+                    else:
+                        SSJD_list.append(str(ReferencesSSJD.objects.filter(url=url)[0].id))
+            elif dbId == 'pc_CRLDENG':
+                # 提取外文题录数据库
+                for li in li_s:
+                    try:
+                        title = li.css('a::text').extract_first()
+                        if len(title) > 255:
+                            title = title[:255]
+                        all_info = li.css('li::text').extract_first().split('\r\n')
+                        if len(all_info) < 3:
+                            # 数据个数不符
+                            continue
+                        info = all_info[1]
+                        if len(info) > 255:
+                            info = info[:255]
+                        issuing_time = all_info[2]
+                        if not ReferencesCRLDENG.objects.filter(
+                                Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time)):
+                            CRLDENG_item = ReferencesCRLDENGItem()
+                            CRLDENG_item['title'] = title
+                            CRLDENG_item['info'] = info
+                            CRLDENG_item['issuing_time'] = issuing_time
+                            yield CRLDENG_item
+                            CRLDENG_list.append(CRLDENG_item['database_id'])
+                        else:
+                            CRLDENG_list.append(
+                                str(
+                                    ReferencesCRLDENG.objects.filter(
+                                        Q(title=title) & Q(info=info) & Q(issuing_time=issuing_time)
+                                    )[0].id
+                                )
+                            )
+                    except TypeError:
+                        continue
+            elif dbId == 'pc_CCND':
+                # 中国重要报纸全文数据库
+                for li in li_s:
+                    url = 'http://kns.cnki.net' + li.css('a::attr(href)').extract_first()
+                    title = li.css('a::text').extract_first()
+                    if len(title) > 255:
+                        title = title[:255]
+                    all_info = li.css('li::text').extract_first().split('\r\n')
+                    authors = all_info[1].split('&nbsp&nbsp')[0]
+                    if len(authors) > 255:
+                        authors = authors[:255]
+                    source = all_info[1].split('&nbsp&nbsp')[-1]
+                    issuing_time = all_info[2]
+                    if not ReferencesCCND.objects.filter(url=url):
+                        # 在数据库中没有这条数据信息
+                        CCND_item = ReferencesCCNDItem()
+                        CCND_item['url'] = url
+                        CCND_item['title'] = title
+                        CCND_item['authors'] = authors
+                        CCND_item['source'] = source
+                        CCND_item['issuing_time'] = issuing_time
+                        yield CCND_item
+                        CCND_list.append(CCND_item['database_id'])
+                    else:
+                        CCND_list.append(str(ReferencesCCND.objects.filter(url=url)[0].id))
+            elif dbId == 'pc_CPFD':
+                for li in li_s:
+                    url = 'http://kns.cnki.net' + li.css('a::attr(href)').extract_first()
+                    title = li.css('a::text').extract_first()
+                    if len(title) > 255:
+                        title = title[:255]
+                    all_info = li.css('li::text').extract_first().split('\r\n')
+                    info = all_info[1]
+                    if len(info) > 255:
+                        info = info[:255]
+                    issuing_time = all_info[2]
+                    if not ReferencesCPFD.objects.filter(url=url):
+                        CPFD_item = ReferencesCPFDItem()
+                        CPFD_item['url'] = url
+                        CPFD_item['title'] = title
+                        CPFD_item['info'] = info
+                        CPFD_item['issuing_time'] = issuing_time
+                        yield CPFD_item
+                        CPFD_list.append(CPFD_item['database_id'])
+                    else:
+                        CPFD_list.append(str(ReferencesCPFD.objects.filter(url=url)[0].id))
+            else:
+                print('当前块所属库dbId错误!url=', response.url)
+
+
+        # 继续爬剩下的
+        if page > cur_page:
+            # 网页+1继续获取信息
+            yield scrapy.Request(
+                url=refers_url, headers=self.header, callback=self.parse_refer_pages,
+                meta={'article': article, 'cur_page': cur_page + 1}
+            )
+
+
+
+
+
+
+
+
+
+
 
     def parse_refer_pages(self, response):
         """
