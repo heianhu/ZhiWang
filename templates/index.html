@@ -492,6 +492,8 @@
                   <th style="width: 10px">#</th>
                   <th>标题</th>
                   <th>作者</th>
+                  <th>文献来源</th>
+
                   <th style="">发表时间</th>
                   <th style="">查看原文</th>
                   <th style="">下载此文</th>
@@ -509,6 +511,8 @@
                   <td>
                     {{ article.authors }}
                   </td>
+                  <td>{{ article.source.name }}</td>
+
                   <td>{{ article.issuing_time }}</td>
                   <td> <a class="" target="_blank" href="{{ article.url }}"><i class="fa fa-book"></i></a></td>
                   <td> <a class="downloadLink" href="{% url 'retrieve:getdetailinfo' article.id %}"> <i class="fa fa-download"></i></a></td>
