@@ -178,7 +178,7 @@ class ReferenceItem(scrapy.Item):
             # 已经存在
         except djIntegrityError or pyIntegrityError:
             print(refer.title)
-            refer = References.objects.get(title=self['info'].get('title', ''))
+            refer = References.objects.get(title=self['info'].get('title', ''), issuing_time =self['info'].get('issuing_time', ''), dbID=self['info'].get('dbID', ''))
         return article, refer
 
     def save_to_mysql_article_refer(self, article, refer):
