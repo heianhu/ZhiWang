@@ -6,7 +6,7 @@ import zipfile
 from dbsetting import OperationDatabases
 import time
 
-database = database
+database = OperationDatabases()
 
 def write_to_one_txt(getdetailinfo_id, filename):
     """
