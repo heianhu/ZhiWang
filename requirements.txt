@@ -1,5 +1,5 @@
 beautifulsoup4==4.6.0
-Django==1.11.4
+Django==1.11.28
 django-appconf==1.0.2
 django-autoslug==1.9.3
 django-compressor==2.2
