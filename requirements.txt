@@ -45,7 +45,7 @@ scrapyd==1.2.0
 scrapyd-client==1.1.0
 selenium==3.4.3
 six==1.11.0
-Twisted==17.9.0
+Twisted==22.2.0
 unicodecsv==0.14.1
 Unidecode==1.0.22
 urllib3==1.22
