@@ -39,7 +39,7 @@ PyMySQL==0.7.11
 requests==2.18.2
 requests-oauthlib==0.8.0
 scipy==0.19.1
-Scrapy==1.4.0
+Scrapy==2.6.2
 scrapy-djangoitem==1.1.1
 scrapyd==1.2.0
 scrapyd-client==1.1.0
